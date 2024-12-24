@@ -15,9 +15,17 @@ if not _G.charSelectExists then
             name = "\\#3f48cc\\Trashcam",
             {text = "Hey man I think ya need some of that character select, if not you a #####.", timer = 11.5*30},
         },
+        {
+            name = "\\#2b0013\\Fłorałys",
+            {text = "really now..?", timer = 3},
+            {text = "hii don't mind me you can't find me anyway", timer = 3},
+            {text = "skill issue", timer = 3},
+            {text = "you're silly", timer = 3},
+            {text = "floralys mussolini is on her way.", timer = 3},
+        },
     }
     local frameCount = 0
-    local rngPerson = math.random(1, #noCSMessages)
+    local rngPerson = (math.random(1, 3) == 3 and math.random(2, #noCSMessages) or 1)
     local rngMessage = math.random(1, #noCSMessages[rngPerson])
     local name = noCSMessages[rngPerson].name
     local message = noCSMessages[rngPerson][rngMessage].text
@@ -44,7 +52,7 @@ local PALETTE_SQUISHY = {
     [PANTS] = "0B0E20",
 }
 
-local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
+local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1, 37)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 
 local MOD_NAME = "Squishy Pack"
