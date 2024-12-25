@@ -52,12 +52,16 @@ local PALETTE_SQUISHY = {
     [PANTS] = "0B0E20",
 }
 
-local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
-_G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
-_G.charSelect.character_add_course_texture(CT_SQUISHY, {
+local COURSE_SQUISHY = {
     top = get_texture_info("squishy-course-top"),
     bottom = get_texture_info("squishy-course-bottom"),
-})
+}
+
+local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
+_G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
+if _G.charSelect.character_add_course_texture ~= nil then
+    _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
+end
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
