@@ -226,7 +226,7 @@ local function act_squishy_ground_pound(m)
         poundSpinAnim = 0
     end
     e.groundPoundFromRollout = true
-    poundSpinAnim = poundSpinAnim + math.abs(m.vel.y)
+    poundSpinAnim = poundSpinAnim + math.min(math.abs(m.vel.y), 100)
     m.marioObj.header.gfx.angle.y = m.faceAngle.y + poundSpinAnim*0x80
     if m.actionArg == 1 then
         m.marioObj.header.gfx.angle.x = 0x4000*clamp(-m.vel.y + 60, 0, 60)/50
@@ -388,7 +388,7 @@ local function act_squishy_wall_slide(m)
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_A_PRESSED ~= 0 then
         set_mario_action_and_y_vel(m, ACT_WALL_KICK_AIR, 0, math.max(m.vel.y * 0.7, 30))
-        m.vel.y = m.vel.y * 0.7
+        m.forwardVel = m.forwardVel * 0.8
     end
 end
 
@@ -471,6 +471,24 @@ local strainingBlacklist = {
     [ACT_SPAWN_SPIN_AIRBORNE] = true,
 }
 
+local canWallkick = {
+    [ACT_JUMP] = ACT_JUMP,
+    [ACT_HOLD_JUMP] = ACT_HOLD_JUMP,
+    [ACT_DOUBLE_JUMP] = ACT_DOUBLE_JUMP,
+    [ACT_TRIPLE_JUMP] = ACT_TRIPLE_JUMP,
+    [ACT_SIDE_FLIP] = ACT_SIDE_FLIP,
+    [ACT_BACKFLIP] = ACT_BACKFLIP,
+    [ACT_LONG_JUMP] = ACT_LONG_JUMP,
+    [ACT_WALL_KICK_AIR] = ACT_WALL_KICK_AIR,
+    [ACT_TOP_OF_POLE_JUMP] = ACT_TOP_OF_POLE_JUMP,
+    [ACT_FREEFALL] = ACT_FREEFALL,
+    [ACT_SQUISHY_DIVE] = ACT_SQUISHY_DIVE,
+    [ACT_SQUISHY_GROUND_POUND] = ACT_SQUISHY_GROUND_POUND,
+    [ACT_SQUISHY_GROUND_POUND_JUMP] = ACT_SQUISHY_GROUND_POUND_JUMP,
+    [ACT_SQUISHY_ROLLOUT] = ACT_SQUISHY_ROLLOUT,
+}
+
+local wallAngleLimit = 70
 local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
     --[[
@@ -497,6 +515,27 @@ local function squishy_before_phys_step(m)
     --local rotSpeed = math.min(0x20*m.forwardVel, 0x300)
     --m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, rotSpeed, rotSpeed)
     --djui_chat_message_create(tostring(e.prevForwardVel))
+
+    -- Wider Wallslide angle
+    if m.wall ~= nil then
+        if (m.wall.type == SURFACE_BURNING) then return end
+
+        local wallDYaw = (atan2s(m.wall.normal.z, m.wall.normal.x) - (m.faceAngle.y))
+        --I don't really understand this however I do know the lower `limit` becomes, the more possible wallkick degrees.
+        local limitNegative = (-((180 - wallAngleLimit) * (8192/45))) + 1
+        local limitPositive = ((180 - wallAngleLimit) * (8192/45)) - 1
+        --wallDYaw is s16, so I converted it
+        wallDYaw = convert_s16(wallDYaw)
+
+        --Standard air hit wall requirements
+        if (m.forwardVel >= 16) and (canWallkick[m.action] ~= nil) then
+            if (wallDYaw >= limitPositive) or (wallDYaw <= limitNegative) then
+                mario_bonk_reflection(m, 0)
+                m.faceAngle.y = m.faceAngle.y + 0x8000
+                set_mario_action(m, ACT_AIR_HIT_WALL, 0)
+            end
+        end
+    end
 
     -- Peaking Velocity
     if m.forwardVel > 70 then
