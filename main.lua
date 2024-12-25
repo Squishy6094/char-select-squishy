@@ -382,7 +382,8 @@ local function act_squishy_wall_slide(m)
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
         else
             m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
-            set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, m.vel.y*0.8)
+            set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, m.vel.y*1.1)
+            m.forwardVel = m.forwardVel * 0.5
         end
     end
     m.actionTimer = m.actionTimer + 1
