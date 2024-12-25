@@ -13,7 +13,7 @@ if not _G.charSelectExists then
         },
         {
             name = "\\#3f48cc\\Trashcam",
-            {text = "Hey man I think ya need some of that character select, if not you a #####.", timer = 11.5*30},
+            {text = "Hey man I think ya need some of that character select, if not you a bitch!", timer = 11.5*30},
         },
         {
             name = "\\#2b0013\\Fłorałys",
@@ -52,8 +52,12 @@ local PALETTE_SQUISHY = {
     [PANTS] = "0B0E20",
 }
 
-local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1, 37)
+local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
+_G.charSelect.character_add_course_texture(CT_SQUISHY, {
+    top = get_texture_info("squishy-course-top"),
+    bottom = get_texture_info("squishy-course-bottom"),
+})
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
@@ -241,9 +245,8 @@ end
 
 --- @param m MarioState
 local function act_squishy_ground_pound_land(m)
-    --common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_SQUISHY_GROUND_POUND)
     if mario_floor_is_slippery(m) ~= 1 then
-        perform_ground_step(m)
+        common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_SQUISHY_GROUND_POUND)
     else
         m.faceAngle.y = m.floorAngle
         common_slide_action_with_jump(m, ACT_SQUISHY_SLIDE, ACT_SQUISHY_GROUND_POUND_JUMP, ACT_SQUISHY_ROLLOUT, MARIO_ANIM_GROUND_POUND_LANDING)
@@ -274,8 +277,8 @@ local function act_squishy_ground_pound_land(m)
                 set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
             else
                 m.forwardVel = (e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60))*0.7
-                set_mario_y_vel_based_on_fspeed(m, 30, 0.2)
-                set_mario_action(m, ACT_SQUISHY_ROLLOUT, 1)
+                set_mario_y_vel_based_on_fspeed(m, 50, 0.1)
+                set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
             end
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
@@ -481,7 +484,7 @@ local function squishy_before_phys_step(m)
         if m.input & INPUT_NONZERO_ANALOG ~= 0 then
             e.intendedDYaw = m.intendedYaw - m.faceAngle.y
             e.intendedMag = m.intendedMag / 32;
-            e.sidewaysSpeed = e.intendedMag * sins(e.intendedDYaw) * m.forwardVel*0.2
+            e.sidewaysSpeed = e.intendedMag * sins(e.intendedDYaw) * m.forwardVel*0.22
         end
         m.vel.x = m.vel.x + e.sidewaysSpeed * sins(m.faceAngle.y + 0x4000);
         m.vel.z = m.vel.z + e.sidewaysSpeed * coss(m.faceAngle.y + 0x4000);
@@ -493,12 +496,11 @@ local function squishy_before_phys_step(m)
 
     -- Peaking Velocity
     if m.forwardVel > 70 then
-        m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.5)
+        m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.25)
     end
     -- Terminal Velocity
-    m.forwardVel = clamp(m.forwardVel, -120, 120)
+    m.forwardVel = math.min(m.forwardVel, 150)
 end
-
 
 local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
