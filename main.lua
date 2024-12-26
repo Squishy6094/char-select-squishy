@@ -83,6 +83,8 @@ for i = 0, MAX_PLAYERS - 1 do
         intendedDYaw = 0,
         intendedMag = 0,
         sidewaysSpeed = 0,
+        prevFloorDist = 0,
+        prevWallAngle = 0,
     }
 end
 
@@ -267,7 +269,7 @@ local function act_squishy_ground_pound_land(m)
     m.forwardVel = 0
 
     m.actionTimer = m.actionTimer + 1
-    if m.actionTimer > 5 then
+    if m.actionTimer > 10 then
         set_mario_action(m, ACT_IDLE, 0)
         e.groundPoundJump = true
     else
@@ -370,6 +372,7 @@ end
 
 --- @param m MarioState
 local function act_squishy_wall_slide(m)
+    local e = gExtraStates[m.playerIndex]
     perform_air_step(m, AIR_STEP_NONE)
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK)
     if m.actionTimer == 1 then 
@@ -378,13 +381,18 @@ local function act_squishy_wall_slide(m)
     m.vel.y = clamp(m.vel.y - 0.6, -70, 150)
     m.particleFlags = PARTICLE_DUST
     if m.wall == nil then
-        if m.pos.y <= m.floorHeight then
+        if m.pos.y == m.floorHeight and e.prevFloorDist < 100 then
+            m.faceAngle.y = convert_s16(e.prevWallAngle)
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
         else
-            m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
-            set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, m.vel.y*1.1)
-            m.forwardVel = m.forwardVel * 0.5
+            m.faceAngle.y = convert_s16(e.prevWallAngle + 0x8000)
+            set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, m.vel.y)
+            m.pos.y = m.pos.y + 10
+            m.forwardVel = m.forwardVel * 0.4
         end
+    else
+        e.prevFloorDist = m.pos.y - m.floorHeight
+        e.prevWallAngle = convert_s16(atan2s(m.wall.normal.z, m.wall.normal.x))
     end
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_A_PRESSED ~= 0 then
@@ -470,6 +478,8 @@ local strainingBlacklist = {
     [ACT_DEATH_EXIT] = true,
     [ACT_SPAWN_NO_SPIN_AIRBORNE] = true,
     [ACT_SPAWN_SPIN_AIRBORNE] = true,
+    [ACT_WATER_JUMP] = true,
+    [ACT_FALL_AFTER_STAR_GRAB] = true,
 }
 
 local canWallkick = {
@@ -483,24 +493,16 @@ local canWallkick = {
     [ACT_WALL_KICK_AIR] = ACT_WALL_KICK_AIR,
     [ACT_TOP_OF_POLE_JUMP] = ACT_TOP_OF_POLE_JUMP,
     [ACT_FREEFALL] = ACT_FREEFALL,
+    
     [ACT_SQUISHY_DIVE] = ACT_SQUISHY_DIVE,
     [ACT_SQUISHY_GROUND_POUND] = ACT_SQUISHY_GROUND_POUND,
     [ACT_SQUISHY_GROUND_POUND_JUMP] = ACT_SQUISHY_GROUND_POUND_JUMP,
     [ACT_SQUISHY_ROLLOUT] = ACT_SQUISHY_ROLLOUT,
 }
 
-local wallAngleLimit = 70
+local wallAngleLimit = 50
 local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
-    --[[
-    if forwardVelActs[m.action] and analog_stick_held_back(m) ~= 0 then
-        e.prevForwardVel = math.max(m.forwardVel, e.prevForwardVel - 5)
-        mario_set_forward_vel(m, e.prevForwardVel)
-    else
-        e.prevForwardVel = m.forwardVel
-    end
-    ]]
-    --(m.intendedMag < convert_s16(m.faceAngle + 0x4000) or m.intendedMag > convert_s16(m.faceAngle - 0x4000))
 
     -- Straining
     if not strainingBlacklist[m.action] and m.pos.y > m.floorHeight then
@@ -512,10 +514,6 @@ local function squishy_before_phys_step(m)
         m.vel.x = m.vel.x + e.sidewaysSpeed * sins(m.faceAngle.y + 0x4000);
         m.vel.z = m.vel.z + e.sidewaysSpeed * coss(m.faceAngle.y + 0x4000);
     end
-
-    --local rotSpeed = math.min(0x20*m.forwardVel, 0x300)
-    --m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, rotSpeed, rotSpeed)
-    --djui_chat_message_create(tostring(e.prevForwardVel))
 
     -- Wider Wallslide angle
     if m.wall ~= nil then
