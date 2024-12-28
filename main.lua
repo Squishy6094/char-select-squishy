@@ -139,12 +139,12 @@ local function convert_s16(num)
     return num
 end
 
-local ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
-local ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE)
-local ACT_SQUISHY_ROLLOUT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING )
-local ACT_SQUISHY_GROUND_POUND = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
+local ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING)
+local ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
+local ACT_SQUISHY_ROLLOUT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+local ACT_SQUISHY_GROUND_POUND = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 local ACT_SQUISHY_GROUND_POUND_LAND = allocate_mario_action(ACT_GROUP_STATIONARY | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
-local ACT_SQUISHY_GROUND_POUND_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
+local ACT_SQUISHY_GROUND_POUND_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_CONTROL_JUMP_HEIGHT)
 --local ACT_SQUISHY_CEILING_STICK = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 --local ACT_SQUISHY_CEILING_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 local ACT_SQUISHY_WALL_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
@@ -252,7 +252,9 @@ end
 --- @param m MarioState
 local function act_squishy_ground_pound_land(m)
     if mario_floor_is_slippery(m) ~= 1 then
-        common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_SQUISHY_GROUND_POUND)
+        m.vel.x = 0
+        m.vel.y = 0
+        common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_FREEFALL)
     else
         m.faceAngle.y = m.floorAngle
         common_slide_action_with_jump(m, ACT_SQUISHY_SLIDE, ACT_SQUISHY_GROUND_POUND_JUMP, ACT_SQUISHY_ROLLOUT, MARIO_ANIM_GROUND_POUND_LANDING)
@@ -401,9 +403,9 @@ local function act_squishy_wall_slide(m)
     end
 end
 
-hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_ANY_ATTACK)
-hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_ATTACK_SLIDE)
-hook_mario_action(ACT_SQUISHY_ROLLOUT, act_squishy_rollout, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_ROLLOUT, act_squishy_rollout)
 hook_mario_action(ACT_SQUISHY_GROUND_POUND, { every_frame = act_squishy_ground_pound, gravity = act_squishy_ground_pound_gravity}, INT_GROUND_POUND)
 hook_mario_action(ACT_SQUISHY_GROUND_POUND_JUMP, { every_frame = act_squishy_ground_pound_jump})
 hook_mario_action(ACT_SQUISHY_GROUND_POUND_LAND, act_squishy_ground_pound_land, INT_GROUND_POUND)
