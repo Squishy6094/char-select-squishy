@@ -141,6 +141,7 @@ end
 
 local ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING)
 local ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
+local ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 local ACT_SQUISHY_ROLLOUT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 local ACT_SQUISHY_GROUND_POUND = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 local ACT_SQUISHY_GROUND_POUND_LAND = allocate_mario_action(ACT_GROUP_STATIONARY | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
@@ -167,13 +168,12 @@ local function act_squishy_slide(m)
     e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.25
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
     m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
-    if m.waterLevel ~= nil and m.pos.y <= m.waterLevel + 30 then
-        djui_chat_message_create("HELPPP")
-        m.vel.y = 50
+    if m.waterLevel ~= nil and m.pos.y <= m.waterLevel + math.abs(e.forwardVelStore) then
+        m.actionTimer = 0
+        set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
     end
-    common_slide_action_with_jump(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_DOUBLE_JUMP, ACT_SQUISHY_ROLLOUT, MARIO_ANIM_SLIDE_KICK)
-    local rotSpeed = 0x80
-    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, rotSpeed, rotSpeed)
+    common_slide_action_with_jump(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x80, 0x80)
     if m.input & INPUT_A_PRESSED ~= 0 then
         if m.actionArg == 1 then
             set_mario_action(m, ACT_DOUBLE_JUMP, 0)
@@ -182,6 +182,26 @@ local function act_squishy_slide(m)
         end
     end
     m.actionTimer = m.actionTimer + 1
+end
+
+--- @param m MarioState
+local function act_squishy_slide_air(m)
+    local e = gExtraStates[m.playerIndex]
+    common_air_action_step(m, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK, AIR_STEP_NONE)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
+    m.forwardVel = e.forwardVelStore
+    if m.waterLevel ~= nil and m.pos.y <= m.waterLevel + 30 and e.forwardVelStore > 30 and m.floor ~= nil then
+        set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, e.forwardVelStore*0.25)
+        e.forwardVelStore = e.forwardVelStore - 2
+        m.particleFlags = PARTICLE_SHALLOW_WATER_SPLASH
+        m.actionTimer = 0
+    end
+    m.actionTimer = m.actionTimer + 1
+    if m.input & INPUT_A_PRESSED ~= 0 or m.actionTimer > 45 then
+        set_mario_action(m, ACT_SQUISHY_ROLLOUT, 0)
+    end
+    djui_chat_message_create(tostring(m.vel.y))
+    m.marioObj.header.gfx.angle.x = -0xB0*clamp(m.vel.y, -40, 40)
 end
 
 --- @param m MarioState
@@ -405,6 +425,7 @@ end
 
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
 hook_mario_action(ACT_SQUISHY_ROLLOUT, act_squishy_rollout)
 hook_mario_action(ACT_SQUISHY_GROUND_POUND, { every_frame = act_squishy_ground_pound, gravity = act_squishy_ground_pound_gravity}, INT_GROUND_POUND)
 hook_mario_action(ACT_SQUISHY_GROUND_POUND_JUMP, { every_frame = act_squishy_ground_pound_jump})
@@ -471,8 +492,6 @@ local forwardVelActs = {
 }
 
 local strainingBlacklist = {
-    --[ACT_SQUISHY_CEILING_STICK] = true,
-    [ACT_SQUISHY_WALL_SLIDE] = true,
     [ACT_FALLING_EXIT_AIRBORNE] = true,
     [ACT_EXIT_AIRBORNE] = true,
     [ACT_SPECIAL_EXIT_AIRBORNE] = true,
@@ -482,6 +501,10 @@ local strainingBlacklist = {
     [ACT_SPAWN_SPIN_AIRBORNE] = true,
     [ACT_WATER_JUMP] = true,
     [ACT_FALL_AFTER_STAR_GRAB] = true,
+    
+    --[ACT_SQUISHY_CEILING_STICK] = true,
+    [ACT_SQUISHY_WALL_SLIDE] = true,
+    [ACT_SQUISHY_SLIDE_AIR] = true,
 }
 
 local canWallkick = {
@@ -507,7 +530,7 @@ local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
 
     -- Straining
-    if not strainingBlacklist[m.action] and m.pos.y > m.floorHeight then
+    if not strainingBlacklist[m.action] and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and m.pos.y > m.floorHeight then
         if m.input & INPUT_NONZERO_ANALOG ~= 0 then
             e.intendedDYaw = m.intendedYaw - m.faceAngle.y
             e.intendedMag = m.intendedMag / 32;
