@@ -126,6 +126,13 @@ local function set_mario_action_and_y_vel(m, action, arg, velY)
     return set_mario_action(m, action, arg)
 end
 
+local function mario_is_on_water(m)
+    if m.waterLevel == nil then return false end
+    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) then return false end
+    if m.waterLevel < m.floorHeight - math.abs(m.forwardVel)*get_mario_floor_steepness(m) + 100 then return false end
+    return true
+end
+
 local function convert_s16(num)
     local min = -32768
     local max = 32767
@@ -166,7 +173,7 @@ local function act_squishy_slide(m)
     e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.25
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
     m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
-    if m.waterLevel ~= nil and m.pos.y <= m.waterLevel + math.abs(e.forwardVelStore) then
+    if mario_is_on_water(m) then
         m.actionTimer = 0
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
     end
@@ -188,7 +195,7 @@ local function act_squishy_slide_air(m)
     common_air_action_step(m, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK, AIR_STEP_NONE)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
     if m.actionArg == 0 then
-        if m.waterLevel ~= nil and m.pos.y <= m.waterLevel + 30 and e.forwardVelStore > 30 and m.floor ~= nil then
+        if e.forwardVelStore > 30 and mario_is_on_water(m) then
             set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, e.forwardVelStore*0.25)
             e.forwardVelStore = e.forwardVelStore - 2
             m.particleFlags = PARTICLE_SHALLOW_WATER_SPLASH
@@ -268,7 +275,7 @@ local function act_squishy_ground_pound(m)
     m.actionTimer = m.actionTimer + 1
     m.peakHeight = m.pos.y
     m.forwardVel = m.forwardVel*1.01
-    if m.pos.y <= m.waterLevel then
+    if mario_is_on_water(m) and m.waterLevel <= m.floorHeight then
         m.faceAngle.x = -0x4000
         set_mario_action(m, ACT_SQUISHY_WATER_POUND, 0)
     end
