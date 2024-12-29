@@ -57,7 +57,7 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
-local CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
+CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 if _G.charSelect.character_add_course_texture ~= nil then
     _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
@@ -126,7 +126,6 @@ local function set_mario_action_and_y_vel(m, action, arg, velY)
     return set_mario_action(m, action, arg)
 end
 
--- Functions and Constants
 local function convert_s16(num)
     local min = -32768
     local max = 32767
@@ -424,6 +423,10 @@ local function act_squishy_water_pound(m)
     poundSwimAnim = poundSwimAnim + math.min(math.abs(e.forwardVelStore), 100)
     m.marioObj.header.gfx.angle.z = m.faceAngle.z + poundSwimAnim*0x80
     --m.marioObj.header.gfx.angle.y = m.faceAngle.y + 0x4000
+    if m.vel.y < 0 and m.faceAngle.x < 0 and m.pos.y < m.floorHeight + 10 then
+        m.faceAngle.x = -m.faceAngle.x
+        m.vel.y = -m.vel.y
+    end
     if e.forwardVelStore > 30 and m.pos.y >= m.waterLevel - 140 then
         m.pos.y = m.pos.y + 140
         set_mario_action(m, ACT_SQUISHY_WATER_POUND_AIR, 0)
