@@ -129,7 +129,7 @@ end
 local function mario_is_on_water(m)
     if m.waterLevel == nil then return false end
     if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) then return false end
-    if m.waterLevel < m.floorHeight - math.abs(m.forwardVel)*get_mario_floor_steepness(m) + 100 then return false end
+    if m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) < m.floorHeight + 60 then return false end
     return true
 end
 
@@ -174,7 +174,7 @@ local function act_squishy_slide(m)
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
     m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
     if mario_is_on_water(m) then
-        m.actionTimer = 0
+        m.pos.y = m.pos.y + 10
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
     end
     common_slide_action_with_jump(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
@@ -212,7 +212,7 @@ local function act_squishy_slide_air(m)
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_Z_DOWN ~= 0 then
         m.actionArg = 1
-        if m.pos.y <= m.waterLevel then
+        if mario_is_on_water(m) then
             m.faceAngle.x = -0x2000
             set_mario_action(m, ACT_SQUISHY_WATER_POUND, 0)
         end
@@ -275,7 +275,7 @@ local function act_squishy_ground_pound(m)
     m.actionTimer = m.actionTimer + 1
     m.peakHeight = m.pos.y
     m.forwardVel = m.forwardVel*1.01
-    if mario_is_on_water(m) and m.waterLevel <= m.floorHeight then
+    if mario_is_on_water(m) then
         m.faceAngle.x = -0x4000
         set_mario_action(m, ACT_SQUISHY_WATER_POUND, 0)
     end
@@ -436,6 +436,7 @@ local function act_squishy_water_pound(m)
     end
     if e.forwardVelStore > 30 and m.pos.y >= m.waterLevel - 140 then
         m.pos.y = m.pos.y + 140
+        e.forwardVelStore = e.forwardVelStore*0.5
         set_mario_action(m, ACT_SQUISHY_WATER_POUND_AIR, 0)
         set_camera_mode(m.area.camera, CAMERA_MODE_NONE, 0)
     end
@@ -457,8 +458,8 @@ local function act_squishy_water_pound_air(m)
         m.vel.y = math.max(m.forwardVel * sins(m.faceAngle.x) * 0.5, 30)
     end
 
-    e.forwardVelStore = e.forwardVelStore - 0.5
-
+    e.forwardVelStore = e.forwardVelStore - 0.75
+    m.vel.y = m.vel.y - 2
     --m.faceAngle.x = clamp(m.faceAngle.x + -m.controller.stickY*0x10, -0x3FF0, 0x3FF0)
     m.faceAngle.y = m.faceAngle.y + -m.controller.stickX*0x10
     m.forwardVel = e.forwardVelStore
@@ -473,9 +474,9 @@ local function act_squishy_water_pound_air(m)
     if m.pos.y <= m.waterLevel then
         m.faceAngle.x = -0x3000
         set_mario_action(m, ACT_SQUISHY_WATER_POUND, 0)
-        m.vel.y = math.min(m.vel.y*1.1, -30)
+        m.vel.y = m.vel.y*1.2
     end
-    if e.forwardVelStore < 15 or m.input & INPUT_Z_DOWN == 0 then
+    if m.input & INPUT_Z_DOWN == 0 then
         set_mario_action(m, ACT_FREEFALL, 0)
     end
     m.actionTimer = m.actionTimer + 1
