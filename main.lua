@@ -88,13 +88,21 @@ for i = 0, MAX_PLAYERS - 1 do
     }
 end
 
-local function get_mario_floor_steepness(m, angle)
+function get_mario_floor_steepness(m, angle)
     if angle == nil then angle = m.faceAngle.y end
     local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
     local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
     local floorDif = floor - floorInFront 
     if floorDif > 20 or floorDif < -20 then floorDif = 0 end
     return floorDif
+end
+
+function get_mario_y_vel_from_floor(m)
+    if m.pos.y == m.floorHeight then
+        return math.sqrt(m.vel.x^2 + m.vel.y^2)*-get_mario_floor_steepness(m)
+    else
+        return m.vel.y
+    end
 end
 
 local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
