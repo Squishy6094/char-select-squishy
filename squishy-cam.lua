@@ -26,7 +26,7 @@ local function round(num)
     return num < 0.5 and math.floor(num) or math.ceil(num)
 end
 
-local OPTION_SQUISHYCAM = _G.charSelect.add_option("Squishy Cam", 1, 2, {"Off", "Squishy", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset"}, true)
+local OPTION_SQUISHYCAM = _G.charSelect.add_option("Doodell Cam", 1, 2, {"Off", "Squishy Only", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset"}, true)
 
 local nonMomentumActs = {
     [ACT_SQUISHY_WALL_SLIDE] = true,
@@ -89,6 +89,12 @@ local function camera_update()
         local angle = camAngle
         if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 then
             angle = m.faceAngle.y - 0x8000
+            if m.controller.buttonDown & L_CBUTTONS ~= 0 then
+                angle = angle - 0x2000
+            end
+            if m.controller.buttonDown & R_CBUTTONS ~= 0 then
+                angle = angle + 0x2000
+            end
             camAngle = round(angle/0x2000)*0x2000
         end
         
@@ -107,7 +113,6 @@ local function camera_update()
         if eepyActs[m.action] then
             doodellState = 4
             eepyTimer = eepyTimer + 1
-            djui_chat_message_create(tostring(eepyTimer))
             local camFloor = collision_find_surface_on_ray(camPos.x, camPos.y + eepyCamOffset, camPos.z, 0, -10000, 0).hitPos.y
             if eepyTimer > eepyStart then
                 doodellState = 5
@@ -120,7 +125,8 @@ local function camera_update()
             eepyTimer = 0
         end
         
-        --djui_chat_message_create(tostring(get_mario_y_vel_from_floor(m)))
+        --warp_camera()
+        
         vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
         vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
         l.roll = lerp(l.roll, ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800), 0.1)
@@ -134,7 +140,6 @@ local function camera_update()
         if l.roll > 1000 then
             doodellState = 3
         end
-        djui_chat_message_create(tostring(l.roll))
     else
         if prevSquishyCamActive ~= squishyCamActive then
             camera_unfreeze()
