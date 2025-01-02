@@ -33,7 +33,7 @@ local OMM_SETTING_CAMERA = ""
 -- Settings Toggles
 local OMM_SETTING_CAMERA_ON = -1
 if _G.OmmEnabled then
-    OMM_SETTING_CAMERA =  _G.OmmApi["OMM_SETTING_CAMERA"]
+    OMM_SETTING_CAMERA = _G.OmmApi["OMM_SETTING_CAMERA"]
     OMM_SETTING_CAMERA_ON = _G.OmmApi["OMM_SETTING_CAMERA_ON"]
 end
 
@@ -60,10 +60,13 @@ local eepyActs = {
 
 local camAngle = 0
 local camScale = 3
+local camPitch = 0
+local camPan = 0
 local squishyCamActive = true
 local prevSquishyCamActive = false
 local camTweenSpeed = 0.12
 local camForwardDist = 10
+local camPanSpeed = 25
 local focusPos = {x = 0, y = 0, z = 0}
 local camPos = {x = 0, y = 0, z = 0}
 local camFov = 50
@@ -84,20 +87,37 @@ local function camera_update()
         doodellState = doodellBlink and 1 or 0
         camera_freeze()
         if not (is_game_paused() or eepyTimer > eepyStart) then
-            if m.controller.buttonPressed & L_CBUTTONS ~= 0 then
-                camAngle = camAngle - 0x2000
-            end
-            if m.controller.buttonPressed & R_CBUTTONS ~= 0 then
-                camAngle = camAngle + 0x2000
-            end
-            if m.controller.buttonDown & R_TRIG ~= 0 then
-                camAngle = round((m.faceAngle.y - 0x8000)/0x2000)*0x2000
-            end
-            if m.controller.buttonPressed & D_CBUTTONS ~= 0 then
-                camScale = math.min(camScale + 1, 7)
-            end
-            if m.controller.buttonPressed & U_CBUTTONS ~= 0 then
-                camScale = math.max(camScale - 1, 1)
+            local camSwitch = (m.controller.buttonDown & R_TRIG ~= 0)
+            --camAngle = round((m.faceAngle.y - 0x8000)/0x2000)*0x2000
+            
+            if not camSwitch then
+                if m.controller.buttonPressed & L_CBUTTONS ~= 0 then
+                    camAngle = camAngle - 0x2000
+                end
+                if m.controller.buttonPressed & R_CBUTTONS ~= 0 then
+                    camAngle = camAngle + 0x2000
+                end
+                if m.controller.buttonPressed & D_CBUTTONS ~= 0 then
+                    camScale = math.min(camScale + 1, 7)
+                end
+                if m.controller.buttonPressed & U_CBUTTONS ~= 0 then
+                    camScale = math.max(camScale - 1, 1)
+                end
+                camPitch = 0
+                camPan = 0
+            else
+                if m.controller.buttonDown & L_CBUTTONS ~= 0 then
+                    camPan = camPan - camPanSpeed*camScale
+                end
+                if m.controller.buttonDown & R_CBUTTONS ~= 0 then
+                    camPan = camPan + camPanSpeed*camScale
+                end
+                if m.controller.buttonDown & D_CBUTTONS ~= 0 then
+                    camPitch = camPitch - camPanSpeed*camScale
+                end
+                if m.controller.buttonDown & U_CBUTTONS ~= 0 then
+                    camPitch = camPitch + camPanSpeed*camScale
+                end
             end
         end
 
@@ -120,17 +140,29 @@ local function camera_update()
             y = m.pos.y - prevPos.y,
             z = m.pos.z - prevPos.z,
         }
+
+        local camPanX = sins(convert_s16(camAngle + 0x4000))*camPan
+        local camPanZ = coss(convert_s16(camAngle + 0x4000))*camPan
         
         focusPos = {
-            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0),
-            y = m.pos.y + 150 + (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*camForwardDist*0.8 or 0) - eepyCamOffset,
-            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0),
+            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + camPanX,
+            y = m.pos.y + 150 + (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*camForwardDist*0.8 or 0) - eepyCamOffset + camPitch,
+            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0) + camPanZ,
         }
         camPos = {
             x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*7 or 0) + sins(angle) * 500 * camScale,
             y = m.pos.y - (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*5 or 0) - 150 + 350 * camScale - eepyCamOffset,
             z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*7 or 0) + coss(angle) * 500 * camScale,
         }
+        djui_chat_message_create(tostring(-atan2s(camPos.y, focusPos.y)))
+        local firstCamPitch = -atan2s(camPos.y, focusPos.y)
+        if firstCamPitch <= -14000 and
+            m.floor and m.floor.type == SURFACE_LOOK_UP_WARP and
+            save_file_get_total_star_count(get_current_save_file_num() - 1, COURSE_MIN - 1, COURSE_MAX - 1) >= gLevelValues.wingCapLookUpReq and
+            not is_game_paused() then
+
+            level_trigger_warp(m, WARP_OP_LOOK_UP)
+        end
 
         -- Doodell is eepy
         if eepyActs[m.action] then
@@ -167,19 +199,20 @@ local function camera_update()
             doodellState = 3
         end
         vec3f_copy(prevPos, m.pos)
-    else
-        if prevSquishyCamActive ~= squishyCamActive then
-            camera_unfreeze()
-            vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-            vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-            set_camera_mode(m.area.camera, CAMERA_MODE_NONE, 0)
-            prevSquishyCamActive = squishyCamActive
-        end
     end
+    
     if (m.area.camera and m.area.camera.cutscene ~= 0) or (m.freeze > 0 and m.freeze ~= 2) or nonCameraActs[m.action] or omm_camera_enabled(m) then
         squishyCamActive = false
     else
         squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
+    end
+    
+    if not squishyCamActive and prevSquishyCamActive ~= squishyCamActive then
+        camera_unfreeze()
+        vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
+        vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
+        set_camera_mode(m.area.camera, CAMERA_MODE_NONE, 0)
+        prevSquishyCamActive = squishyCamActive
     end
 end
 
