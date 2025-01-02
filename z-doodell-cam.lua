@@ -26,7 +26,23 @@ local function round(num)
     return num < 0.5 and math.floor(num) or math.ceil(num)
 end
 
-local OPTION_SQUISHYCAM = _G.charSelect.add_option("Doodell Cam", 1, 2, {"Off", "Squishy Only", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset"}, true)
+local OPTION_SQUISHYCAM = _G.charSelect.add_option("Doodell Cam", 1, 2, {"Off", "Squishy Only", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset", (_G.OmmEnabled and "(Inactive with OMM Camera)" or "")}, true)
+
+-- Settings
+local OMM_SETTING_CAMERA = ""
+-- Settings Toggles
+local OMM_SETTING_CAMERA_ON = -1
+if _G.OmmEnabled then
+    OMM_SETTING_CAMERA =  _G.OmmApi["OMM_SETTING_CAMERA"]
+    OMM_SETTING_CAMERA_ON = _G.OmmApi["OMM_SETTING_CAMERA_ON"]
+end
+
+local function omm_camera_enabled(m)
+    if not _G.OmmEnabled then return false end
+    if _G.OmmApi.omm_get_setting(m, OMM_SETTING_CAMERA) == OMM_SETTING_CAMERA_ON then
+        return true
+    end
+end
 
 local nonMomentumActs = {
     [ACT_SQUISHY_WALL_SLIDE] = true,
@@ -46,7 +62,7 @@ local camAngle = 0
 local camScale = 3
 local squishyCamActive = true
 local prevSquishyCamActive = false
-local camTweenSpeed = 0.11
+local camTweenSpeed = 0.12
 local camForwardDist = 10
 local focusPos = {x = 0, y = 0, z = 0}
 local camPos = {x = 0, y = 0, z = 0}
@@ -58,6 +74,7 @@ local doodellBlink = false
 local eepyTimer = 0
 local eepyStart = 390
 local eepyCamOffset = 0
+local prevPos = {x = 0, y = 0, z = 0}
 local function camera_update()
     local m = gMarioStates[0]
     local l = gLakituState
@@ -97,16 +114,22 @@ local function camera_update()
             end
             camAngle = round(angle/0x2000)*0x2000
         end
+
+        local posVel = {
+            x = m.pos.x - prevPos.x,
+            y = m.pos.y - prevPos.y,
+            z = m.pos.z - prevPos.z,
+        }
         
         focusPos = {
-            x = m.pos.x + (not nonMomentumActs[m.action] and m.vel.x*camForwardDist or 0),
+            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0),
             y = m.pos.y + 150 + (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*camForwardDist*0.8 or 0) - eepyCamOffset,
-            z = m.pos.z + (not nonMomentumActs[m.action] and m.vel.z*camForwardDist or 0),
+            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0),
         }
         camPos = {
-            x = m.pos.x + (not nonMomentumActs[m.action] and m.vel.x*7 or 0) + sins(angle) * 500 * camScale,
+            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*7 or 0) + sins(angle) * 500 * camScale,
             y = m.pos.y - (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*5 or 0) - 150 + 350 * camScale - eepyCamOffset,
-            z = m.pos.z + (not nonMomentumActs[m.action] and m.vel.z*7 or 0) + coss(angle) * 500 * camScale,
+            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*7 or 0) + coss(angle) * 500 * camScale,
         }
 
         -- Doodell is eepy
@@ -124,11 +147,14 @@ local function camera_update()
             eepyCamOffset = eepyCamOffset * 0.9
             eepyTimer = 0
         end
-        
-        --warp_camera()
-        
-        vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-        vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
+
+        if math.abs(math.sqrt(camPos.x^2 + camPos.z^2) - math.sqrt(l.pos.x^2 + l.pos.z^2)) < 1500*((camScale+1)*0.5) then
+            vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
+            vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
+        else
+            vec3f_copy(l.focus, focusPos)
+            vec3f_copy(l.pos, camPos)
+        end
         l.roll = lerp(l.roll, ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800), 0.1)
         camFov = lerp(camFov, 50 + m.forwardVel*0.1, 0.1)
         set_override_fov(camFov)
@@ -140,6 +166,7 @@ local function camera_update()
         if l.roll > 1000 then
             doodellState = 3
         end
+        vec3f_copy(prevPos, m.pos)
     else
         if prevSquishyCamActive ~= squishyCamActive then
             camera_unfreeze()
@@ -149,10 +176,10 @@ local function camera_update()
             prevSquishyCamActive = squishyCamActive
         end
     end
-    if m.area.camera and m.area.camera.cutscene == 0 and not nonCameraActs[m.action] then
-        squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
-    else
+    if (m.area.camera and m.area.camera.cutscene ~= 0) or (m.freeze > 0 and m.freeze ~= 2) or nonCameraActs[m.action] or omm_camera_enabled(m) then
         squishyCamActive = false
+    else
+        squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
     end
 end
 
