@@ -154,7 +154,6 @@ local function camera_update()
             y = m.pos.y - (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*5 or 0) - 150 + 350 * camScale - eepyCamOffset,
             z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*7 or 0) + coss(angle) * 500 * camScale,
         }
-        djui_chat_message_create(tostring(-atan2s(camPos.y, focusPos.y)))
         local firstCamPitch = -atan2s(camPos.y, focusPos.y)
         if firstCamPitch <= -14000 and
             m.floor and m.floor.type == SURFACE_LOOK_UP_WARP and
