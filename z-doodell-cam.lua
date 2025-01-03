@@ -146,7 +146,7 @@ local function camera_update()
         
         focusPos = {
             x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + camPanX,
-            y = m.pos.y + 150 + (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*camForwardDist*0.8 or 0) - eepyCamOffset + camPitch,
+            y = m.pos.y + 150 + (not nonMomentumActs[m.action] and clamp(get_mario_y_vel_from_floor(m), -100, 100)*camForwardDist*0.8 or 0) - eepyCamOffset + camPitch,
             z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0) + camPanZ,
         }
         camPos = {
@@ -154,8 +154,8 @@ local function camera_update()
             y = m.pos.y - (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*5 or 0) - 150 + 350 * camScale - eepyCamOffset,
             z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*7 or 0) + coss(angle) * 500 * camScale,
         }
-        local firstCamPitch = -atan2s(camPos.y, focusPos.y)
-        if firstCamPitch <= -14000 and
+        
+        if camPitch >= 600*((camScale + 1)/3.5) and
             m.floor and m.floor.type == SURFACE_LOOK_UP_WARP and
             save_file_get_total_star_count(get_current_save_file_num() - 1, COURSE_MIN - 1, COURSE_MAX - 1) >= gLevelValues.wingCapLookUpReq and
             not is_game_paused() then
@@ -200,7 +200,7 @@ local function camera_update()
         vec3f_copy(prevPos, m.pos)
     end
     
-    if (m.area.camera and m.area.camera.cutscene ~= 0) or (m.freeze > 0 and m.freeze ~= 2) or nonCameraActs[m.action] or omm_camera_enabled(m) then
+    if (m.area.camera and m.area.camera.cutscene ~= 0) or (m.freeze > 0 and m.freeze ~= 2) or nonCameraActs[m.action] or omm_camera_enabled(m) or camera_config_is_free_cam_enabled() then
         squishyCamActive = false
     else
         squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
