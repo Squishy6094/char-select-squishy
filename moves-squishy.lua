@@ -482,10 +482,12 @@ end
 local function act_squishy_fire_burn(m)
     local e = gExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_FREEFALL_LAND, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_NONE)
-    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
+    --[[
     if m.vel.y < 0 then
         set_mario_action(m, ACT_FREEFALL, 0)
     end
+    ]]
 
     m.actionTimer = m.actionTimer + 1
 end
@@ -530,12 +532,12 @@ local function squishy_update(m)
         m.particleFlags = PARTICLE_FIRE
         m.health = m.health - 10
         play_sound(SOUND_AIR_BLOW_FIRE, m.pos)
-        if m.input & INPUT_A_PRESSED ~= 0 then
+        if (m.input & INPUT_A_PRESSED ~= 0 or m.input & INPUT_B_PRESSED ~= 0 or m.input & INPUT_Z_PRESSED ~= 0) then
             e.spamBurnout = e.spamBurnout - 1
             play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
         end
         if m.health < 255 then
-            set_mario_action(m, ACT_LAVA_BOOST, 0)
+            set_mario_action_and_y_vel(m, ACT_LAVA_BOOST, 0, m.vel.y)
             e.spamBurnout = 0
         end
         if (m.waterLevel ~= nil and m.pos.y < m.waterLevel) then
@@ -573,7 +575,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel + math.max(m.vel.y*0.7, 0))
     end
     if (nextAct == ACT_BURNING_FALL or nextAct == ACT_BURNING_GROUND or nextAct == ACT_BURNING_JUMP or nextAct == ACT_LAVA_BOOST) and m.health > 255 then
-        e.spamBurnout = 10
+        e.spamBurnout = 15
         m.hurtCounter = 0
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_FIRE_BURN, 0, 90)
     end
@@ -662,9 +664,23 @@ local function squishy_before_phys_step(m)
     m.forwardVel = math.min(m.forwardVel, 150)
 end
 
+local function hud_render()
+    local m = gMarioStates[0]
+    local e = gExtraStates[0]
+    djui_hud_set_resolution(RESOLUTION_N64)
+    local burning = e.spamBurnout/15
+    if burning > 0 then
+        djui_hud_set_color(0, 0, 0, 200)
+        djui_hud_render_rect(16, 30, 6, 25)
+        djui_hud_set_color(255, 20, 0, 255)
+        djui_hud_render_rect(17, 31, 4, 23*burning)
+    end
+end
+
 local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
