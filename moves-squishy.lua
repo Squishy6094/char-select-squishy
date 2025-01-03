@@ -508,10 +508,10 @@ local function squishy_update(m)
     if m.pos.y == m.floorHeight and m.action ~= ACT_SQUISHY_GROUND_POUND_LAND and m.action ~= ACT_SQUISHY_GROUND_POUND_JUMP then
         e.groundPoundJump = true
     end
+    if m.action == ACT_SPAWN_SPIN_AIRBORNE and m.waterLevel > m.floorHeight then
+        set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
+    end
     if omm_moveset_enabled(m) then
-        if m.action == ACT_SPAWN_SPIN_AIRBORNE and m.waterLevel > m.floorHeight then
-            set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
-        end
         if m.input & INPUT_Z_PRESSED ~= 0 then
             if m.action == ACT_SQUISHY_SLIDE and m.actionTimer > 3 then
                 set_mario_action(m, ACT_OMM_ROLL, 0)
@@ -522,7 +522,6 @@ local function squishy_update(m)
             end
         end
         e.ommRolling = (m.action == ACT_SQUISHY_SLIDE or m.action == ACT_OMM_ROLL)
-        djui_chat_message_create(tostring(e.ommRolling))
     end
 end
 
@@ -542,23 +541,6 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel + math.max(m.vel.y*0.7, 0))
     end
     if omm_moveset_enabled(m) then
-        djui_chat_message_create(tostring(e.ommRolling))
-        if not e.ommRolling then
-            --[[
-            if (nextAct == ACT_OMM_ROLL) then
-                if m.prevAction == ACT_OMM_SPIN_POUND_LAND then
-                    e.forwardVelStore = math.max(e.yVelStore, 50)
-                    m.faceAngle.y = m.intendedYaw
-                else
-                    e.forwardVelStore = math.max(m.forwardVel, 50)
-                end
-                e.ommRolling = true
-                return set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
-            else
-                e.ommRolling = false
-            end
-            ]]
-        end
         if nextAct == ACT_OMM_SPIN_POUND then
             return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 2, -70)
         end

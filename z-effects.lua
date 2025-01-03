@@ -55,7 +55,7 @@ function bhv_spark_loop(obj)
         obj.oAnimations = nil
     end
 
-    if m.action == ACT_SQUISHY_SLIDE then
+    if m.action == ACT_SQUISHY_SLIDE and m.actionTimer > 5 and m.forwardVel > 30 then
         cur_obj_unhide()
     else
         cur_obj_hide()
@@ -96,7 +96,7 @@ function bhv_squishy_slide_spark_render(obj)
     --local animFrame = m.marioObj.header.gfx.animInfo.animFrame
 
     if m.action == ACT_SQUISHY_SLIDE then
-        obj.oFaceAngleRoll = obj.oFaceAngleRoll + 0x800
+        --obj.oFaceAngleRoll = obj.oFaceAngleRoll + 0x800
         --[[
         if m.actionArg == 1 then
             obj.oFaceAnglePitch = e.rotAngle + 0x9000
@@ -140,6 +140,8 @@ function on_object_render(obj)
     --    return
     --end
 
+
+
     obj.oFaceAngleYaw = m.faceAngle.y--obj.oFaceAngleYaw + 0x800
     obj.oFaceAnglePitch = 0--obj.oFaceAnglePitch + 0x2800
     obj.oFaceAngleRoll = obj.oFaceAngleRoll + 0x2000
@@ -149,7 +151,7 @@ function on_object_render(obj)
     obj.oPosY = get_hand_foot_pos_y(m, 2) - 10
     obj.oPosZ = get_hand_foot_pos_z(m, 2)
 
-    bhv_squishy_slide_spark_render(obj)
+    --bhv_squishy_slide_spark_render(obj)
 
     -- if the player is off screen, move the obj to the player origin
     if m.marioBodyState.updateTorsoTime ~= gMarioStates[0].marioBodyState.updateTorsoTime then

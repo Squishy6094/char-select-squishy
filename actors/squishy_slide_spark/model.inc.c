@@ -1,6 +1,3 @@
-Lights0 squishy_slide_spark_Fast3D_Material_lights = gdSPDefLights0(
-	0xFF, 0xFF, 0xFF);
-
 Gfx squishy_slide_spark_squishy_slide_burn_ci4_aligner[] = {gsSPEndDisplayList()};
 u8 squishy_slide_spark_squishy_slide_burn_ci4[] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -76,47 +73,52 @@ u8 squishy_slide_spark_squishy_slide_burn_pal_rgba16[] = {
 	0xcf, 0xbb, 
 };
 
-Vtx squishy_slide_spark_Cone_mesh_layer_5_vtx_0[15] = {
-	{{ {100, 0, -66}, 0, {-16, -5}, {101, 0, 78, 255} }},
-	{{ {0, 0, 63}, 0, {-16, 993}, {0, 0, 127, 255} }},
-	{{ {71, -71, -66}, 0, {530, -5}, {71, 185, 78, 255} }},
-	{{ {71, 71, -66}, 0, {-562, -5}, {71, 71, 78, 255} }},
-	{{ {71, -71, -66}, 0, {-562, -5}, {71, 185, 78, 255} }},
-	{{ {0, 0, 63}, 0, {-16, 993}, {0, 0, 127, 255} }},
-	{{ {0, -100, -66}, 0, {-16, -5}, {0, 155, 78, 255} }},
-	{{ {-71, -71, -66}, 0, {530, -5}, {185, 185, 78, 255} }},
-	{{ {-71, -71, -66}, 0, {-562, -5}, {185, 185, 78, 255} }},
-	{{ {0, 0, 63}, 0, {-16, 993}, {0, 0, 127, 255} }},
-	{{ {-100, 0, -66}, 0, {-16, -5}, {155, 0, 78, 255} }},
-	{{ {-71, 71, -66}, 0, {530, -5}, {185, 71, 78, 255} }},
-	{{ {-71, 71, -66}, 0, {-562, -5}, {185, 71, 78, 255} }},
-	{{ {0, 100, -66}, 0, {-16, -5}, {0, 101, 78, 255} }},
-	{{ {71, 71, -66}, 0, {530, -5}, {71, 71, 78, 255} }},
+Vtx squishy_slide_spark_Cone_mesh_layer_4_vtx_cull[8] = {
+	{{ {-100, -100, 55}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {-100, 100, 55}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {-100, 100, -74}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {-100, -100, -74}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, -100, 55}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, 100, 55}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, 100, -74}, 0, {0, 0}, {0, 0, 0, 0} }},
+	{{ {100, -100, -74}, 0, {0, 0}, {0, 0, 0, 0} }},
 };
 
-Gfx squishy_slide_spark_Cone_mesh_layer_5_tri_0[] = {
-	gsSPVertex(squishy_slide_spark_Cone_mesh_layer_5_vtx_0 + 0, 15, 0),
-	gsSP1Triangle(0, 1, 2, 0),
-	gsSP1Triangle(3, 1, 0, 0),
-	gsSP1Triangle(4, 5, 6, 0),
-	gsSP1Triangle(6, 5, 7, 0),
-	gsSP1Triangle(8, 9, 10, 0),
-	gsSP1Triangle(10, 9, 11, 0),
-	gsSP1Triangle(12, 5, 13, 0),
-	gsSP1Triangle(13, 5, 14, 0),
+Vtx squishy_slide_spark_Cone_mesh_layer_4_vtx_0[15] = {
+	{{ {100, 0, -74}, 0, {-16, -5}, {100, 0, 78, 255} }},
+	{{ {0, 0, 55}, 0, {-16, 993}, {0, 0, 127, 255} }},
+	{{ {71, -71, -74}, 0, {530, -5}, {71, 185, 78, 255} }},
+	{{ {71, 71, -74}, 0, {-562, -5}, {71, 71, 78, 255} }},
+	{{ {71, -71, -74}, 0, {-562, -5}, {71, 185, 78, 255} }},
+	{{ {0, 0, 55}, 0, {-16, 993}, {0, 0, 127, 255} }},
+	{{ {0, -100, -74}, 0, {-16, -5}, {0, 156, 78, 255} }},
+	{{ {-71, -71, -74}, 0, {530, -5}, {185, 185, 78, 255} }},
+	{{ {-71, -71, -74}, 0, {-562, -5}, {185, 185, 78, 255} }},
+	{{ {0, 0, 55}, 0, {-16, 993}, {0, 0, 127, 255} }},
+	{{ {-100, 0, -74}, 0, {-16, -5}, {156, 0, 78, 255} }},
+	{{ {-71, 71, -74}, 0, {530, -5}, {185, 71, 78, 255} }},
+	{{ {-71, 71, -74}, 0, {-562, -5}, {185, 71, 78, 255} }},
+	{{ {0, 100, -74}, 0, {-16, -5}, {0, 100, 78, 255} }},
+	{{ {71, 71, -74}, 0, {530, -5}, {71, 71, 78, 255} }},
+};
+
+Gfx squishy_slide_spark_Cone_mesh_layer_4_tri_0[] = {
+	gsSPVertex(squishy_slide_spark_Cone_mesh_layer_4_vtx_0 + 0, 15, 0),
+	gsSP2Triangles(0, 1, 2, 0, 3, 1, 0, 0),
+	gsSP2Triangles(4, 5, 6, 0, 6, 5, 7, 0),
+	gsSP2Triangles(8, 9, 10, 0, 10, 9, 11, 0),
+	gsSP2Triangles(12, 5, 13, 0, 13, 5, 14, 0),
 	gsSPEndDisplayList(),
 };
 
 
 Gfx mat_squishy_slide_spark_Fast3D_Material[] = {
+	gsSPGeometryMode(G_CULL_BACK, 0),
 	gsDPPipeSync(),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
-	gsSPClearGeometryMode(G_CULL_BACK),
+	gsDPSetCombineLERP(0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0, 0, 0, 0, TEXEL0),
 	gsDPSetAlphaDither(G_AD_NOISE),
 	gsDPSetTextureLUT(G_TT_RGBA16),
 	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
-	gsSPSetLights0(squishy_slide_spark_Fast3D_Material_lights),
 	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, squishy_slide_spark_squishy_slide_burn_pal_rgba16),
 	gsDPSetTile(0, 0, 0, 256, 5, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadTLUTCmd(5, 4),
@@ -129,21 +131,21 @@ Gfx mat_squishy_slide_spark_Fast3D_Material[] = {
 };
 
 Gfx mat_revert_squishy_slide_spark_Fast3D_Material[] = {
+	gsSPGeometryMode(0, G_CULL_BACK),
 	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_CULL_BACK),
 	gsDPSetAlphaDither(G_AD_DISABLE),
 	gsDPSetTextureLUT(G_TT_NONE),
 	gsSPEndDisplayList(),
 };
 
-Gfx squishy_slide_spark_Cone_mesh_layer_5[] = {
+Gfx squishy_slide_spark_Cone_mesh_layer_4[] = {
+	gsSPClearGeometryMode(G_LIGHTING),
+	gsSPVertex(squishy_slide_spark_Cone_mesh_layer_4_vtx_cull + 0, 8, 0),
+	gsSPSetGeometryMode(G_LIGHTING),
+	gsSPCullDisplayList(0, 7),
 	gsSPDisplayList(mat_squishy_slide_spark_Fast3D_Material),
-	gsSPDisplayList(squishy_slide_spark_Cone_mesh_layer_5_tri_0),
+	gsSPDisplayList(squishy_slide_spark_Cone_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_squishy_slide_spark_Fast3D_Material),
-	gsSPEndDisplayList(),
-};
-
-Gfx squishy_slide_spark_material_revert_render_settings[] = {
 	gsDPPipeSync(),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),
