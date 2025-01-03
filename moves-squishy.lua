@@ -17,6 +17,7 @@ for i = 0, MAX_PLAYERS - 1 do
         prevFloorDist = 0,
         prevWallAngle = 0,
         ommRolling = false,
+        spamBurnout = 0,
     }
 end
 
@@ -125,6 +126,7 @@ ACT_SQUISHY_GROUND_POUND_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_F
 ACT_SQUISHY_WALL_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 ACT_SQUISHY_WATER_POUND = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_SWIMMING_OR_FLYING)
 ACT_SQUISHY_WATER_POUND_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_SWIMMING_OR_FLYING)
+ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 
 --- @param m MarioState
 local function act_squishy_dive(m)
@@ -312,11 +314,11 @@ local function act_squishy_ground_pound_land(m)
                     m.forwardVel = e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60)
                     --set_mario_x_and_y_vel_from_floor_steepness(m, 1000)
                     e.groundPoundJump = false
-                    set_mario_y_vel_based_on_fspeed(m, 50, 0.2)
+                    set_mario_y_vel_based_on_fspeed(m, math.max(70, e.yVelStore - 10), 0.2)
                     set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 else
                     m.forwardVel = (e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60))*0.7
-                    set_mario_y_vel_based_on_fspeed(m, 50, 0.1)
+                    set_mario_y_vel_based_on_fspeed(m, math.max(60, e.yVelStore - 20), 0.1)
                     set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 end
             end
@@ -476,6 +478,18 @@ local function act_squishy_water_pound_air_gravity(m)
     m.vel.y = math.max(m.vel.y - 4, -200)
 end
 
+--- @param m MarioState
+local function act_squishy_fire_burn(m)
+    local e = gExtraStates[m.playerIndex]
+    common_air_action_step(m, ACT_FREEFALL_LAND, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_NONE)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
+    if m.vel.y < 0 then
+        set_mario_action(m, ACT_FREEFALL, 0)
+    end
+
+    m.actionTimer = m.actionTimer + 1
+end
+
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
@@ -486,6 +500,7 @@ hook_mario_action(ACT_SQUISHY_GROUND_POUND_LAND, act_squishy_ground_pound_land, 
 hook_mario_action(ACT_SQUISHY_WALL_SLIDE, {every_frame = act_squishy_wall_slide})
 hook_mario_action(ACT_SQUISHY_WATER_POUND, {every_frame = act_squishy_water_pound})
 hook_mario_action(ACT_SQUISHY_WATER_POUND_AIR, {every_frame = act_squishy_water_pound_air, gravity = act_squishy_water_pound_air_gravity})
+hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 
 local function squishy_update(m)
     local e = gExtraStates[m.playerIndex]
@@ -510,6 +525,23 @@ local function squishy_update(m)
     end
     if m.action == ACT_SPAWN_SPIN_AIRBORNE and m.waterLevel > m.floorHeight then
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
+    end
+    if e.spamBurnout > 0 then
+        m.particleFlags = PARTICLE_FIRE
+        m.health = m.health - 10
+        play_sound(SOUND_AIR_BLOW_FIRE, m.pos)
+        if m.input & INPUT_A_PRESSED ~= 0 then
+            e.spamBurnout = e.spamBurnout - 1
+            play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
+        end
+        if m.health < 255 then
+            set_mario_action(m, ACT_LAVA_BOOST, 0)
+            e.spamBurnout = 0
+        end
+        if (m.waterLevel ~= nil and m.pos.y < m.waterLevel) then
+            play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
+            e.spamBurnout = 0
+        end
     end
     if omm_moveset_enabled(m) then
         if m.input & INPUT_Z_PRESSED ~= 0 then
@@ -539,6 +571,11 @@ local function squishy_before_action(m, nextAct)
     end
     if nextAct == ACT_AIR_HIT_WALL or nextAct == ACT_OMM_WALL_SLIDE then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel + math.max(m.vel.y*0.7, 0))
+    end
+    if (nextAct == ACT_BURNING_FALL or nextAct == ACT_BURNING_GROUND or nextAct == ACT_BURNING_JUMP or nextAct == ACT_LAVA_BOOST) and m.health > 255 then
+        e.spamBurnout = 10
+        m.hurtCounter = 0
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_FIRE_BURN, 0, 90)
     end
     if omm_moveset_enabled(m) then
         if nextAct == ACT_OMM_SPIN_POUND then

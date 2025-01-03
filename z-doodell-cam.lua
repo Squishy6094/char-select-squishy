@@ -187,7 +187,7 @@ local function camera_update()
             vec3f_copy(l.pos, camPos)
         end
         l.roll = lerp(l.roll, ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800), 0.1)
-        camFov = lerp(camFov, 50 + m.forwardVel*0.1, 0.1)
+        camFov = lerp(camFov, 50 + math.abs(m.forwardVel)*0.1, 0.1)
         set_override_fov(camFov)
         prevSquishyCamActive = squishyCamActive
 
