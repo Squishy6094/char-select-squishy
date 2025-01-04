@@ -145,6 +145,7 @@ local function act_squishy_slide(m)
     e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.25
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
     m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
+    e.yVelStore = get_mario_y_vel_from_floor(m)
     if mario_is_on_water(m) then
         m.pos.y = m.pos.y + 10
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
@@ -166,6 +167,9 @@ local function act_squishy_slide_air(m)
     local e = gExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK, AIR_STEP_NONE)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
+    if m.actionTimer == 1 and m.prevAction == ACT_SQUISHY_SLIDE then
+        m.vel.y = e.yVelStore
+    end
     if m.actionArg == 0 then
         if e.forwardVelStore > 30 and mario_is_on_water(m) then
             set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, e.forwardVelStore*0.25)
@@ -656,12 +660,14 @@ local function squishy_before_phys_step(m)
         end
     end
 
-    -- Peaking Velocity
-    if m.forwardVel > 70 then
-        m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.25)
+    if not omm_moveset_enabled(m) then
+        -- Peaking Velocity
+        if m.forwardVel > 70 then
+            m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.25)
+        end
+        -- Terminal Velocity
+        m.forwardVel = math.min(m.forwardVel, 150)
     end
-    -- Terminal Velocity
-    m.forwardVel = math.min(m.forwardVel, 150)
 end
 
 local function hud_render()
