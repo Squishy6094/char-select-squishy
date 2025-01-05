@@ -531,7 +531,7 @@ local function squishy_update(m)
     if m.pos.y == m.floorHeight and m.action ~= ACT_SQUISHY_GROUND_POUND_LAND and m.action ~= ACT_SQUISHY_GROUND_POUND_JUMP then
         e.groundPoundJump = true
     end
-    if m.action == ACT_SPAWN_SPIN_AIRBORNE and m.waterLevel > m.floorHeight then
+    if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
     if e.spamBurnout > 0 then

@@ -124,6 +124,7 @@ local function camera_update()
         --l.mode = CAMERA_MODE_NONE
 
         local angle = camAngle
+        local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800)
         if not camSwitch then
             if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 then
                 angle = m.faceAngle.y - 0x8000
@@ -134,6 +135,10 @@ local function camera_update()
                     angle = angle + 0x2000
                 end
                 camAngle = round(angle/0x2000)*0x2000
+
+                if m.action & ACT_FLAG_FLYING ~= 0 then
+                    roll = m.faceAngle.z*0.1
+                end
             end
         end
 
@@ -188,7 +193,7 @@ local function camera_update()
             vec3f_copy(l.focus, focusPos)
             vec3f_copy(l.pos, camPos)
         end
-        l.roll = lerp(l.roll, ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800), 0.1)
+        l.roll = lerp(l.roll, roll, 0.1)
         camFov = lerp(camFov, 50 + math.abs(m.forwardVel)*0.1, 0.1)
         set_override_fov(camFov)
         prevSquishyCamActive = squishyCamActive
