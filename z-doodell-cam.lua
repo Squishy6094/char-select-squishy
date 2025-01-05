@@ -86,8 +86,8 @@ local function camera_update()
     if squishyCamActive then
         doodellState = doodellBlink and 1 or 0
         camera_freeze()
+        local camSwitch = (m.controller.buttonDown & R_TRIG ~= 0)
         if not (is_game_paused() or eepyTimer > eepyStart) then
-            local camSwitch = (m.controller.buttonDown & R_TRIG ~= 0)
             --camAngle = round((m.faceAngle.y - 0x8000)/0x2000)*0x2000
             
             if not camSwitch then
@@ -124,15 +124,17 @@ local function camera_update()
         --l.mode = CAMERA_MODE_NONE
 
         local angle = camAngle
-        if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 then
-            angle = m.faceAngle.y - 0x8000
-            if m.controller.buttonDown & L_CBUTTONS ~= 0 then
-                angle = angle - 0x2000
+        if not camSwitch then
+            if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 then
+                angle = m.faceAngle.y - 0x8000
+                if m.controller.buttonDown & L_CBUTTONS ~= 0 then
+                    angle = angle - 0x2000
+                end
+                if m.controller.buttonDown & R_CBUTTONS ~= 0 then
+                    angle = angle + 0x2000
+                end
+                camAngle = round(angle/0x2000)*0x2000
             end
-            if m.controller.buttonDown & R_CBUTTONS ~= 0 then
-                angle = angle + 0x2000
-            end
-            camAngle = round(angle/0x2000)*0x2000
         end
 
         local posVel = {

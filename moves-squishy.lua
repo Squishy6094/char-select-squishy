@@ -316,13 +316,12 @@ local function act_squishy_ground_pound_land(m)
                 if e.groundPoundJump then
                     m.faceAngle.y = m.intendedYaw
                     m.forwardVel = e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60)
-                    --set_mario_x_and_y_vel_from_floor_steepness(m, 1000)
                     e.groundPoundJump = false
-                    set_mario_y_vel_based_on_fspeed(m, math.max(70, e.yVelStore - 10), 0.2)
+                    m.vel.y = math.max(70, math.abs(e.yVelStore*0.7))
                     set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 else
                     m.forwardVel = (e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60))*0.7
-                    set_mario_y_vel_based_on_fspeed(m, math.max(60, e.yVelStore - 20), 0.1)
+                    m.vel.y = math.max(70, math.abs(e.yVelStore*0.6))
                     set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 end
             end
@@ -485,13 +484,16 @@ end
 --- @param m MarioState
 local function act_squishy_fire_burn(m)
     local e = gExtraStates[m.playerIndex]
-    common_air_action_step(m, ACT_FREEFALL_LAND, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_SQUISHY_FIRE_BURN, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_NONE)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
-    --[[
-    if m.vel.y < 0 then
+    
+    if m.pos.y == m.floorHeight and m.vel.y < 50 then
+        m.vel.y = 50
+    end
+    
+    if e.spamBurnout <= 0 then
         set_mario_action(m, ACT_FREEFALL, 0)
     end
-    ]]
 
     m.actionTimer = m.actionTimer + 1
 end
