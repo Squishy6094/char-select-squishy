@@ -388,8 +388,8 @@ local function act_squishy_wall_slide(m)
     end
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_A_PRESSED ~= 0 then
+        m.forwardVel = math.abs(m.vel.y)
         set_mario_action_and_y_vel(m, ACT_WALL_KICK_AIR, 0, math.max(m.vel.y * 0.7, 30))
-        m.forwardVel = m.forwardVel * 0.8
     end
 end
 
