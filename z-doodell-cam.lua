@@ -126,7 +126,7 @@ local function camera_update()
         local angle = camAngle
         local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800)
         if not camSwitch then
-            if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 then
+            if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_TWIRL_LAND then
                 angle = m.faceAngle.y - 0x8000
                 if m.controller.buttonDown & L_CBUTTONS ~= 0 then
                     angle = angle - 0x2000
