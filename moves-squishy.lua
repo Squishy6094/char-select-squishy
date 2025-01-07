@@ -68,6 +68,7 @@ function get_mario_y_vel_from_floor(m)
     end
 end
 
+--[[
 local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
     if multiplier == nil then multiplier = 1 end
     local angle = m.floorAngle
@@ -78,6 +79,7 @@ local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
     m.vel.x = m.vel.x + sins(angle)*floorDif*multiplier
     m.vel.z = m.vel.z + coss(angle)*floorDif*multiplier
 end
+]]
 
 local function clamp(num, min, max)
     return math.min(math.max(num, min), max)
