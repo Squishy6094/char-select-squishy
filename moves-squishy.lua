@@ -25,7 +25,7 @@ end
 -- OMM Moves
 local ACT_OMM_SPIN_JUMP = -1
 local ACT_OMM_SPIN_POUND = -1
-local ACT_OMM_SPIN_POUND_LAND = -1
+--local ACT_OMM_SPIN_POUND_LAND = -1
 local ACT_OMM_ROLL = -1
 local ACT_OMM_WALL_SLIDE = -1
 -- Settings
@@ -35,7 +35,7 @@ local OMM_SETTING_MOVESET_ODYSSEY = -1
 if _G.OmmEnabled then
     ACT_OMM_SPIN_JUMP = _G.OmmApi["ACT_OMM_SPIN_JUMP"]
     ACT_OMM_SPIN_POUND = _G.OmmApi["ACT_OMM_SPIN_POUND"]
-    ACT_OMM_SPIN_POUND_LAND = _G.OmmApi["ACT_OMM_SPIN_POUND_LAND"]
+    --ACT_OMM_SPIN_POUND_LAND = _G.OmmApi["ACT_OMM_SPIN_POUND_LAND"]
     ACT_OMM_ROLL = _G.OmmApi["ACT_OMM_ROLL"]
     ACT_OMM_WALL_SLIDE = _G.OmmApi["ACT_OMM_WALL_SLIDE"]
     OMM_SETTING_MOVESET =  _G.OmmApi["OMM_SETTING_MOVESET"]
@@ -68,6 +68,7 @@ function get_mario_y_vel_from_floor(m)
     end
 end
 
+--[[
 local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
     if multiplier == nil then multiplier = 1 end
     local angle = m.floorAngle
@@ -78,6 +79,7 @@ local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
     m.vel.x = m.vel.x + sins(angle)*floorDif*multiplier
     m.vel.z = m.vel.z + coss(angle)*floorDif*multiplier
 end
+]]
 
 local function clamp(num, min, max)
     return math.min(math.max(num, min), max)
