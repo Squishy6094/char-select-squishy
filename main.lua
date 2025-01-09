@@ -17,12 +17,21 @@ if not _G.charSelectExists then
         },
         {
             name = "\\#2b0013\\Fłorałys",
-            {text = "really now..?", timer = 3},
-            {text = "hii don't mind me you can't find me anyway", timer = 3},
-            {text = "skill issue", timer = 3},
-            {text = "you're silly", timer = 3},
-            {text = "floralys mussolini is on her way.", timer = 3},
+            {text = "really now..?", timer = 2.9},
+            {text = "hii don't mind me you can't find me anyway", timer = 5.7},
+            {text = "skill issue", timer = 2.5},
+            {text = "you're silly", timer = 2.6},
+            {text = "floralys mussolini is on her way.", timer = 6.9},
         },
+        {
+            name = "\\#FF6A00\\Mlops\\#FFCC33\\Funny",
+            {text = "The Host doesn't need to hear all this, they're a highly trained professional", timer = 9.130},
+            {text = "Heh, dumbass.", timer = 3.930},
+            {text = "Why do they call it character select when you char a ter select elect er char ter?", timer = 9.430},
+            {text = "You're meanin' to tell me you DON'T know what CS stands for?", timer = 7.730},
+            {text = "Come back with the api and THEN we'll talk.", timer = 5.830},
+        }, 
+
     }
     local frameCount = 0
     local rngPerson = (math.random(1, 3) == 3 and math.random(2, #noCSMessages) or 1)
