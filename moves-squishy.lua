@@ -94,6 +94,10 @@ local function clamp_soft(num, min, max, rate)
     return num
 end
 
+local function lerp(a, b, t)
+    return a * (1 - t) + b * t
+end
+
 local function set_mario_action_and_y_vel(m, action, arg, velY)
     m.vel.y = velY
     return set_mario_action(m, action, arg)
@@ -118,6 +122,7 @@ local function convert_s16(num)
     return num
 end
 
+ACT_SQUISHY_MACH_RUN = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
 ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
@@ -129,6 +134,41 @@ ACT_SQUISHY_WALL_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOV
 ACT_SQUISHY_WATER_POUND = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_SWIMMING_OR_FLYING)
 ACT_SQUISHY_WATER_POUND_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_SWIMMING_OR_FLYING)
 ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
+
+
+--- @param m MarioState
+local function act_squishy_mach_run(m)
+    local e = gExtraStates[m.playerIndex]
+    perform_ground_step(m)
+    if m.actionTimer == 1 then
+        e.forwardVelStore = m.forwardVel
+        set_mario_anim_with_accel(m, MARIO_ANIM_RUNNING_UNUSED, 1)
+    end
+    
+    e.forwardVelStore = e.forwardVelStore - 0.25 + get_mario_floor_steepness(m)*2
+    if e.forwardVelStore < 70 then
+        set_mario_action(m, ACT_WALKING, 0)
+    end
+    if m.pos.y > m.floorHeight then
+        set_mario_action(m, ACT_FREEFALL, 0)
+    end
+    local prevFaceAngle = m.faceAngle.y
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x400, 0x400)
+    m.vel.x = sins(m.faceAngle.y)*e.forwardVelStore
+    m.vel.z = coss(m.faceAngle.y)*e.forwardVelStore
+    m.marioObj.header.gfx.angle.z = lerp(m.marioObj.header.gfx.angle.z, (prevFaceAngle - m.faceAngle.y)*0x8, 0.2)
+    --m.forwardVel = e.forwardVelStore
+    m.actionTimer = m.actionTimer + 1
+    if m.input & INPUT_A_PRESSED ~= 0 then
+        set_mario_action(m, ACT_DOUBLE_JUMP, 0)
+    end
+    if m.input & INPUT_B_PRESSED ~= 0 then
+        set_mario_action(m, ACT_SQUISHY_DIVE, 0)
+    end
+    if m.input & INPUT_Z_PRESSED ~= 0 then
+        set_mario_action(m, ACT_CROUCH_SLIDE, 0)
+    end
+end
 
 --- @param m MarioState
 local function act_squishy_dive(m)
@@ -500,6 +540,7 @@ local function act_squishy_fire_burn(m)
     m.actionTimer = m.actionTimer + 1
 end
 
+hook_mario_action(ACT_SQUISHY_MACH_RUN, { every_frame = act_squishy_mach_run})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
@@ -592,6 +633,9 @@ local function squishy_before_action(m, nextAct)
             return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 2, -70)
         end
     end
+    if nextAct == ACT_WALKING and m.forwardVel > 70 then
+        return set_mario_action(m, ACT_SQUISHY_MACH_RUN, 0)
+    end
 end
 
 local strainingBlacklist = {
@@ -664,10 +708,14 @@ local function squishy_before_phys_step(m)
         end
     end
 
+    if m.action == ACT_SQUISHY_MACH_RUN then
+        m.forwardVel = e.forwardVelStore
+    end
+
     if not omm_moveset_enabled(m) then
         -- Peaking Velocity
         if m.forwardVel > 70 then
-            m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.25)
+            m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.1)
         end
         -- Terminal Velocity
         m.forwardVel = math.min(m.forwardVel, 150)
