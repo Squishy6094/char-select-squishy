@@ -123,6 +123,7 @@ local function convert_s16(num)
 end
 
 ACT_SQUISHY_MACH_RUN = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
+ACT_SQUISHY_CROUCH_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
 ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
 ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
@@ -140,7 +141,7 @@ ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVI
 local function act_squishy_mach_run(m)
     local e = gExtraStates[m.playerIndex]
     perform_ground_step(m)
-    if m.actionTimer == 1 then
+    if m.actionTimer == 0 then
         e.forwardVelStore = m.forwardVel
         set_mario_animation(m, MARIO_ANIM_RUNNING_UNUSED)
     end
@@ -148,6 +149,7 @@ local function act_squishy_mach_run(m)
     e.forwardVelStore = e.forwardVelStore - 0.25 + get_mario_floor_steepness(m)*2
     if e.forwardVelStore < 70 then
         set_mario_action(m, ACT_WALKING, 0)
+        e.forwardVelStore = 0
     end
     if m.pos.y > m.floorHeight then
         set_mario_action(m, ACT_FREEFALL, 0)
@@ -166,7 +168,39 @@ local function act_squishy_mach_run(m)
         set_mario_action(m, ACT_SQUISHY_DIVE, 0)
     end
     if m.input & INPUT_Z_PRESSED ~= 0 then
-        set_mario_action(m, ACT_CROUCH_SLIDE, 0)
+        set_mario_action(m, ACT_SQUISHY_CROUCH_SLIDE, 0)
+    end
+end
+
+--- @param m MarioState
+local function act_squishy_crouch_slide(m)
+    local e = gExtraStates[m.playerIndex]
+    perform_ground_step(m)
+    if m.actionTimer == 0 then
+        e.forwardVelStore = math.max(m.forwardVel, 30)
+        set_mario_animation(m, MARIO_ANIM_CROUCHING)
+    end
+    
+    e.forwardVelStore = e.forwardVelStore*0.95 + get_mario_floor_steepness(m)*4
+    if math.abs(e.forwardVelStore) < 1 then
+        set_mario_action(m, ACT_CROUCHING, 0)
+        e.forwardVelStore = 0
+    end
+    if m.pos.y > m.floorHeight then
+        set_mario_action(m, ACT_FREEFALL, 0)
+    end
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x200, 0x200)
+    m.vel.x = sins(m.faceAngle.y)*e.forwardVelStore
+    m.vel.z = coss(m.faceAngle.y)*e.forwardVelStore
+    m.actionTimer = m.actionTimer + 1
+    if m.input & INPUT_A_PRESSED ~= 0 then
+        set_mario_action(m, ACT_LONG_JUMP, 0)
+    end
+    if m.input & INPUT_B_PRESSED ~= 0 then
+        set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
+    end
+    if m.input & INPUT_Z_DOWN == 0 then
+        set_mario_action(m, ACT_SQUISHY_MACH_RUN, 0)
     end
 end
 
@@ -541,6 +575,7 @@ local function act_squishy_fire_burn(m)
 end
 
 hook_mario_action(ACT_SQUISHY_MACH_RUN, { every_frame = act_squishy_mach_run})
+hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
@@ -636,6 +671,9 @@ local function squishy_before_action(m, nextAct)
     if nextAct == ACT_WALKING and m.forwardVel > 70 then
         return set_mario_action(m, ACT_SQUISHY_MACH_RUN, 0)
     end
+    if nextAct == ACT_CROUCH_SLIDE then
+        return set_mario_action(m, ACT_SQUISHY_CROUCH_SLIDE, 0)
+    end
 end
 
 local strainingBlacklist = {
@@ -708,7 +746,7 @@ local function squishy_before_phys_step(m)
         end
     end
 
-    if m.action == ACT_SQUISHY_MACH_RUN then
+    if m.action == ACT_SQUISHY_MACH_RUN or m.action == ACT_SQUISHY_CROUCH_SLIDE or m.action == ACT_LONG_JUMP then
         m.forwardVel = e.forwardVelStore
     end
 
