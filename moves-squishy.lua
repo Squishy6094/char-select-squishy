@@ -142,7 +142,7 @@ local function act_squishy_mach_run(m)
     perform_ground_step(m)
     if m.actionTimer == 1 then
         e.forwardVelStore = m.forwardVel
-        set_mario_anim_with_accel(m, MARIO_ANIM_RUNNING_UNUSED, 1)
+        set_mario_animation(m, MARIO_ANIM_RUNNING_UNUSED)
     end
     
     e.forwardVelStore = e.forwardVelStore - 0.25 + get_mario_floor_steepness(m)*2
