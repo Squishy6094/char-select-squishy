@@ -28,6 +28,41 @@ end
 
 local OPTION_SQUISHYCAM = _G.charSelect.add_option("Doodell Cam", 1, 2, {"Off", "Squishy Only", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset", (_G.OmmEnabled and "(Inactive with OMM Camera)" or "")}, true)
 
+local cutsceneActExclude = {
+    [ACT_LEDGE_GRAB] = true,
+    [ACT_LEDGE_CLIMB_DOWN] = true,
+    [ACT_LEDGE_CLIMB_FAST] = true,
+    [ACT_LEDGE_CLIMB_SLOW_1] = true,
+    [ACT_LEDGE_CLIMB_SLOW_2] = true,
+
+    [ACT_WARP_DOOR_SPAWN] = true,
+    [ACT_PULLING_DOOR] = true,
+    [ACT_PUSHING_DOOR] = true,
+    [ACT_UNLOCKING_KEY_DOOR] = true,
+    [ACT_UNLOCKING_STAR_DOOR] = true,
+    [ACT_ENTERING_STAR_DOOR] = true,
+
+    [ACT_GRAB_POLE_FAST] = true,
+    [ACT_GRAB_POLE_SLOW] = true,
+    [ACT_TOP_OF_POLE] = true,
+    [ACT_HOLDING_POLE] = true,
+    [ACT_CLIMBING_POLE] = true,
+    [ACT_TOP_OF_POLE_TRANSITION] = true,
+    [ACT_TOP_OF_POLE_JUMP] = true,
+    
+    [ACT_EMERGE_FROM_PIPE] = true,
+    --[ACT_DISAPPEARED] = true,
+
+    [ACT_PICKING_UP_BOWSER] = true,
+    [ACT_HOLDING_BOWSER] = true,
+    [ACT_RELEASING_BOWSER] = true,
+}
+local function is_mario_in_cutscene(m)
+    if m.action & ACT_GROUP_CUTSCENE ~= 0 and not cutsceneActExclude[m.action] then return true end
+    if (m.area.camera and m.area.camera.cutscene ~= 0) then return true end
+    return false
+end
+
 -- Settings
 local OMM_SETTING_CAMERA = ""
 -- Settings Toggles
@@ -207,7 +242,7 @@ local function camera_update()
         vec3f_copy(prevPos, m.pos)
     end
     
-    if (m.area.camera and m.area.camera.cutscene ~= 0) or (m.freeze > 0 and m.freeze ~= 2) or nonCameraActs[m.action] or omm_camera_enabled(m) or camera_config_is_free_cam_enabled() then
+    if is_mario_in_cutscene(m) or (m.freeze > 0 and not is_game_paused())or nonCameraActs[m.action] or omm_camera_enabled(m) or camera_config_is_free_cam_enabled() then
         squishyCamActive = false
     else
         squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
