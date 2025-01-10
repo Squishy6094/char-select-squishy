@@ -710,20 +710,14 @@ local function squishy_before_action(m, nextAct)
     end
 end
 
-local strainingBlacklist = {
-    [ACT_FALLING_EXIT_AIRBORNE] = true,
-    [ACT_EXIT_AIRBORNE] = true,
-    [ACT_SPECIAL_EXIT_AIRBORNE] = true,
-    [ACT_SPECIAL_DEATH_EXIT] = true,
-    [ACT_DEATH_EXIT] = true,
-    [ACT_SPAWN_NO_SPIN_AIRBORNE] = true,
-    [ACT_SPAWN_SPIN_AIRBORNE] = true,
-    [ACT_WATER_JUMP] = true,
-    [ACT_FALL_AFTER_STAR_GRAB] = true,
-    
-    --[ACT_SQUISHY_CEILING_STICK] = true,
-    [ACT_SQUISHY_WALL_SLIDE] = true,
-    [ACT_SQUISHY_SLIDE_AIR] = true,
+local strainingActs = {
+    [ACT_JUMP] = true,
+    [ACT_DOUBLE_JUMP] = true,
+    [ACT_TRIPLE_JUMP] = true,
+    [ACT_SQUISHY_ROLLOUT] = true,
+    [ACT_SQUISHY_DIVE] = true,
+    [ACT_SQUISHY_GROUND_POUND_JUMP] = true,
+    [ACT_SQUISHY_LONGJUMP] = true,
 }
 
 local canWallkick = {
@@ -749,7 +743,7 @@ local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
 
     -- Straining
-    if not strainingBlacklist[m.action] and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and m.pos.y > m.floorHeight then
+    if strainingActs[m.action] and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and m.pos.y > m.floorHeight then
         if m.input & INPUT_NONZERO_ANALOG ~= 0 then
             e.intendedDYaw = m.intendedYaw - m.faceAngle.y
             e.intendedMag = m.intendedMag / 32;
