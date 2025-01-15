@@ -162,8 +162,9 @@ local function act_squishy_mach_run(m)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x400, 0x400)
     m.vel.x = sins(m.faceAngle.y)*e.forwardVelStore
     m.vel.z = coss(m.faceAngle.y)*e.forwardVelStore
-    perform_ground_step(m)
-    m.marioObj.header.gfx.angle.z = lerp(m.marioObj.header.gfx.angle.z, (prevFaceAngle - m.faceAngle.y)*0xF, 0.1)
+    local groundStep = perform_ground_step(m)
+    m.marioObj.header.gfx.angle.z = lerp(m.marioObj.header.gfx.angle.z, (prevFaceAngle - m.faceAngle.y)*0xF, 0.08)
+    m.marioObj.header.gfx.animInfo.animAccel = math.floor(clamp(e.forwardVelStore, -150, 150)*0.2)<<16
     --m.forwardVel = e.forwardVelStore
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_A_PRESSED ~= 0 then
@@ -177,6 +178,11 @@ local function act_squishy_mach_run(m)
     end
     if m.input & INPUT_NONZERO_ANALOG == 0 then
         set_mario_action(m, ACT_TURNING_AROUND, 0)
+    end
+    if groundStep == GROUND_STEP_HIT_WALL then
+        m.pos.y = m.pos.y + 10
+        m.vel.y = e.forwardVelStore*0.7
+        set_mario_action(m, ACT_HARD_BACKWARD_AIR_KB, 0)
     end
 end
 
@@ -593,7 +599,8 @@ local function act_squishy_fire_burn(m)
     local e = gExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_SQUISHY_FIRE_BURN, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_NONE)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
-    
+    m.peakHeight = m.pos.y
+
     if m.pos.y == m.floorHeight and m.vel.y < 50 then
         m.vel.y = 50
     end
@@ -802,10 +809,15 @@ local function hud_render()
     end
 end
 
+local function level_init()
+    gExtraStates[0].spamBurnout = 0
+end
+
 local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, level_init)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
