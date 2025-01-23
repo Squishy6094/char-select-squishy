@@ -71,6 +71,7 @@ function get_mario_y_vel_from_floor(m)
         return m.vel.y
     end
 end
+    
 
 --[[
 local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
@@ -163,26 +164,30 @@ local function act_squishy_mach_run(m)
     m.vel.x = sins(m.faceAngle.y)*e.forwardVelStore
     m.vel.z = coss(m.faceAngle.y)*e.forwardVelStore
     local groundStep = perform_ground_step(m)
-    m.marioObj.header.gfx.angle.z = lerp(m.marioObj.header.gfx.angle.z, (prevFaceAngle - m.faceAngle.y)*0xF, 0.08)
+    m.marioObj.header.gfx.angle.z = (prevFaceAngle - m.faceAngle.y)*4
     m.marioObj.header.gfx.animInfo.animAccel = math.floor(clamp(e.forwardVelStore, -150, 150)*0.2)<<16
-    --m.forwardVel = e.forwardVelStore
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_A_PRESSED ~= 0 then
         set_mario_action(m, ACT_DOUBLE_JUMP, 0)
+        return
     end
     if m.input & INPUT_B_PRESSED ~= 0 then
         set_mario_action(m, ACT_SQUISHY_DIVE, 0)
+        return
     end
     if m.input & INPUT_Z_PRESSED ~= 0 then
         set_mario_action(m, ACT_SQUISHY_CROUCH_SLIDE, 0)
+        return
     end
-    if m.input & INPUT_NONZERO_ANALOG == 0 then
+    if analog_stick_held_back(m) == 1 then
         set_mario_action(m, ACT_TURNING_AROUND, 0)
+        return
     end
     if groundStep == GROUND_STEP_HIT_WALL then
         m.pos.y = m.pos.y + 10
         m.vel.y = e.forwardVelStore*0.7
-        set_mario_action(m, ACT_HARD_BACKWARD_AIR_KB, 0)
+        set_mario_action(m, ACT_BACKWARD_AIR_KB, 0)
+        return
     end
 end
 
@@ -239,7 +244,7 @@ end
 local function act_squishy_long_jump(m)
     local e = gExtraStates[m.playerIndex]
     if m.actionTimer == 0 then
-        m.forwardVel = m.forwardVel*1.5
+        m.forwardVel = m.forwardVel*1.1
         e.longJumpAnim = -0x10000 * math.floor(m.forwardVel/50)
         m.pos.y = m.pos.y + 10
         m.vel.y = 30

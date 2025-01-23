@@ -1,3 +1,4 @@
+--[[
 local audio = audio_stream_load("passive-noise.ogg")
 audio_stream_set_looping(audio, true)
 audio_stream_play(audio, true, 0)
@@ -21,13 +22,9 @@ local function update()
             end
         end
     end
-    djui_chat_message_create(tostring(soundDist))
-    djui_chat_message_create(tostring(soundDistPrev))
     if soundDist and soundDistPrev then
         audio_stream_set_volume(audio, math.abs(math.min(soundDist-soundDistMax, 0))/soundDistMax * soundSourceSpeed/150)
         local soundDistSpeed = soundDist - soundDistPrev
-        djui_chat_message_create(tostring(soundDistSpeed))
-        djui_chat_message_create(tostring(soundDist - soundDistPrev))
         audio_stream_set_frequency(audio, 1 - (soundDistSpeed/150)*0.2)
     else
         audio_stream_set_volume(audio, 0)
@@ -37,3 +34,4 @@ local function update()
 end
 
 hook_event(HOOK_UPDATE, update)
+]]
