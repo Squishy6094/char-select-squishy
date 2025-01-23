@@ -244,7 +244,7 @@ end
 local function act_squishy_long_jump(m)
     local e = gExtraStates[m.playerIndex]
     if m.actionTimer == 0 then
-        m.forwardVel = m.forwardVel*1.1
+        m.forwardVel = (m.forwardVel + 20)
         e.longJumpAnim = -0x10000 * math.floor(m.forwardVel/50)
         m.pos.y = m.pos.y + 10
         m.vel.y = 30

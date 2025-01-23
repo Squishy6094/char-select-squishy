@@ -26,6 +26,10 @@ local function round(num)
     return num < 0.5 and math.floor(num) or math.ceil(num)
 end
 
+local function clamp(num, min, max)
+    return math.min(math.max(num, min), max)
+end
+
 local OPTION_SQUISHYCAM = _G.charSelect.add_option("Doodell Cam", 1, 2, {"Off", "Squishy Only", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset", (_G.OmmEnabled and "(Inactive with OMM Camera)" or "")}, true)
 
 local cutsceneActExclude = {
@@ -67,6 +71,13 @@ local function omm_camera_enabled(m)
     end
 end
 
+local function button_to_analog(m, negInput, posInput)
+    local num = 0
+    num = num - (m.controller.buttonDown & negInput ~= 0 and 127 or 0)
+    num = num + (m.controller.buttonDown & posInput ~= 0 and 127 or 0)
+    return num
+end
+
 local nonMomentumActs = {
     [ACT_SQUISHY_WALL_SLIDE] = true,
 }
@@ -87,7 +98,7 @@ local camPitch = 0
 local camPan = 0
 local squishyCamActive = true
 local prevSquishyCamActive = false
-local camTweenSpeed = 0.12
+local camTweenSpeed = 0.1
 local camForwardDist = 10
 local camPanSpeed = 25
 local focusPos = {x = 0, y = 0, z = 0}
@@ -109,36 +120,61 @@ local function camera_update()
     if squishyCamActive then
         doodellState = doodellBlink and 1 or 0
         camera_freeze()
-        local camSwitch = (m.controller.buttonDown & R_TRIG ~= 0)
         if not (is_game_paused() or eepyTimer > eepyStart) then
-            --camAngle = round((m.faceAngle.y - 0x8000)/0x2000)*0x2000
+            local controller = m.controller
+            local camSwitch = (controller.buttonDown & R_TRIG ~= 0)
+            local analogToggle = camera_config_is_analog_cam_enabled()
+            local invertXMultiply = camera_config_is_x_inverted() and -1 or 1
+            local invertYMultiply = camera_config_is_y_inverted() and -1 or 1
+
+            local camDigitalLeft  = analogToggle and L_JPAD or L_CBUTTONS
+            local camDigitalRight = analogToggle and R_JPAD or R_CBUTTONS
+            local camDigitalUp    = analogToggle and U_JPAD or U_CBUTTONS
+            local camDigitalDown  = analogToggle and D_JPAD or D_CBUTTONS
+
+            local camAnalogX = analogToggle and controller.extStickX or button_to_analog(m, L_JPAD, R_JPAD)
+            local camAnalogY = analogToggle and controller.extStickY or button_to_analog(m, U_JPAD, D_JPAD)
+            djui_chat_message_create(tostring(camAnalogX))
+            djui_chat_message_create(tostring(camAnalogY))
             
             if not camSwitch then
-                if m.controller.buttonPressed & L_CBUTTONS ~= 0 then
-                    camAngle = camAngle - 0x2000
+                if m.forwardVel > 0 then
+                    camAngle = m.faceAngle.y+0x8000 - approach_s32(convert_s16(m.faceAngle.y+0x8000 - camAngle), 0, m.forwardVel*2, m.forwardVel*2)
                 end
-                if m.controller.buttonPressed & R_CBUTTONS ~= 0 then
-                    camAngle = camAngle + 0x2000
+
+                if math.abs(camAnalogX) > 10 then
+                    camAngle = camAngle + camAnalogX*10*invertXMultiply
                 end
-                if m.controller.buttonPressed & D_CBUTTONS ~= 0 then
-                    camScale = math.min(camScale + 1, 7)
+                if math.abs(camAnalogY) > 10 then
+                    camScale = clamp(camScale - camAnalogY*0.001*invertYMultiply, 1, 7)
                 end
-                if m.controller.buttonPressed & U_CBUTTONS ~= 0 then
-                    camScale = math.max(camScale - 1, 1)
+                djui_chat_message_create(tostring(camScale))
+
+                if controller.buttonPressed & camDigitalLeft ~= 0 then
+                    camAngle = camAngle - 0x2000*invertXMultiply
+                end
+                if controller.buttonPressed & camDigitalRight ~= 0 then
+                    camAngle = camAngle + 0x2000*invertXMultiply
+                end
+                if controller.buttonPressed & camDigitalDown ~= 0 then
+                    camScale = math.min(camScale + invertYMultiply, 7)
+                end
+                if controller.buttonPressed & camDigitalUp ~= 0 then
+                    camScale = math.max(camScale - invertYMultiply, 1)
                 end
                 camPitch = 0
                 camPan = 0
             else
-                if m.controller.buttonDown & L_CBUTTONS ~= 0 then
+                if controller.buttonDown & L_CBUTTONS ~= 0 then
                     camPan = camPan - camPanSpeed*camScale
                 end
-                if m.controller.buttonDown & R_CBUTTONS ~= 0 then
+                if controller.buttonDown & R_CBUTTONS ~= 0 then
                     camPan = camPan + camPanSpeed*camScale
                 end
-                if m.controller.buttonDown & D_CBUTTONS ~= 0 then
+                if controller.buttonDown & D_CBUTTONS ~= 0 then
                     camPitch = camPitch - camPanSpeed*camScale
                 end
-                if m.controller.buttonDown & U_CBUTTONS ~= 0 then
+                if controller.buttonDown & U_CBUTTONS ~= 0 then
                     camPitch = camPitch + camPanSpeed*camScale
                 end
             end
