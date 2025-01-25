@@ -260,7 +260,7 @@ end
 local function act_squishy_slide(m)
     local e = gExtraStates[m.playerIndex]
     if m.actionTimer == 0 then
-        e.forwardVelStore = math.max(m.forwardVel, 70)
+        e.forwardVelStore = math.max(m.forwardVel + 20, 70)
     end
     e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.25
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
@@ -487,8 +487,16 @@ local function act_squishy_wall_slide(m)
     perform_air_step(m, AIR_STEP_NONE)
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK)
     if m.actionTimer == 1 then
-        mario_bonk_reflection(m, 0)
-        --m.faceAngle.y = m.faceAngle.y + 0x8000
+        if (m.wall ~= nil) then
+            local wallAngle = convert_s16(atan2s(m.wall.normal.z, m.wall.normal.x));
+            m.faceAngle.y = wallAngle - convert_s16(m.faceAngle.y - wallAngle);
+
+            play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject);
+        else
+            play_sound(SOUND_ACTION_HIT, m.marioObj.header.gfx.cameraToObject);
+        end
+
+        m.faceAngle.y = m.faceAngle.y + 0x8000;
     end
     m.vel.y = clamp(m.vel.y - 0.2, -70, 150)
     m.particleFlags = PARTICLE_DUST
@@ -780,9 +788,7 @@ local function squishy_before_phys_step(m)
         --Standard air hit wall requirements
         if (m.forwardVel >= 16) and (canWallkick[m.action] ~= nil) then
             if (wallDYaw >= limitPositive) or (wallDYaw <= limitNegative) then
-                mario_bonk_reflection(m, 0)
-                m.faceAngle.y = m.faceAngle.y + 0x8000
-                set_mario_action(m, ACT_AIR_HIT_WALL, 0)
+                set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
             end
         end
     end

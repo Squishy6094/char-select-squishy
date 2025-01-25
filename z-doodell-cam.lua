@@ -265,7 +265,7 @@ local function camera_update()
         vec3f_copy(prevPos, m.pos)
     end
     
-    if is_mario_in_cutscene(m) or (m.freeze > 0 and not is_game_paused())or nonCameraActs[m.action] or omm_camera_enabled(m) or camera_config_is_free_cam_enabled() then
+    if is_mario_in_cutscene(m) or nonCameraActs[m.action] or omm_camera_enabled(m) or camera_config_is_free_cam_enabled() then
         squishyCamActive = false
     else
         squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
