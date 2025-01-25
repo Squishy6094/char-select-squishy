@@ -134,13 +134,13 @@ local function camera_update()
 
             local camAnalogX = analogToggle and controller.extStickX or button_to_analog(m, L_JPAD, R_JPAD)
             local camAnalogY = analogToggle and controller.extStickY or button_to_analog(m, U_JPAD, D_JPAD)
-            djui_chat_message_create(tostring(camAnalogX))
-            djui_chat_message_create(tostring(camAnalogY))
             
             if not camSwitch then
+                --[[
                 if m.forwardVel > 0 then
-                    camAngle = m.faceAngle.y+0x8000 - approach_s32(convert_s16(m.faceAngle.y+0x8000 - camAngle), 0, m.forwardVel*2, m.forwardVel*2)
+                    camAngle = m.faceAngle.y+0x8000 - approach_s32(convert_s16(m.faceAngle.y+0x8000 - camAngle), 0, m.forwardVel*5, m.forwardVel*5)
                 end
+                ]]
 
                 if math.abs(camAnalogX) > 10 then
                     camAngle = camAngle + camAnalogX*10*invertXMultiply
@@ -148,7 +148,6 @@ local function camera_update()
                 if math.abs(camAnalogY) > 10 then
                     camScale = clamp(camScale - camAnalogY*0.001*invertYMultiply, 1, 7)
                 end
-                djui_chat_message_create(tostring(camScale))
 
                 if controller.buttonPressed & camDigitalLeft ~= 0 then
                     camAngle = camAngle - 0x2000*invertXMultiply
