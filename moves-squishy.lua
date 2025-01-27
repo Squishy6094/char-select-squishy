@@ -832,3 +832,27 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, level_init)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
+
+---@param obj Object
+local function bhv_custom_mips_loop(obj)
+    local m = nearest_interacting_mario_state_to_object(obj)
+    local dist = dist_between_objects(obj, m.marioObj)
+    local radius = 150
+
+    if dist < radius and m.action == ACT_SQUISHY_SLIDE then
+        obj.oMoveAngleYaw = m.faceAngle.y
+        obj.oForwardVel = 90
+        obj.oVelY = 70
+        obj.oAction = MIPS_ACT_FALL_DOWN
+        obj.oMipsStarStatus = MIPS_STAR_STATUS_SHOULD_SPAWN_STAR
+    end
+    obj.oGravity = 5
+    if obj.oPosY == obj.oFloorHeight and obj.oVelY < -5 then
+        obj.oVelY = math.abs(obj.oVelY) - 5
+    end
+    djui_chat_message_create(tostring(obj.oFloorHeight))
+    djui_chat_message_create(tostring(obj.oPosY))
+end
+
+-- hook the behavior
+id_bhvCustomMips = hook_behavior(id_bhvMips, OBJ_LIST_PUSHABLE, false, nil, bhv_custom_mips_loop)
