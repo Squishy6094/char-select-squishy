@@ -127,6 +127,7 @@ local function convert_s16(num)
     return num
 end
 
+ACT_SQUISHY_WALKING = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_MACH_RUN = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_CROUCH_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
 ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
@@ -142,6 +143,109 @@ ACT_SQUISHY_WATER_POUND = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_M
 ACT_SQUISHY_WATER_POUND_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_SWIMMING_OR_FLYING)
 ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 
+local function update_squishy_walking_speed(m)
+    local maxTargetSpeed;
+    local targetSpeed;
+
+    if (m.floor ~= nil and m.floor.type == SURFACE_SLOW) then
+        maxTargetSpeed = 24
+    else
+        maxTargetSpeed = 32
+    end
+
+    targetSpeed = m.intendedMag < maxTargetSpeed and m.intendedMag or maxTargetSpeed;
+
+    --[[
+    if (m.quicksandDepth > 10) then
+        targetSpeed = targetSpeed * (6.25 / m.quicksandDepth)
+    end
+    ]]
+
+    if (m.forwardVel <= 0.0) then
+        m.forwardVel = m.forwardVel + 1.1;
+    elseif (m.forwardVel <= targetSpeed) then
+        m.forwardVel = m.forwardVel + 1.1 - m.forwardVel / 43.0;
+    elseif (m.floor.normal.y >= 0.95) then
+        m.forwardVel = m.forwardVel - 1.0;
+    end
+
+    --[[
+    if (m.forwardVel > 48.0) then
+        m.forwardVel = 48.0;
+    end
+    ]]
+
+    m.faceAngle.y = m.intendedYaw - approach_s32((m.intendedYaw - m.faceAngle.y), 0, 0x800, 0x800);
+    apply_slope_accel(m);
+end
+
+local function act_squishy_walking(m)
+    local startPos = {x = 0, y = 0, z = 0}
+    local startYaw = m.faceAngle.y
+
+    mario_drop_held_object(m)
+
+    --[[
+    if (should_begin_sliding(m)) then
+        return set_mario_action(m, ACT_BEGIN_SLIDING, 0)
+    end
+    ]]
+
+    if (m.input & INPUT_FIRST_PERSON ~= 0) then
+        return begin_braking_action(m)
+    end
+
+    if (m.input & INPUT_A_PRESSED ~= 0) then
+        return set_jump_from_landing(m)
+    end
+
+    --[[
+    if (check_ground_dive_or_punch(m)) then
+        return true
+    end
+    ]]
+
+    --[[
+    if (m.input & INPUT_UNKNOWN_5 ~= 0) then
+        return begin_braking_action(m);
+    end
+    ]]
+
+    --[[
+    if (analog_stick_held_back(m) and m.forwardVel >= 16) then
+        return set_mario_action(m, ACT_TURNING_AROUND, 0)
+    end
+    ]]
+    if (m.input & INPUT_Z_PRESSED ~= 0) then
+        return set_mario_action(m, ACT_CROUCH_SLIDE, 0)
+    end
+
+    m.actionState = 0
+
+    vec3f_copy(startPos, m.pos);
+    update_squishy_walking_speed(m)
+
+    local switch = perform_ground_step(m)
+    if switch == GROUND_STEP_LEFT_GROUND then
+        set_mario_action(m, ACT_FREEFALL, 0);
+        set_mario_animation(m, MARIO_ANIM_GENERAL_FALL);
+        return
+    elseif switch == GROUND_STEP_NONE then
+        anim_and_audio_for_walk(m)
+        if (m.intendedMag - m.forwardVel > 16.0) then
+            m.particleFlags = PARTICLE_DUST;
+        end
+        return
+    elseif switch == GROUND_STEP_HIT_WALL then
+        push_or_sidle_wall(m, startPos);
+        m.actionTimer = 0;
+        return
+    end
+
+    check_ledge_climb_down(m);
+    tilt_body_walking(m, startYaw);
+    return false;
+end
 
 --- @param m MarioState
 local function act_squishy_mach_run(m)
@@ -224,7 +328,7 @@ local function act_squishy_crouch_slide(m)
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
     if m.input & INPUT_Z_DOWN == 0 then
-        set_mario_action(m, ACT_SQUISHY_MACH_RUN, 0)
+        set_mario_action(m, ACT_SQUISHY_WALKING, 0)
     end
 end
 
@@ -625,6 +729,7 @@ local function act_squishy_fire_burn(m)
     m.actionTimer = m.actionTimer + 1
 end
 
+hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_MACH_RUN, { every_frame = act_squishy_mach_run})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -695,6 +800,9 @@ end
 ---@param m MarioState
 local function squishy_before_action(m, nextAct)
     local e = gExtraStates[m.playerIndex]
+    if nextAct == ACT_WALKING then
+        return set_mario_action(m, ACT_SQUISHY_WALKING, 0)
+    end
     if nextAct == ACT_GROUND_POUND then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 0, 60)
     end
@@ -720,9 +828,11 @@ local function squishy_before_action(m, nextAct)
             return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 2, -70)
         end
     end
+    --[[
     if nextAct == ACT_WALKING and m.forwardVel > 70 then
         return set_mario_action(m, ACT_SQUISHY_MACH_RUN, 0)
     end
+    ]]
     if nextAct == ACT_CROUCH_SLIDE then
         return set_mario_action(m, ACT_SQUISHY_CROUCH_SLIDE, 0)
     end
@@ -793,7 +903,7 @@ local function squishy_before_phys_step(m)
         end
     end
 
-    if m.action == ACT_SQUISHY_MACH_RUN or m.action == ACT_SQUISHY_CROUCH_SLIDE then
+    if m.action == ACT_SQUISHY_CROUCH_SLIDE then
         m.forwardVel = e.forwardVelStore
     end
 
