@@ -51,6 +51,8 @@ end
 
 local E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
 
+local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
+
 local PALETTE_SQUISHY = {
     [SHOES] = "1C1C1C",
     [GLOVES] = "BFC72F",
@@ -66,7 +68,7 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
-CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, "S", 1.1, 37)
+CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1, 37)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 if _G.charSelect.character_add_course_texture ~= nil then
     _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
