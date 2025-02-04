@@ -1005,6 +1005,16 @@ local wallAngleLimit = 50
 local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
 
+    -- Uncapped Actions
+    if m.action == ACT_SQUISHY_SLIDE then
+        djui_chat_message_create(tostring(m.forwardVel))
+        m.forwardVel = e.forwardVelStore
+    end
+    if m.action == ACT_SQUISHY_CROUCH_SLIDE then
+        m.forwardVel = e.forwardVelStore
+    end
+
+
     -- Straining
     if strainingActs[m.action] and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and m.pos.y > m.floorHeight then
         if m.input & INPUT_NONZERO_ANALOG ~= 0 then
@@ -1033,10 +1043,6 @@ local function squishy_before_phys_step(m)
                 set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
             end
         end
-    end
-
-    if m.action == ACT_SQUISHY_CROUCH_SLIDE then
-        m.forwardVel = e.forwardVelStore
     end
 
     if not omm_moveset_enabled(m) then
