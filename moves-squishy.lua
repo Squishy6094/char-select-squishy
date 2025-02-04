@@ -164,16 +164,20 @@ local function update_squishy_sliding(m, stopSpeed)
 
     --! This is attempting to use trig derivatives to rotate Mario's speed.
     -- It is slightly off/asymmetric since it uses the new X speed, but the old
-    -- Z speed.
-    m.slideVelX = m.slideVelX + m.slideVelZ * (m.intendedMag / 32.0) * sideward * 0.05;
-    m.slideVelZ = m.slideVelZ - m.slideVelX * (m.intendedMag / 32.0) * sideward * 0.05;
+    -- Z speed. (fixed)
+    local newSlideX = m.slideVelX + m.slideVelZ * (m.intendedMag / 32.0) * sideward * 0.05;
+    local newSlideZ = m.slideVelZ - m.slideVelX * (m.intendedMag / 32.0) * sideward * 0.05;
+    m.slideVelX = newSlideX
+    m.slideVelZ = newSlideZ
 
     newSpeed = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
 
+    --[[
     if (oldSpeed > 0.0 and newSpeed > 0.0) then
         m.slideVelX = m.slideVelX * oldSpeed / newSpeed;
         m.slideVelZ = m.slideVelZ * oldSpeed / newSpeed;
     end
+    ]]
 
     -- update sliding angle    
         local newFacingDYaw;
@@ -246,7 +250,6 @@ local function update_squishy_sliding(m, stopSpeed)
     return stopped
 end
 
---[[
 local function common_squishy_slide_action(m, endAction, airAction, animation)
     local pos = {x = 0, y = 0, z = 0}
 
@@ -296,7 +299,6 @@ local function common_squishy_slide_action(m, endAction, airAction, animation)
         return;
     end
 end
-]]
 
 local function update_squishy_walking_speed(m)
     local maxTargetSpeed;
@@ -374,11 +376,9 @@ local function act_squishy_walking(m)
         return true
     end
 
-    --[[
-    if (m.input & INPUT_NONZERO_ANALOG ~= 0) then
+    if (m.input & INPUT_NONZERO_ANALOG == 0) and m.forwardVel < 30 then
         return begin_braking_action(m);
     end
-    ]]
 
     if (analog_stick_held_back(m) == 1 and m.forwardVel >= 16) then
         set_mario_action(m, ACT_TURNING_AROUND, 0)
@@ -486,15 +486,20 @@ local function act_squishy_slide(m)
     if m.actionTimer == 0 then
         e.forwardVelStore = math.max(m.forwardVel + 20, 70)
     end
-    e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.25
+    e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.05
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
     m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
+    m.forwardVel = e.forwardVelStore
     e.yVelStore = get_mario_y_vel_from_floor(m)
     if mario_is_on_water(m) then
         m.pos.y = m.pos.y + 10
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
     end
-    common_slide_action_with_jump(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
+    --common_slide_action_with_jump(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
+    common_squishy_slide_action(m, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
+    if update_squishy_sliding(m, 4) then
+        set_mario_action(m, ACT_SLIDE_KICK_SLIDE_STOP, 0)
+    end
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x80, 0x80)
     if m.input & INPUT_A_PRESSED ~= 0 then
         if m.actionArg == 1 then
@@ -1007,7 +1012,6 @@ local function squishy_before_phys_step(m)
 
     -- Uncapped Actions
     if m.action == ACT_SQUISHY_SLIDE then
-        djui_chat_message_create(tostring(m.forwardVel))
         m.forwardVel = e.forwardVelStore
     end
     if m.action == ACT_SQUISHY_CROUCH_SLIDE then
