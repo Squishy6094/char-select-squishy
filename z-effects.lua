@@ -55,7 +55,7 @@ local function bhv_spark_loop(obj)
         obj.oAnimations = nil
     end
 
-    if m.action == ACT_SQUISHY_SLIDE and m.actionTimer > 5 and m.forwardVel > 50 then
+    if m.action == ACT_SQUISHY_SLIDE and m.actionTimer > 5 and m.forwardVel > 70 then
         cur_obj_unhide()
         obj.oOpacity = math.min(m.forwardVel/70, 1)*255
     else
