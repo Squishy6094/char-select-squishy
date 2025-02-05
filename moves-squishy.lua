@@ -486,7 +486,7 @@ local function act_squishy_slide(m)
     if m.actionTimer == 0 then
         e.forwardVelStore = math.max(m.forwardVel + 20, 70)
     end
-    e.forwardVelStore = math.min(e.forwardVelStore + get_mario_floor_steepness(m)*8, 130) - 0.05
+    e.forwardVelStore = e.forwardVelStore + get_mario_floor_steepness(m)*8 - 0.05
     m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
     m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
     m.forwardVel = e.forwardVelStore
@@ -494,6 +494,10 @@ local function act_squishy_slide(m)
     if mario_is_on_water(m) then
         m.pos.y = m.pos.y + 10
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
+    end
+    if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
+        m.forwardVel = m.forwardVel - 10
+        m.particleFlags = PARTICLE_FIRE
     end
     --common_slide_action_with_jump(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
     common_squishy_slide_action(m, ACT_DOUBLE_JUMP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
