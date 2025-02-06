@@ -15,7 +15,6 @@ for i = 0, MAX_PLAYERS - 1 do
         intendedMag = 0,
         sidewaysSpeed = 0,
         prevFloorDist = 0,
-        prevWallAngle = 0,
         ommRolling = false,
         spamBurnout = 0,
         longJumpAnim = 0,
@@ -23,6 +22,8 @@ for i = 0, MAX_PLAYERS - 1 do
         poundJumpSpinAnim = 0,
         poundSwimAnim = 0,
         attemptToGetInDoor = false,
+        prevWall = nil,
+        prevAngle = 0,
     }
 end
 
@@ -77,6 +78,13 @@ local function pos_or_neg(num)
     if num >= 1 then return 1 end
     if num <= -1 then return -1 end
     return 0
+end
+
+local function get_wall_raycasted(m)
+    local velFrames = 5
+    local wall = collision_find_surface_on_ray(m.pos.x, m.pos.y + 60, m.pos.z, m.vel.x*velFrames, 0, m.vel.z*velFrames).hitPos
+    spawn_non_sync_object(id_bhvSparkleSpawn, E_MODEL_NONE, wall.x, wall.y, wall.z, nil)
+    return resolve_and_return_wall_collisions(wall, 60, 50)
 end
     
 
@@ -620,18 +628,18 @@ local function act_squishy_ground_pound_land(m)
                     m.faceAngle.y = m.intendedYaw
                     m.forwardVel = e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60)
                     e.groundPoundJump = false
-                    m.vel.y = math.max(70, math.abs(e.yVelStore*0.7))
+                    m.vel.y = math.max(60, math.abs(e.yVelStore*0.6))
                     set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 else
                     m.forwardVel = (e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60))*0.7
-                    m.vel.y = math.max(70, math.abs(e.yVelStore*0.6))
+                    m.vel.y = math.max(50, math.abs(e.yVelStore*0.4))
                     set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 end
             end
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
             m.faceAngle.y = m.intendedYaw
-            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
+            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.8
             set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
             e.groundPoundJump = true
         end
@@ -670,39 +678,43 @@ local function act_squishy_wall_slide(m)
     local e = gExtraStates[m.playerIndex]
     perform_air_step(m, AIR_STEP_NONE)
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK)
-    if m.actionTimer == 1 then
-        if (m.wall ~= nil) then
-            local wallAngle = convert_s16(atan2s(m.wall.normal.z, m.wall.normal.x));
-            m.faceAngle.y = wallAngle - convert_s16(m.faceAngle.y - wallAngle);
-
-            play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject);
-        else
-            play_sound(SOUND_ACTION_HIT, m.marioObj.header.gfx.cameraToObject);
-        end
-
-        m.faceAngle.y = m.faceAngle.y + 0x8000;
+    
+    if m.actionTimer == 0 then
+        e.prevAngle = m.faceAngle.y
     end
+    
+    --mario_set_forward_vel(m, -m.forwardVel);
+
     m.vel.y = clamp(m.vel.y - 0.2, -70, 150)
     m.particleFlags = PARTICLE_DUST
     if m.wall == nil then
         if m.pos.y == m.floorHeight and e.prevFloorDist < 100 then
-            m.faceAngle.y = convert_s16(e.prevWallAngle)
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
         else
-            m.faceAngle.y = convert_s16(e.prevWallAngle + 0x8000)
+            m.faceAngle.y = m.faceAngle.y + 0x8000
             set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, m.vel.y)
             m.pos.y = m.pos.y + 10
             m.forwardVel = m.forwardVel * 0.4
         end
     else
+        m.faceAngle.y = atan2s(m.wall.normal.z, m.wall.normal.x)
         e.prevFloorDist = m.pos.y - m.floorHeight
-        e.prevWallAngle = convert_s16(atan2s(m.wall.normal.z, m.wall.normal.x))
+        e.prevWall = m.wall
     end
-    m.actionTimer = m.actionTimer + 1
+    
     if m.input & INPUT_A_PRESSED ~= 0 then
+        m.faceAngle.y = e.prevAngle
+        m.wall = e.prevWall
+        m.faceAngle.y = m.faceAngle.y + 0x8000;
+
+        play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK,
+                m.marioObj.header.gfx.cameraToObject);
+
         m.forwardVel = math.abs(m.vel.y)
         set_mario_action_and_y_vel(m, ACT_WALL_KICK_AIR, 0, math.max(m.vel.y * 0.7, 30))
     end
+
+    m.actionTimer = m.actionTimer + 1
 end
 
 --- @param m MarioState
@@ -832,6 +844,7 @@ hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 
 local function squishy_update(m)
     local e = gExtraStates[m.playerIndex]
+
     if (m.action == ACT_SQUISHY_LONG_JUMP or m.action == ACT_SQUISHY_DIVE) and m.input & INPUT_Z_PRESSED ~= 0 then
         set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, (m.action == ACT_SQUISHY_DIVE and 1 or 0), 60)
     end
@@ -894,6 +907,7 @@ end
 ---@param m MarioState
 local function squishy_before_action(m, nextAct)
     local e = gExtraStates[m.playerIndex]
+
     if nextAct == ACT_WALKING then
         if not e.attemptToGetInDoor then
             return set_mario_action(m, ACT_SQUISHY_WALKING, 0)
@@ -910,7 +924,7 @@ local function squishy_before_action(m, nextAct)
     if nextAct == ACT_FORWARD_ROLLOUT then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
     end
-    if nextAct == ACT_AIR_HIT_WALL or nextAct == ACT_OMM_WALL_SLIDE then
+    if m.wall ~= nil and nextAct == ACT_AIR_HIT_WALL or nextAct == ACT_OMM_WALL_SLIDE then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel*0.9 + math.max(m.vel.y*0.7, 0))
     end
     if nextAct == ACT_LONG_JUMP and m.forwardVel > 0 then
@@ -963,6 +977,7 @@ local canWallkick = {
 }
 
 local wallAngleLimit = 50
+local initPeakVel = 40
 local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
 
@@ -1007,9 +1022,7 @@ local function squishy_before_phys_step(m)
 
     if not omm_moveset_enabled(m) then
         -- Peaking Velocity
-        if m.forwardVel > 70 then
-            m.forwardVel = clamp_soft(m.forwardVel, -70, 70, 0.1*math.floor(m.forwardVel/70))
-        end
+        m.forwardVel = clamp_soft(m.forwardVel, -initPeakVel, initPeakVel, 0.1*math.floor(m.forwardVel/initPeakVel))
         -- Terminal Velocity
         --m.forwardVel = math.min(m.forwardVel, 150)
     end
