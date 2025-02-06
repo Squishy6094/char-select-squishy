@@ -866,8 +866,10 @@ local function squishy_update(m)
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
     if e.spamBurnout > 0 then
-        m.particleFlags = PARTICLE_FIRE
-        m.health = m.health - 10
+        if (m.flags & MARIO_METAL_CAP == 0) then
+            m.particleFlags = PARTICLE_FIRE
+            m.health = m.health - 10
+        end
         play_sound(SOUND_AIR_BLOW_FIRE, m.pos)
         if (m.input & INPUT_A_PRESSED ~= 0 or m.input & INPUT_B_PRESSED ~= 0 or m.input & INPUT_Z_PRESSED ~= 0) then
             e.spamBurnout = e.spamBurnout - 1
