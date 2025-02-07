@@ -624,17 +624,13 @@ local function act_squishy_ground_pound_land(m)
             if omm_moveset_enabled(m) and m.controller.buttonDown & Y_BUTTON ~= 0 then
                 set_mario_action(m, ACT_OMM_SPIN_JUMP, 0)
             else
-                if e.groundPoundJump then
-                    m.faceAngle.y = m.intendedYaw
-                    m.forwardVel = e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60)
-                    e.groundPoundJump = false
-                    m.vel.y = math.max(60, math.abs(e.yVelStore*0.6))
-                    set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
-                else
-                    m.forwardVel = (e.forwardVelStore + clamp(get_mario_floor_steepness(m)*50, -60, 60))*0.7
-                    m.vel.y = math.max(50, math.abs(e.yVelStore*0.4))
-                    set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
+                local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
+                if e.forwardVelStore > 15 then
+                    m.forwardVel = math.max(e.forwardVelStore, speedBalanced)*0.6
                 end
+                m.vel.y = math.max(speedBalanced, math.max(e.yVelStore, 150))*0.4
+                set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
+                m.faceAngle.y = m.intendedYaw
             end
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
