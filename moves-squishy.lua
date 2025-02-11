@@ -292,6 +292,19 @@ local function update_squishy_walking_speed(m)
     apply_slope_accel(m);
 end
 
+local function revert_mario_bonk_reflection(m, negateSpeed)
+    if (m.wall ~= nil) then
+        local wallAngle = atan2s(m.wall.normal.z, m.wall.normal.x);
+        m.faceAngle.y = wallAngle + convert_s16(m.faceAngle.y + wallAngle);
+    end
+
+    if (negateSpeed) then
+        mario_set_forward_vel(m, m.forwardVel);
+    else
+        m.faceAngle.y = m.faceAngle.y - 0x8000;
+    end
+end
+
 ACT_SQUISHY_WALKING = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_CROUCH_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
 ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
@@ -677,6 +690,9 @@ local function act_squishy_wall_slide(m)
     
     if m.actionTimer == 0 then
         e.prevAngle = m.faceAngle.y
+        if m.actionArg == 0 then
+            revert_mario_bonk_reflection(m, false)
+        end
     end
     
     --mario_set_forward_vel(m, -m.forwardVel);
@@ -974,7 +990,7 @@ local canWallkick = {
     [ACT_SQUISHY_ROLLOUT] = ACT_SQUISHY_ROLLOUT,
 }
 
-local wallAngleLimit = 50
+local wallAngleLimit = 70
 local initPeakVel = 40
 local function squishy_before_phys_step(m)
     local e = gExtraStates[m.playerIndex]
@@ -1013,7 +1029,9 @@ local function squishy_before_phys_step(m)
         --Standard air hit wall requirements
         if (m.forwardVel >= 16) and (canWallkick[m.action] ~= nil) then
             if (wallDYaw >= limitPositive) or (wallDYaw <= limitNegative) then
-                set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
+                mario_bonk_reflection(m, 0);
+                m.faceAngle.y = m.faceAngle.y + 0x8000;
+                set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 1)
             end
         end
     end
