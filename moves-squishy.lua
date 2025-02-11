@@ -1070,6 +1070,18 @@ local function on_interact(m, obj, type)
     end
 end
 
+local function allow_interact(m, o, intType)
+    if m.action == ACT_SQUISHY_DIVE then
+        if (intType & (INTERACT_GRABBABLE) ~= 0) and o.oInteractionSubtype & (INT_SUBTYPE_NOT_GRABBABLE) == 0 then
+            m.interactObj = o
+            m.input = m.input | INPUT_INTERACT_OBJ_GRABBABLE
+            if o.oSyncID ~= 0 then
+                network_send_object(o, true)
+            end
+        end
+    end 
+end
+
 local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
@@ -1077,6 +1089,7 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, level_init)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_INTERACT, on_interact)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_INTERACT, allow_interact)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
 
