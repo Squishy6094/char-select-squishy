@@ -890,6 +890,7 @@ local function squishy_update(m)
         e.groundPoundJump = true
     end
     if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
+        m.pos.y = math.max(m.pos.y - m.floorHeight, 1000) + m.floorHeight -- Force spawn height
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
     if e.spamBurnout > 0 then
