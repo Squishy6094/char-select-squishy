@@ -430,9 +430,24 @@ local function act_squishy_dive(m)
     local e = gExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
     if m.actionTimer == 0 then
-        mario_set_forward_vel(m, m.forwardVel + 10)
+        mario_set_forward_vel(m, m.forwardVel + 12)
     end
     e.forwardVelStore = m.forwardVel
+    
+    if mario_check_object_grab(m) ~= 0 then
+        mario_grab_used_object(m)
+        if m.interactObj.behavior == get_behavior_from_id(id_bhvBowser) then
+            set_mario_action(m, ACT_PICKING_UP_BOWSER, 0)
+            m.marioBodyState.grabPos = GRAB_POS_BOWSER
+            return 1
+        elseif m.interactObj.oInteractionSubtype & INT_SUBTYPE_GRABS_MARIO ~= 0 then
+            return 0
+        else
+            m.marioBodyState.grabPos = GRAB_POS_LIGHT_OBJ
+            return 1
+        end
+    end
+
     m.actionTimer = m.actionTimer + 1
 end
 
