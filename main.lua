@@ -76,5 +76,5 @@ end
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
-_G.charSelect.credit_add(MOD_NAME, "SprSn64", "Models")
+_G.charSelect.credit_add(MOD_NAME, "SprSn64", "Models / Textures")
 _G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Textures / Prettyy >//<")
