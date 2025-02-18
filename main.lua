@@ -50,6 +50,7 @@ if not _G.charSelectExists then
 end
 
 local E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
+local E_MODEL_SHELL = smlua_model_util_get_id("shell_geo")
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
 
@@ -63,6 +64,17 @@ local PALETTE_SQUISHY = {
     [PANTS] = "0B0E20",
 }
 
+local PALETTE_SHELL = {
+    [SHOES] = "FFFFFF",
+    [GLOVES] = "161225",
+    [EMBLEM] = "FFFFFF",
+    [HAIR] = "9D94FF",
+    [SKIN] = "FFFFFF",
+    [SHIRT] = "D9D4FF",
+    [PANTS] = "0A0718",
+    [CAP]   = "463DA7"
+}
+
 local COURSE_SQUISHY = {
     top = get_texture_info("squishy-course-top"),
     bottom = get_texture_info("squishy-course-bottom"),
@@ -73,6 +85,9 @@ _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 if _G.charSelect.character_add_course_texture ~= nil then
     _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 end
+
+--CT_SHELL = _G.charSelect.character_add("Shell", "Pretty ladyy", "Squishy / SprSn64", "9D94FF", E_MODEL_SHELL, CT_LUIGI, "S", 1)
+--_G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTE_SHELL)
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")

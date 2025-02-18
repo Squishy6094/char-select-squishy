@@ -22,8 +22,7 @@ for i = 0, MAX_PLAYERS - 1 do
         poundJumpSpinAnim = 0,
         poundSwimAnim = 0,
         attemptToGetInDoor = false,
-        prevWall = nil,
-        prevAngle = 0,
+        prevWallAngle = 0,
     }
 end
 
@@ -428,7 +427,9 @@ end
 --- @param m MarioState
 local function act_squishy_dive(m)
     local e = gExtraStates[m.playerIndex]
+    local angle = m.faceAngle.y
     common_air_action_step(m, ACT_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
+    m.faceAngle.y = angle
     if m.actionTimer == 0 then
         mario_set_forward_vel(m, m.forwardVel + 12)
     end
@@ -704,10 +705,7 @@ local function act_squishy_wall_slide(m)
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK)
     
     if m.actionTimer == 0 then
-        e.prevAngle = m.faceAngle.y
-        if m.actionArg == 0 then
-            revert_mario_bonk_reflection(m, false)
-        end
+        --revert_mario_bonk_reflection(m, true)
     end
     
     --mario_set_forward_vel(m, -m.forwardVel);
@@ -715,6 +713,7 @@ local function act_squishy_wall_slide(m)
     m.vel.y = clamp(m.vel.y - 0.2, -70, 150)
     m.particleFlags = PARTICLE_DUST
     if m.wall == nil then
+        m.faceAngle.y = e.prevWallAngle
         if m.pos.y == m.floorHeight and e.prevFloorDist < 100 then
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
         else
@@ -724,15 +723,14 @@ local function act_squishy_wall_slide(m)
             m.forwardVel = m.forwardVel * 0.4
         end
     else
-        m.faceAngle.y = atan2s(m.wall.normal.z, m.wall.normal.x)
+        e.prevWallAngle = atan2s(m.wall.normal.z, m.wall.normal.x)
+        m.marioObj.header.gfx.angle.y = atan2s(m.wall.normal.z, m.wall.normal.x)
         e.prevFloorDist = m.pos.y - m.floorHeight
-        e.prevWall = m.wall
+        play_sound(SOUND_MOVING_TERRAIN_SLIDE + m.terrainSoundAddend, m.marioObj.header.gfx.cameraToObject);
     end
     
     if m.input & INPUT_A_PRESSED ~= 0 then
-        m.faceAngle.y = e.prevAngle
-        m.wall = e.prevWall
-        m.faceAngle.y = m.faceAngle.y + 0x8000;
+        m.faceAngle.y = e.prevWallAngle
 
         play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK,
                 m.marioObj.header.gfx.cameraToObject);
