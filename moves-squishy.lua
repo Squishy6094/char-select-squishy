@@ -881,7 +881,7 @@ hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 -- Object Interactions --
 -------------------------
 
-local shellSpeed = 1.5
+local shellSpeed = 1.0
 
 local function race_get_slope_physics(m)
     local friction = 0.96
@@ -1038,9 +1038,9 @@ local function update_race_shell_speed(m)
     race_apply_slope_accel(m)
 end
 
-ACT_SQUISHY_RIDING_SHELL_GROUND = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
-ACT_SQUISHY_RIDING_SHELL_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING )
-ACT_SQUISHY_RIDING_SHELL_FALL = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING )
+ACT_SQUISHY_RIDING_SHELL_GROUND = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_RIDING_SHELL)
+ACT_SQUISHY_RIDING_SHELL_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_RIDING_SHELL | ACT_FLAG_CONTROL_JUMP_HEIGHT)
+ACT_SQUISHY_RIDING_SHELL_FALL = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_RIDING_SHELL)
 
 local function act_race_shell_ground(m)
     local e = gExtraStates[m.playerIndex]
@@ -1056,7 +1056,8 @@ local function act_race_shell_ground(m)
     if (m.input & INPUT_A_PRESSED) ~= 0 then
         m.vel.x = m.vel.x * 0.9
         m.vel.z = m.vel.z * 0.9
-        return set_mario_action(m, ACT_RIDING_SHELL_JUMP, 0)
+        m.vel.y = 50
+        return set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_JUMP, 0)
     end
 
     -- update physics
@@ -1072,7 +1073,7 @@ local function act_race_shell_ground(m)
     local gs = perform_ground_step(m)
     if gs == GROUND_STEP_LEFT_GROUND then
         m.vel.y = (m.pos.y - e.lastShellY)
-        return set_mario_action(m, ACT_RIDING_SHELL_FALL, 0)
+        return set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_FALL, 0)
 
     elseif gs == GROUND_STEP_HIT_WALL then
         -- check if the wall is in the facing direction
@@ -1157,9 +1158,9 @@ function act_race_shell_air(m)
     return 0
 end
 
-hook_mario_action(ACT_SQUISHY_RIDING_SHELL_GROUND, { every_frame = act_race_shell_ground })
-hook_mario_action(ACT_SQUISHY_RIDING_SHELL_JUMP, { every_frame = act_race_shell_air })
-hook_mario_action(ACT_SQUISHY_RIDING_SHELL_FALL, { every_frame = act_race_shell_air })
+hook_mario_action(ACT_SQUISHY_RIDING_SHELL_GROUND, { every_frame = act_race_shell_ground }, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_RIDING_SHELL_JUMP, { every_frame = act_race_shell_air }, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_RIDING_SHELL_FALL, { every_frame = act_race_shell_air }, INT_FAST_ATTACK_OR_SHELL)
 
 local function squishy_update(m)
     local e = gExtraStates[m.playerIndex]
