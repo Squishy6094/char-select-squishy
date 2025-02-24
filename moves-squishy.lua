@@ -17,14 +17,13 @@ for i = 0, MAX_PLAYERS - 1 do
         prevFloorDist = 0,
         ommRolling = false,
         spamBurnout = 0,
-        longJumpAnim = 0,
-        poundSpinAnim = 0,
-        poundJumpSpinAnim = 0,
-        poundSwimAnim = 0,
         forceDefaultWalk = false,
         prevWallAngle = 0,
         hasShell = false,
-        rhythmSwimTimer = 0
+        
+        gfxAnimX = 0,
+        gfxAnimY = 0,
+        gfxAnimZ = 0,
     }
 end
 
@@ -109,7 +108,7 @@ end
 local function clamp_soft(num, min, max, rate)
     if num < min then
         num = num + rate
-    elseif num > min then
+    elseif num > max then
         num = num - rate
     end
     return num
@@ -333,6 +332,7 @@ ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVI
 
 ACT_SQUISHY_SWIM_IDLE = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
 ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
+ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
 
 
 local function act_squishy_walking(m)
@@ -472,14 +472,14 @@ local function act_squishy_long_jump(m)
     local e = gSquishyExtraStates[m.playerIndex]
     if m.actionTimer == 0 then
         m.forwardVel = (m.forwardVel + 20)
-        e.longJumpAnim = -0x10000 * math.floor(m.forwardVel/50)
+        e.gfxAnimX = -0x10000 * math.floor(m.forwardVel/50)
         m.pos.y = m.pos.y + 10
         m.vel.y = 30
     end
     m.vel.y = m.vel.y + 2
     common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_NONE)
-    e.longJumpAnim = e.longJumpAnim * 0.8
-    m.marioObj.header.gfx.angle.x = e.longJumpAnim
+    e.gfxAnimX = e.gfxAnimX * 0.8
+    m.marioObj.header.gfx.angle.x = e.gfxAnimX
     m.actionTimer = m.actionTimer + 1
 end
 
@@ -608,11 +608,11 @@ local function act_squishy_ground_pound(m)
     -- setup when action starts (horizontal speed and voiceline)
     if m.actionTimer == 1 then
         play_character_sound(m, CHAR_SOUND_WAH2)
-        e.poundSpinAnim = 0
+        e.gfxAnimY = 0
     end
     e.groundPoundFromRollout = true
-    e.poundSpinAnim = e.poundSpinAnim + math.min(math.abs(m.vel.y), 100)
-    m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.poundSpinAnim*0x80
+    e.gfxAnimY = e.gfxAnimY + math.min(math.abs(m.vel.y), 100)
+    m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfxAnimY*0x80
     if m.actionArg == 1 then
         m.marioObj.header.gfx.angle.x = 0x4000*clamp(-m.vel.y + 60, 0, 60)/50
     else
@@ -703,11 +703,11 @@ local function act_squishy_ground_pound_jump(m)
     common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_NONE)
     if m.actionTimer == 1 then
         play_character_sound(m, CHAR_SOUND_YAHOO_WAHA_YIPPEE)
-        e.poundJumpSpinAnim = 0x20000
+        e.gfxAnimY = 0x20000
     end
-    if e.poundJumpSpinAnim > 1 then
-        e.poundJumpSpinAnim = e.poundJumpSpinAnim*0.8
-        m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.poundJumpSpinAnim
+    if e.gfxAnimY > 1 then
+        e.gfxAnimY = e.gfxAnimY*0.8
+        m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfxAnimY
     end
     set_mario_particle_flags(m, PARTICLE_SPARKLES, 0)
 
@@ -796,8 +796,8 @@ local function act_squishy_water_pound(m)
     m.vel.y = m.forwardVel * sins(m.faceAngle.x)
     m.vel.z = m.forwardVel * coss(m.faceAngle.y) * coss(m.faceAngle.x)
 
-    e.poundSwimAnim = e.poundSwimAnim + math.min(math.abs(e.forwardVelStore), 100)
-    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.poundSwimAnim*0x80
+    e.gfxAnimZ = e.gfxAnimZ + math.min(math.abs(e.forwardVelStore), 100)
+    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfxAnimZ*0x80
     --m.marioObj.header.gfx.angle.y = m.faceAngle.y + 0x4000
     if m.vel.y < 0 and m.faceAngle.x < 0 and m.pos.y < m.floorHeight + 10 then
         m.faceAngle.x = -m.faceAngle.x
@@ -834,8 +834,8 @@ local function act_squishy_water_pound_air(m)
     m.vel.x = m.forwardVel * sins(m.faceAngle.y) * coss(m.faceAngle.x)
     m.vel.z = m.forwardVel * coss(m.faceAngle.y) * coss(m.faceAngle.x)
 
-    e.poundSwimAnim = e.poundSwimAnim + math.min(math.abs(e.forwardVelStore*0.8), 100)
-    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.poundSwimAnim*0x80
+    e.gfxAnimZ = e.gfxAnimZ + math.min(math.abs(e.forwardVelStore*0.8), 100)
+    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfxAnimZ*0x80
     m.marioObj.header.gfx.angle.x = m.faceAngle.x - 0x4000 - m.vel.y*0x80
 
     if m.pos.y <= m.waterLevel then
@@ -877,16 +877,20 @@ local function update_mario_water_health(m)
     if (m.area.terrainType & TERRAIN_MASK) == TERRAIN_SNOW then
         m.health = m.health - 3
     else
-        m.health = m.health - 1
+        if (m.pos.y >= (m.waterLevel - 140)) then
+            m.health = m.health + 0x1A;
+        else
+            m.health = m.health - 1
+        end
     end
 end
 
 --- @param m MarioState
 local function act_squishy_swim_idle(m)
-    djui_chat_message_create("idle")
     local e = gSquishyExtraStates[m.playerIndex]
     perform_water_step(m)
     set_mario_animation(m, MARIO_ANIM_WATER_IDLE)
+    update_mario_water_health(m)
 
     m.vel.x = clamp_soft(m.vel.x, 0, 0, 1)
     m.vel.y = clamp_soft(m.vel.y, 0, 0, 1)
@@ -902,10 +906,9 @@ end
 
 --- @param m MarioState
 local function act_squishy_swim_moving(m)
-    djui_chat_message_create("moving")
     local e = gSquishyExtraStates[m.playerIndex]
     perform_water_step(m)
-    set_mario_animation(m, MARIO_ANIM_SWIM_PART1)
+    set_mario_animation(m, MARIO_ANIM_FLUTTERKICK)
     update_mario_water_health(m)
 
     if m.actionTimer == 0 then
@@ -916,15 +919,21 @@ local function act_squishy_swim_moving(m)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
 
     if m.input & INPUT_NONZERO_ANALOG ~= 0 or m.input & INPUT_A_DOWN ~= 0 or m.input & INPUT_Z_DOWN ~= 0 then
-        if m.forwardVel < 30 then
+        if m.forwardVel < 25 then
             m.forwardVel = m.forwardVel + 1
+        elseif m.forwardVel > 30 then
+            m.forwardVel = m.forwardVel - 2
         end
         m.faceAngle.x = clamp_soft(m.faceAngle.x, 0, 0, 0x200)
     else
-        m.forwardVel = m.forwardVel - 2
+        m.forwardVel = m.forwardVel - 3
         if m.forwardVel < 10 then
             set_mario_action(m, ACT_SQUISHY_SWIM_IDLE, 0)
         end
+    end
+    
+    if m.input & INPUT_B_PRESSED ~= 0 then
+        return set_mario_action(m, ACT_SQUISHY_SWIM_ATTACK, 0)
     end
 
     if m.input & INPUT_A_DOWN ~= 0 then
@@ -965,8 +974,8 @@ local function act_squishy_swim_moving(m)
     m.vel.y = m.forwardVel * sins(m.faceAngle.x)
     m.vel.z = m.forwardVel * coss(m.faceAngle.y) * coss(m.faceAngle.x)
 
-    e.poundSwimAnim = e.poundSwimAnim + math.min(math.abs(e.forwardVelStore), 100)
-    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.poundSwimAnim*0x80
+    e.gfxAnimZ = e.gfxAnimZ + math.min(math.abs(e.forwardVelStore), 100)
+    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfxAnimZ*0x80
     --m.marioObj.header.gfx.angle.y = m.faceAngle.y + 0x4000
     if m.vel.y < 0 and m.faceAngle.x < 0 and m.pos.y < m.floorHeight + 10 then
         m.faceAngle.x = -m.faceAngle.x
@@ -985,6 +994,36 @@ local function act_squishy_swim_moving(m)
     ]]
 end
 
+--- @param m MarioState
+local function act_squishy_swim_attack(m)
+    local e = gSquishyExtraStates[m.playerIndex]
+    perform_water_step(m)
+    set_mario_animation(m, MARIO_ANIM_FORWARD_SPINNING)
+    update_mario_water_health(m)
+
+    if m.actionTimer == 0 then
+        m.forwardVel = m.forwardVel + 10
+        e.gfxAnimZ = 0x10000
+    end
+
+    m.vel.x = m.forwardVel * sins(m.faceAngle.y) * coss(m.faceAngle.x)
+    m.vel.y = m.forwardVel * sins(m.faceAngle.x)
+    m.vel.z = m.forwardVel * coss(m.faceAngle.y) * coss(m.faceAngle.x)
+
+    if m.actionTimer > 15 then
+        set_mario_action(m, ACT_SQUISHY_SWIM_IDLE, 0)
+    end
+
+    if (m.pos.y >= (m.waterLevel - 140) and m.faceAngle.x > 0x100) then
+        m.pos.y = m.waterLevel
+        m.forwardVel = math.sqrt(m.vel.x^2 + m.vel.z^2)
+        m.vel.y = math.max(m.vel.y, 50)
+        set_mario_action(m, ACT_SQUISHY_ROLLOUT, 1)
+    end
+
+    m.actionTimer = m.actionTimer + 1
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1001,6 +1040,7 @@ hook_mario_action(ACT_SQUISHY_WATER_POUND_AIR, {every_frame = act_squishy_water_
 hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
+hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack})
 
 -------------------------
 -- Object Interactions --
@@ -1434,6 +1474,9 @@ local function squishy_before_action(m, nextAct)
         e.hasShell = true
         return set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
     end
+    if nextAct == ACT_WATER_IDLE then
+        return set_mario_action(m, ACT_SQUISHY_SWIM_IDLE, 0)
+    end
     if nextAct == ACT_WATER_PLUNGE then
         return set_mario_action(m, ACT_SQUISHY_SWIM_MOVING, 0)
     end
@@ -1538,12 +1581,14 @@ local function hud_render()
         djui_hud_render_rect(17, 31, 4, 23*burning)
     end
 
+    --[[
     if e.rhythmSwimTimer > 0 then
         djui_hud_set_color(100, 100, 255, 100)
         djui_hud_render_rect(10, height - 30, 20, 20)
         djui_hud_set_color(100, 100, 255, 100)
         djui_hud_render_rect(10 + 145-(e.rhythmSwimTimer)%150, height - 30, 20, 20)
     end
+    ]]
 end
 
 local function level_init()
