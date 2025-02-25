@@ -1643,6 +1643,7 @@ local function on_character_select_load()
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
 
+--[[
 ---@param obj Object
 local function bhv_custom_mips_loop(obj)
     local m = nearest_interacting_mario_state_to_object(obj)
@@ -1664,3 +1665,4 @@ end
 
 -- hook the behavior
 id_bhvCustomMips = hook_behavior(id_bhvMips, OBJ_LIST_PUSHABLE, false, nil, bhv_custom_mips_loop)
+]]
