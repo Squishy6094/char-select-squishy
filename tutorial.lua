@@ -21,4 +21,4 @@ function tutorial_warp()
 end
 
 hook_event(HOOK_ON_LEVEL_INIT, tutorial_init)
-hook_chat_command("squishy-tutorial", "Warps you to Squishy Tutorial", tutorial_warp)
+--hook_chat_command("squishy-tutorial", "Warps you to Squishy Tutorial", tutorial_warp)
