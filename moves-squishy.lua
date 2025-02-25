@@ -156,6 +156,13 @@ end
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
 
+local initPeakVel = 40
+local function update_speed_cap(m)
+    m.forwardVel = clamp_soft(m.forwardVel, -initPeakVel, initPeakVel, 0.1*math.floor(m.forwardVel/initPeakVel))
+    m.slideVelX = clamp_soft(m.slideVelX, -initPeakVel, initPeakVel, 0.1*math.floor(m.slideVelX/initPeakVel))
+    m.slideVelZ = clamp_soft(m.slideVelZ, -initPeakVel, initPeakVel, 0.1*math.floor(m.slideVelZ/initPeakVel))
+end
+
 local function update_squishy_sliding_angle(m, accel, lossFactor)
     local newFacingDYaw;
     local facingDYaw;
@@ -215,6 +222,7 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
         m.slideVelZ = m.slideVelZ * 100.0 / m.forwardVel;
     end
     ]]
+    update_speed_cap(m)
 
     if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) then
         m.forwardVel = m.forwardVel * -1.0;
@@ -1521,7 +1529,6 @@ local canWallkick = {
 }
 
 local wallAngleLimit = 70
-local initPeakVel = 40
 local function squishy_before_phys_step(m)
     local e = gSquishyExtraStates[m.playerIndex]
 
@@ -1570,9 +1577,7 @@ local function squishy_before_phys_step(m)
 
     if not omm_moveset_enabled(m) then
         -- Peaking Velocity
-        m.forwardVel = clamp_soft(m.forwardVel, -initPeakVel, initPeakVel, 0.1*math.floor(m.forwardVel/initPeakVel))
-        -- Terminal Velocity
-        --m.forwardVel = math.min(m.forwardVel, 150)
+        update_speed_cap(m)
     end
 end
 
