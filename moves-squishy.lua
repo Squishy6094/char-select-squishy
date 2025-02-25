@@ -1543,6 +1543,8 @@ local function squishy_before_phys_step(m)
         end
         m.vel.x = m.vel.x + e.sidewaysSpeed * sins(m.faceAngle.y + 0x4000);
         m.vel.z = m.vel.z + e.sidewaysSpeed * coss(m.faceAngle.y + 0x4000);
+    else
+        e.sidewaysSpeed = 0
     end
 
     -- Wider Wallslide angle
