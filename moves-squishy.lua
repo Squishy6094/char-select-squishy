@@ -913,7 +913,7 @@ local function act_squishy_swim_moving(m)
 
     if m.actionTimer == 0 then
         m.forwardVel = math.sqrt(m.vel.x^2 + m.vel.y^2 + m.vel.z^2)
-        m.faceAngle.x = m.vel.y
+        m.faceAngle.x = atan2s(m.forwardVel, m.vel.y)
     end
 
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
@@ -924,7 +924,7 @@ local function act_squishy_swim_moving(m)
         elseif m.forwardVel > 30 then
             m.forwardVel = m.forwardVel - 2
         end
-        m.faceAngle.x = clamp_soft(m.faceAngle.x, 0, 0, 0x200)
+        m.faceAngle.x = clamp_soft(m.faceAngle.x, 0, 0, 0x100)
     else
         m.forwardVel = m.forwardVel - 3
         if m.forwardVel < 10 then
@@ -1004,6 +1004,16 @@ local function act_squishy_swim_attack(m)
     if m.actionTimer == 0 then
         m.forwardVel = m.forwardVel + 10
         e.gfxAnimZ = 0x10000
+    end
+
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x100, 0x100)
+
+    if m.input & INPUT_A_DOWN ~= 0 then
+        m.faceAngle.x = math.min(m.faceAngle.x + 0x100, 0x3000)
+    end
+
+    if m.input & INPUT_Z_DOWN ~= 0 then
+        m.faceAngle.x = math.max(m.faceAngle.x - 0x100, -0x3000)
     end
 
     m.vel.x = m.forwardVel * sins(m.faceAngle.y) * coss(m.faceAngle.x)
