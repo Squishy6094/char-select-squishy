@@ -37,7 +37,7 @@ local ACT_OMM_WALL_SLIDE = -1
 local OMM_SETTING_MOVESET = ""
 -- Settings Toggles
 local OMM_SETTING_MOVESET_ODYSSEY = -1
-if _G.OmmEnabled then
+if _G.OmmApi ~= nil then
     ACT_OMM_SPIN_JUMP = _G.OmmApi["ACT_OMM_SPIN_JUMP"]
     ACT_OMM_SPIN_POUND = _G.OmmApi["ACT_OMM_SPIN_POUND"]
     --ACT_OMM_SPIN_POUND_LAND = _G.OmmApi["ACT_OMM_SPIN_POUND_LAND"]
@@ -107,8 +107,10 @@ end
 local function clamp_soft(num, min, max, rate)
     if num < min then
         num = num + rate
+        num = math.min(num, max)
     elseif num > max then
         num = num - rate
+        num = math.max(num, min)
     end
     return num
 end
@@ -157,9 +159,9 @@ end
 
 local initPeakVel = 40
 local function update_speed_cap(m)
-    m.forwardVel = clamp_soft(m.forwardVel, -initPeakVel, initPeakVel, 0.1*math.floor(m.forwardVel/initPeakVel))
-    m.slideVelX = clamp_soft(m.slideVelX, -initPeakVel, initPeakVel, 0.1*math.floor(m.slideVelX/initPeakVel))
-    m.slideVelZ = clamp_soft(m.slideVelZ, -initPeakVel, initPeakVel, 0.1*math.floor(m.slideVelZ/initPeakVel))
+    m.forwardVel = clamp_soft(m.forwardVel, -initPeakVel, initPeakVel, 0.1*math.floor(math.abs(m.forwardVel)/initPeakVel))
+    m.slideVelX = clamp_soft(m.slideVelX, -initPeakVel, initPeakVel, 0.1*math.floor(math.abs(m.slideVelX)/initPeakVel))
+    m.slideVelZ = clamp_soft(m.slideVelZ, -initPeakVel, initPeakVel, 0.1*math.floor(math.abs(m.slideVelZ)/initPeakVel))
 end
 
 local function update_squishy_sliding_angle(m, accel, lossFactor)
@@ -325,7 +327,8 @@ end
 
 ACT_SQUISHY_WALKING = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_CROUCH_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
-ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
+ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_AIR)
+ACT_SQUISHY_DIVE_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
 ACT_SQUISHY_LONG_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING )
 ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
@@ -451,7 +454,7 @@ end
 local function act_squishy_dive(m)
     local e = gSquishyExtraStates[m.playerIndex]
     local angle = m.faceAngle.y
-    common_air_action_step(m, ACT_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_SQUISHY_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
     m.faceAngle.y = angle
     if m.actionTimer == 0 then
         mario_set_forward_vel(m, m.forwardVel + 12)
@@ -463,16 +466,30 @@ local function act_squishy_dive(m)
         if m.interactObj.behavior == get_behavior_from_id(id_bhvBowser) then
             set_mario_action(m, ACT_PICKING_UP_BOWSER, 0)
             m.marioBodyState.grabPos = GRAB_POS_BOWSER
-            return 1
+            return true
         elseif m.interactObj.oInteractionSubtype & INT_SUBTYPE_GRABS_MARIO ~= 0 then
-            return 0
+            return false
         else
             m.marioBodyState.grabPos = GRAB_POS_LIGHT_OBJ
-            return 1
+            return true
         end
     end
 
     m.actionTimer = m.actionTimer + 1
+end
+
+local function act_squishy_dive_slide(m)
+        if (m.input & (INPUT_A_PRESSED | INPUT_B_PRESSED) ~= 0) then
+            queue_rumble_data(5, 80);
+            return set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30);
+        end
+
+    if (update_squishy_sliding(m, 4.0)) then
+        return set_mario_action(m, ACT_STOMACH_SLIDE_STOP, 0)
+    end
+
+    common_slide_action(m, ACT_STOMACH_SLIDE_STOP, ACT_SQUISHY_DIVE, MARIO_ANIM_SLIDE_DIVE);
+    m.actionTimer = m.actionTimer + 1;
 end
 
 --- @param m MarioState
@@ -1045,6 +1062,7 @@ end
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_DIVE_SLIDE, { every_frame = act_squishy_dive_slide}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_LONG_JUMP, { every_frame = act_squishy_long_jump})
 hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
@@ -1058,7 +1076,7 @@ hook_mario_action(ACT_SQUISHY_WATER_POUND_AIR, {every_frame = act_squishy_water_
 hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
-hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack})
+hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
 
 -------------------------
 -- Object Interactions --
@@ -1589,15 +1607,6 @@ local function hud_render()
         djui_hud_set_color(255, 20, 0, 255)
         djui_hud_render_rect(17, 31, 4, 23*burning)
     end
-
-    --[[
-    if e.rhythmSwimTimer > 0 then
-        djui_hud_set_color(100, 100, 255, 100)
-        djui_hud_render_rect(10, height - 30, 20, 20)
-        djui_hud_set_color(100, 100, 255, 100)
-        djui_hud_render_rect(10 + 145-(e.rhythmSwimTimer)%150, height - 30, 20, 20)
-    end
-    ]]
 end
 
 local function level_init()
@@ -1617,8 +1626,14 @@ local function on_interact(m, obj, type)
     end
 end
 
+local grabActions = {
+    [ACT_SQUISHY_DIVE] = true,
+    [ACT_SQUISHY_DIVE_SLIDE] = true,
+    [ACT_SQUISHY_SWIM_ATTACK] = true,
+}
+
 local function allow_interact(m, o, intType)
-    if m.action == ACT_SQUISHY_DIVE then
+    if grabActions[m.action] then
         if (intType & (INTERACT_GRABBABLE) ~= 0) and o.oInteractionSubtype & (INT_SUBTYPE_NOT_GRABBABLE) == 0 then
             m.interactObj = o
             m.input = m.input | INPUT_INTERACT_OBJ_GRABBABLE
