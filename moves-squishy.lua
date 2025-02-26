@@ -15,7 +15,6 @@ for i = 0, MAX_PLAYERS - 1 do
         intendedMag = 0,
         sidewaysSpeed = 0,
         prevFloorDist = 0,
-        ommRolling = false,
         spamBurnout = 0,
         forceDefaultWalk = false,
         prevWallAngle = 0,
@@ -222,7 +221,8 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
         m.slideVelZ = m.slideVelZ * 100.0 / m.forwardVel;
     end
     ]]
-    update_speed_cap(m)
+    
+    --update_speed_cap(m)
 
     if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) then
         m.forwardVel = m.forwardVel * -1.0;
@@ -1412,17 +1412,6 @@ local function squishy_update(m)
             e.spamBurnout = 0
         end
     end
-    if omm_moveset_enabled(m) then
-        if m.input & INPUT_Z_PRESSED ~= 0 then
-            if m.action == ACT_SQUISHY_SLIDE and m.actionTimer > 3 then
-                set_mario_action(m, ACT_OMM_ROLL, 0)
-            end
-            if m.action == ACT_OMM_ROLL and m.actionTimer > 3 then
-                set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
-            end
-        end
-        e.ommRolling = (m.action == ACT_SQUISHY_SLIDE or m.action == ACT_OMM_ROLL)
-    end
 
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
         if m.forwardVel >= 50 then
@@ -1480,6 +1469,9 @@ local function squishy_before_action(m, nextAct)
     if omm_moveset_enabled(m) then
         if nextAct == ACT_OMM_SPIN_POUND then
             return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 2, -70)
+        end
+        if nextAct == ACT_OMM_ROLL then
+            return set_mario_action(m, ACT_SQUISHY_SLIDE, 2)
         end
     end
     if nextAct == ACT_CROUCH_SLIDE then
