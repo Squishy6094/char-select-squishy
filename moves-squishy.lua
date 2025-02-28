@@ -26,6 +26,8 @@ for i = 0, MAX_PLAYERS - 1 do
     }
 end
 
+local spamBurnoutMax = 100
+
 function get_mario_floor_steepness(m, angle)
     if angle == nil then angle = m.faceAngle.y end
     local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
@@ -762,11 +764,27 @@ local function act_squishy_fire_burn(m)
         m.vel.y = 50
     end
     
-    if e.spamBurnout <= 0 then
+
+    m.actionTimer = m.actionTimer + 1
+
+    if (m.health < 0x100) then
+        if (m.playerIndex ~= 0) then
+            -- never kill remote marios
+            m.health = 0x100;
+        else
+            if (mario_can_bubble(m)) then
+                m.health = 0xFF;
+                mario_set_bubbled(m);
+            else
+                level_trigger_warp(m, WARP_OP_DEATH);
+            end
+        end
+        e.spamBurnout = 0
+    elseif e.spamBurnout <= 0 then
         set_mario_action(m, ACT_FREEFALL, 0)
     end
 
-    m.actionTimer = m.actionTimer + 1
+    m.marioBodyState.eyeState = MARIO_EYES_DEAD;
 end
 
 --- @param m MarioState
@@ -1250,17 +1268,14 @@ local function squishy_update(m)
         end
         play_sound(SOUND_AIR_BLOW_FIRE, m.pos)
         if (m.input & INPUT_A_PRESSED ~= 0 or m.input & INPUT_B_PRESSED ~= 0 or m.input & INPUT_Z_PRESSED ~= 0) then
-            e.spamBurnout = e.spamBurnout - 1
+            e.spamBurnout = e.spamBurnout - 2
             play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
-        end
-        if m.health < 255 then
-            set_mario_action_and_y_vel(m, ACT_LAVA_BOOST, 0, m.vel.y)
-            e.spamBurnout = 0
         end
         if (m.waterLevel ~= nil and m.pos.y < m.waterLevel) then
             play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
             e.spamBurnout = 0
         end
+        e.spamBurnout = e.spamBurnout - 1
     end
 
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
@@ -1312,7 +1327,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action(m, ACT_SQUISHY_LONG_JUMP, 0)
     end
     if (nextAct == ACT_BURNING_FALL or nextAct == ACT_BURNING_GROUND or nextAct == ACT_BURNING_JUMP or nextAct == ACT_LAVA_BOOST) and m.health > 255 then
-        e.spamBurnout = 15
+        e.spamBurnout = spamBurnoutMax
         m.hurtCounter = 0
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_FIRE_BURN, 0, 90)
     end
@@ -1434,7 +1449,7 @@ local function hud_render()
     local width = djui_hud_get_screen_width()
     local height = djui_hud_get_screen_height()
 
-    local burning = e.spamBurnout/15
+    local burning = e.spamBurnout/spamBurnoutMax
     if burning > 0 then
         djui_hud_set_color(0, 0, 0, 200)
         djui_hud_render_rect(16, 30, 6, 25)
