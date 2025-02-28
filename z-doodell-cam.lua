@@ -92,6 +92,7 @@ local eepyActs = {
     [ACT_SLEEPING] = true,
 }
 
+local camAngleRaw = 0
 local camAngle = 0
 local camScale = 3
 local camPitch = 0
@@ -104,6 +105,7 @@ local camPanSpeed = 25
 local focusPos = {x = 0, y = 0, z = 0}
 local camPos = {x = 0, y = 0, z = 0}
 local camFov = 50
+local camSwitchHeld = 0
 
 local doodellState = 0
 local doodellTimer = 1
@@ -123,6 +125,9 @@ local function camera_update()
         if not (is_game_paused() or eepyTimer > eepyStart) then
             local controller = m.controller
             local camSwitch = (controller.buttonDown & R_TRIG ~= 0)
+            if camSwitch then
+                camSwitchHeld = camSwitchHeld + 1
+            end
             local analogToggle = camera_config_is_analog_cam_enabled()
             local invertXMultiply = camera_config_is_x_inverted() and -1 or 1
             local invertYMultiply = camera_config_is_y_inverted() and -1 or 1
@@ -138,22 +143,22 @@ local function camera_update()
             if not camSwitch then
                 --[[
                 if m.forwardVel > 0 then
-                    camAngle = m.faceAngle.y+0x8000 - approach_s32(convert_s16(m.faceAngle.y+0x8000 - camAngle), 0, m.forwardVel*5, m.forwardVel*5)
+                    camAngleRaw = m.faceAngle.y+0x8000 - approach_s32(convert_s16(m.faceAngle.y+0x8000 - camAngleRaw), 0, m.forwardVel*5, m.forwardVel*5)
                 end
                 ]]
 
                 if math.abs(camAnalogX) > 10 then
-                    camAngle = camAngle + camAnalogX*10*invertXMultiply
+                    camAngleRaw = camAngleRaw + camAnalogX*10*invertXMultiply
                 end
                 if math.abs(camAnalogY) > 10 then
                     camScale = clamp(camScale - camAnalogY*0.001*invertYMultiply, 1, 7)
                 end
 
                 if controller.buttonPressed & camDigitalLeft ~= 0 then
-                    camAngle = camAngle - 0x2000*invertXMultiply
+                    camAngleRaw = camAngleRaw - 0x2000*invertXMultiply
                 end
                 if controller.buttonPressed & camDigitalRight ~= 0 then
-                    camAngle = camAngle + 0x2000*invertXMultiply
+                    camAngleRaw = camAngleRaw + 0x2000*invertXMultiply
                 end
                 if controller.buttonPressed & camDigitalDown ~= 0 then
                     camScale = math.min(camScale + invertYMultiply, 7)
@@ -177,12 +182,23 @@ local function camera_update()
                     camPitch = camPitch + camPanSpeed*camScale
                 end
             end
+
+            if m.controller.buttonReleased & R_TRIG ~= 0 then
+                if camSwitchHeld < 5 then
+                    if analogToggle then
+                        camAngleRaw = m.faceAngle.y + 0x8000
+                    else
+                        camAngleRaw = round((m.faceAngle.y + 0x8000)/0x2000)*0x2000
+                    end
+                end
+                camSwitchHeld = 0
+            end
         end
 
         --l.mode = CAMERA_MODE_NONE
 
-        local angle = camAngle
-        local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngle)*m.forwardVel/150)*0x800)
+        local angle = camAngleRaw
+        local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngleRaw)*m.forwardVel/150)*0x800)
         if not camSwitch then
             if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_TWIRL_LAND then
                 angle = m.faceAngle.y - 0x8000
@@ -192,7 +208,7 @@ local function camera_update()
                 if m.controller.buttonDown & R_CBUTTONS ~= 0 then
                     angle = angle + 0x2000
                 end
-                camAngle = round(angle/0x2000)*0x2000
+                camAngleRaw = round(angle/0x2000)*0x2000
 
                 if m.action & ACT_FLAG_FLYING ~= 0 then
                     roll = m.faceAngle.z*0.1
@@ -206,8 +222,8 @@ local function camera_update()
             z = m.pos.z - prevPos.z,
         }
 
-        local camPanX = sins(convert_s16(camAngle + 0x4000))*camPan
-        local camPanZ = coss(convert_s16(camAngle + 0x4000))*camPan
+        local camPanX = sins(convert_s16(camAngleRaw + 0x4000))*camPan
+        local camPanZ = coss(convert_s16(camAngleRaw + 0x4000))*camPan
         
         focusPos = {
             x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + camPanX,
@@ -278,6 +294,8 @@ local function camera_update()
         set_camera_mode(m.area.camera, CAMERA_MODE_NONE, 0)
         prevSquishyCamActive = squishyCamActive
     end
+    
+    camAngle = atan2s(l.pos.z - l.focus.z, l.pos.x - l.focus.x)
 end
 
 local TEX_DOODELL_CAM = get_texture_info("squishy-doodell-cam")
@@ -322,7 +340,7 @@ local function input_update(m)
 end
 
 local function on_level_init()
-    camAngle = round(gMarioStates[0].faceAngle.y/0x2000)*0x2000 - 0x8000
+    camAngleRaw = round(gMarioStates[0].faceAngle.y/0x2000)*0x2000 - 0x6000
 end
 
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
