@@ -26,36 +26,6 @@ for i = 0, MAX_PLAYERS - 1 do
     }
 end
 
--- OMM Support
--- OMM Moves
-local ACT_OMM_SPIN_JUMP = -1
-local ACT_OMM_SPIN_POUND = -1
---local ACT_OMM_SPIN_POUND_LAND = -1
-local ACT_OMM_ROLL = -1
-local ACT_OMM_WALL_SLIDE = -1
--- Settings
-local OMM_SETTING_MOVESET = ""
--- Settings Toggles
-local OMM_SETTING_MOVESET_ODYSSEY = -1
-if _G.OmmApi ~= nil then
-    ACT_OMM_SPIN_JUMP = _G.OmmApi["ACT_OMM_SPIN_JUMP"]
-    ACT_OMM_SPIN_POUND = _G.OmmApi["ACT_OMM_SPIN_POUND"]
-    --ACT_OMM_SPIN_POUND_LAND = _G.OmmApi["ACT_OMM_SPIN_POUND_LAND"]
-    ACT_OMM_ROLL = _G.OmmApi["ACT_OMM_ROLL"]
-    ACT_OMM_WALL_SLIDE = _G.OmmApi["ACT_OMM_WALL_SLIDE"]
-    OMM_SETTING_MOVESET =  _G.OmmApi["OMM_SETTING_MOVESET"]
-    OMM_SETTING_MOVESET_ODYSSEY = _G.OmmApi["OMM_SETTING_MOVESET_ODYSSEY"]
-end
-
-
---- @param m MarioState
-local function omm_moveset_enabled(m)
-    if not _G.OmmEnabled then return false end
-    if _G.OmmApi.omm_get_setting(m, OMM_SETTING_MOVESET) == OMM_SETTING_MOVESET_ODYSSEY then
-        return true
-    end
-end
-
 function get_mario_floor_steepness(m, angle)
     if angle == nil then angle = m.faceAngle.y end
     local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
@@ -338,9 +308,9 @@ ACT_SQUISHY_GROUND_POUND_LAND = allocate_mario_action(ACT_GROUP_STATIONARY | ACT
 ACT_SQUISHY_GROUND_POUND_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_CONTROL_JUMP_HEIGHT)
 ACT_SQUISHY_WALL_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
 ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
-ACT_SQUISHY_SWIM_IDLE = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
-ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
-ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
+ACT_SQUISHY_SWIM_IDLE = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
+ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
+ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
 
 
 local function act_squishy_walking(m)
@@ -543,6 +513,9 @@ local function act_squishy_slide(m)
         else
             set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
         end
+    end
+    if omm_moveset_enabled(m) and m.controller.buttonPressed & X_BUTTON ~= 0 then
+        set_mario_action(m, ACT_OMM_CAPPY_THROW_GROUND, 0)
     end
     m.actionTimer = m.actionTimer + 1
 end
@@ -812,6 +785,9 @@ end
 --- @param m MarioState
 local function act_squishy_swim_idle(m)
     local e = gSquishyExtraStates[m.playerIndex]
+    perform_water_step(m)
+    set_mario_animation(m, MARIO_ANIM_WATER_IDLE)
+    update_mario_water_health(m)
 
     m.vel.x = clamp_soft(m.vel.x, 0, 0, 1)
     m.vel.y = clamp_soft(m.vel.y, 0, 0, 1)
@@ -822,9 +798,6 @@ local function act_squishy_swim_idle(m)
     end
     m.faceAngle.x = clamp_soft(m.faceAngle.x, 0, 0, 0x200)
     
-    perform_water_step(m)
-    set_mario_animation(m, MARIO_ANIM_WATER_IDLE)
-    update_mario_water_health(m)
 
     m.actionTimer = m.actionTimer + 1
 end
@@ -832,6 +805,9 @@ end
 --- @param m MarioState
 local function act_squishy_swim_moving(m)
     local e = gSquishyExtraStates[m.playerIndex]
+    perform_water_step(m)
+    set_mario_animation(m, MARIO_ANIM_FLUTTERKICK)
+    update_mario_water_health(m)
 
     if m.actionTimer == 0 then
         m.forwardVel = math.sqrt(m.vel.x^2 + m.vel.y^2 + m.vel.z^2)
@@ -870,16 +846,17 @@ local function act_squishy_swim_moving(m)
     m.vel.y = m.forwardVel * sins(m.faceAngle.x)
     m.vel.z = m.forwardVel * coss(m.faceAngle.y) * coss(m.faceAngle.x)
     
-    perform_water_step(m)
-    set_mario_animation(m, MARIO_ANIM_FLUTTERKICK)
-    update_mario_water_health(m)
 
     m.actionTimer = m.actionTimer + 1
+    apply_water_current(m, m.vel)
 end
 
 --- @param m MarioState
 local function act_squishy_swim_attack(m)
     local e = gSquishyExtraStates[m.playerIndex]
+    perform_water_step(m)
+    set_mario_animation(m, MARIO_ANIM_FORWARD_SPINNING)
+    update_mario_water_health(m)
 
     if m.actionTimer == 0 then
         m.forwardVel = m.forwardVel + 10
@@ -911,11 +888,9 @@ local function act_squishy_swim_attack(m)
         set_mario_action(m, ACT_SQUISHY_ROLLOUT, 1)
     end
     
-    perform_water_step(m)
-    set_mario_animation(m, MARIO_ANIM_FORWARD_SPINNING)
-    update_mario_water_health(m)
 
     m.actionTimer = m.actionTimer + 1
+    apply_water_current(m, m.vel)
 end
 
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
@@ -1359,7 +1334,7 @@ local function squishy_before_action(m, nextAct)
         e.hasShell = true
         return set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
     end
-    if (m.flags & MARIO_METAL_CAP ~= 0) then
+    if (m.flags & MARIO_METAL_CAP == 0) then
         if nextAct == ACT_WATER_IDLE then
             return set_mario_action(m, ACT_SQUISHY_SWIM_IDLE, 0)
         end

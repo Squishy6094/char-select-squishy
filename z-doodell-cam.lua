@@ -127,13 +127,13 @@ local function camera_update()
             local invertXMultiply = camera_config_is_x_inverted() and -1 or 1
             local invertYMultiply = camera_config_is_y_inverted() and -1 or 1
 
-            local camDigitalLeft  = analogToggle and L_JPAD or L_CBUTTONS
-            local camDigitalRight = analogToggle and R_JPAD or R_CBUTTONS
-            local camDigitalUp    = analogToggle and U_JPAD or U_CBUTTONS
-            local camDigitalDown  = analogToggle and D_JPAD or D_CBUTTONS
+            local camDigitalLeft  = analogToggle and (_G.OmmEnabled and 0 or L_JPAD) or L_CBUTTONS
+            local camDigitalRight = analogToggle and (_G.OmmEnabled and 0 or R_JPAD) or R_CBUTTONS
+            local camDigitalUp    = analogToggle and (_G.OmmEnabled and 0 or U_JPAD) or U_CBUTTONS
+            local camDigitalDown  = analogToggle and (_G.OmmEnabled and 0 or D_JPAD) or D_CBUTTONS
 
-            local camAnalogX = analogToggle and controller.extStickX or button_to_analog(m, L_JPAD, R_JPAD)
-            local camAnalogY = analogToggle and controller.extStickY or button_to_analog(m, U_JPAD, D_JPAD)
+            local camAnalogX = analogToggle and controller.extStickX or (_G.OmmEnabled and 0 or button_to_analog(m, L_JPAD, R_JPAD))
+            local camAnalogY = analogToggle and controller.extStickY or (_G.OmmEnabled and 0 or button_to_analog(m, U_JPAD, D_JPAD))
             
             if not camSwitch then
                 --[[
