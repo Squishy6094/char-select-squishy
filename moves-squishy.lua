@@ -645,7 +645,11 @@ local function act_squishy_ground_pound_land(m)
         play_character_sound(m, CHAR_SOUND_HAHA)
         --play_mario_heavy_landing_sound(m)
         e.forwardVelStore = m.forwardVel
+        m.forwardVel = 0
+        m.vel.x = 0
+        m.vel.y = 0
         m.particleFlags = PARTICLE_HORIZONTAL_STAR | PARTICLE_MIST_CIRCLE
+        set_environmental_camera_shake(SHAKE_ENV_EXPLOSION)
     end
     if mario_get_floor_class(m) ~= SURFACE_CLASS_VERY_SLIPPERY then
         m.vel.x = 0
@@ -790,6 +794,7 @@ local function act_squishy_fire_burn(m)
     m.marioBodyState.eyeState = MARIO_EYES_DEAD;
 end
 
+--[[
 --- @param m MarioState
 local function update_mario_water_health(m)
     if (m.area.terrainType & TERRAIN_MASK) == TERRAIN_SNOW then
@@ -802,13 +807,14 @@ local function update_mario_water_health(m)
         end
     end
 end
+]]
 
 --- @param m MarioState
 local function act_squishy_swim_idle(m)
     local e = gSquishyExtraStates[m.playerIndex]
     perform_water_step(m)
     set_mario_animation(m, MARIO_ANIM_WATER_IDLE)
-    update_mario_water_health(m)
+    --update_mario_water_health(m)
 
     m.vel.x = clamp_soft(m.vel.x, 0, 0, 1)
     m.vel.y = clamp_soft(m.vel.y, 0, 0, 1)
@@ -828,7 +834,7 @@ local function act_squishy_swim_moving(m)
     local e = gSquishyExtraStates[m.playerIndex]
     perform_water_step(m)
     set_mario_animation(m, MARIO_ANIM_FLUTTERKICK)
-    update_mario_water_health(m)
+    --update_mario_water_health(m)
 
     if m.actionTimer == 0 then
         m.forwardVel = math.sqrt(m.vel.x^2 + m.vel.y^2 + m.vel.z^2)
@@ -877,7 +883,7 @@ local function act_squishy_swim_attack(m)
     local e = gSquishyExtraStates[m.playerIndex]
     perform_water_step(m)
     set_mario_animation(m, MARIO_ANIM_FORWARD_SPINNING)
-    update_mario_water_health(m)
+    --update_mario_water_health(m)
 
     if m.actionTimer == 0 then
         m.forwardVel = m.forwardVel + 10

@@ -66,12 +66,6 @@ local sOverrideCameraModes = {
     [CAMERA_MODE_BOSS_FIGHT]        = true,
 }
 
-local function is_mario_in_cutscene(m)
-    if m.action & ACT_GROUP_MASK == ACT_GROUP_CUTSCENE and not cutsceneActExclude[m.action] then return true end
-    if (m.area.camera and m.area.camera.cutscene ~= 0) then return true end
-    return false
-end
-
 local function button_to_analog(m, negInput, posInput)
     local num = 0
     num = num - (m.controller.buttonDown & negInput ~= 0 and 127 or 0)
@@ -91,11 +85,6 @@ local function doodell_cam_enabled()
 end
 
 function doodell_cam_active()
-    --djui_chat_message_create(tostring(doodell_cam_enabled()))
-    --djui_chat_message_create(tostring(not camera_config_is_free_cam_enabled()))
-    --djui_chat_message_create(tostring(not omm_camera_enabled()))
-    --djui_chat_message_create(tostring(gLakituState.mode == CAMERA_MODE_NONE))
-    --djui_chat_message_create(tostring(gMarioStates[0].area.camera ~= nil))
     return doodell_cam_enabled() and
     not camera_config_is_free_cam_enabled() and
     not omm_camera_enabled() and
@@ -104,12 +93,6 @@ end
 
 local nonMomentumActs = {
     [ACT_SQUISHY_WALL_SLIDE] = true,
-}
-local nonCameraActs = {
-    [ACT_READING_AUTOMATIC_DIALOG] = true,
-    [ACT_READING_NPC_DIALOG] = true,
-    [ACT_WAITING_FOR_DIALOG] = true,
-    [ACT_IN_CANNON] = true
 }
 
 local eepyActs = {
@@ -138,6 +121,58 @@ local eepyTimer = 0
 local eepyStart = 390
 local eepyCamOffset = 0
 local prevPos = {x = 0, y = 0, z = 0}
+
+local camSpawnAngles = {
+    [LEVEL_BITDW] = 0x4000,
+    [LEVEL_BITFS] = 0x4000,
+    [LEVEL_BITS] = 0x4000,
+    [LEVEL_WF] = 0x4000,
+    [LEVEL_TTM] = 0x6000,
+    [LEVEL_CCM] = -0x6000,
+    [LEVEL_WDW] = 0x4000,
+    [LEVEL_LLL] = 0x4000,
+    [LEVEL_SSL] = 0x4000,
+    [LEVEL_RR] = 0x4000,
+}
+
+local function doodell_cam_snap(levelInit)
+    if levelInit ~= false then levelInit = true end
+    local m = gMarioStates[0]
+    local l = gLakituState
+    local levelNum = gNetworkPlayers[0].currLevelNum
+    local c = m.area.camera
+    if levelInit then
+        djui_chat_message_create(tostring(camSpawnAngles[levelNum]))
+        camAngleRaw = round(gMarioStates[0].faceAngle.y/0x2000)*0x2000 - 0x8000 + (camSpawnAngles[levelNum] ~= nil and camSpawnAngles[levelNum] or 0)
+        camAngle = camAngleRaw
+        camScale = 3
+        camPitch = 0
+    end
+    rawFocusPos = {
+        x = m.pos.x,
+        y = m.pos.y + 150,
+        z = m.pos.z,
+    }
+    rawCamPos = {
+        x = m.pos.x + sins(camAngleRaw) * 500 * camScale,
+        y = m.pos.y - 150 + 350 * camScale - eepyCamOffset,
+        z = m.pos.z + coss(camAngleRaw) * 500 * camScale,
+    }
+    vec3f_copy(camPos, rawCamPos)
+    vec3f_copy(focusPos, rawFocusPos)
+    vec3f_copy(c.pos, camPos)
+    vec3f_copy(l.pos, camPos)
+    vec3f_copy(l.goalPos, camPos)
+
+    vec3f_copy(c.focus, focusPos)
+    vec3f_copy(l.focus, focusPos)
+    vec3f_copy(l.goalFocus, focusPos)
+
+    vec3f_copy(prevPos, m.pos)
+
+    camera_set_use_course_specific_settings(0)
+end
+
 local function camera_update()
     local m = gMarioStates[0]
     local l = gLakituState
@@ -147,7 +182,6 @@ local function camera_update()
     -- If turned off, restore camera mode
     local mode = l.mode
     if not doodell_cam_active() then
-        --omm_camera_exit_first_person(c, true)
         if mode == CAMERA_MODE_NONE then
             set_camera_mode(c, CAMERA_MODE_OUTWARD_RADIAL, 0)
         end
@@ -181,12 +215,6 @@ local function camera_update()
             local camAnalogY = analogToggle and controller.extStickY or (_G.OmmEnabled and 0 or button_to_analog(m, U_JPAD, D_JPAD))
             
             if not camSwitch then
-                --[[
-                if m.forwardVel > 0 then
-                    camAngleRaw = m.faceAngle.y+0x8000 - approach_s32(convert_s16(m.faceAngle.y+0x8000 - camAngleRaw), 0, m.forwardVel*5, m.forwardVel*5)
-                end
-                ]]
-
                 if math.abs(camAnalogX) > 10 then
                     camAngleRaw = camAngleRaw + camAnalogX*10*invertXMultiply
                 end
@@ -254,6 +282,10 @@ local function camera_update()
             end
         end
 
+        local posVelDist = vec3f_dist(prevPos, m.pos)
+        if posVelDist > 500 then
+            doodell_cam_snap(false)
+        end
         local posVel = {
             x = m.pos.x - prevPos.x,
             y = m.pos.y - prevPos.y,
@@ -366,33 +398,6 @@ local function input_update(m)
     end
 end
 
-local function on_level_init()
-    local m = gMarioStates[0]
-    local l = gLakituState
-    local c = m.area.camera
-    camAngleRaw = round(gMarioStates[0].faceAngle.y/0x2000)*0x2000 - 0x6000
-    rawFocusPos = {
-        x = m.pos.x,
-        y = m.pos.y + 150,
-        z = m.pos.z,
-    }
-    rawCamPos = {
-        x = m.pos.x + sins(camAngleRaw) * 500 * camScale,
-        y = m.pos.y - 150 + 350 * camScale - eepyCamOffset,
-        z = m.pos.z + coss(camAngleRaw) * 500 * camScale,
-    }
-    vec3f_copy(camPos, rawCamPos)
-    vec3f_copy(focusPos, rawFocusPos)
-    vec3f_copy(c.pos, camPos)
-    vec3f_copy(l.pos, camPos)
-    vec3f_copy(l.goalPos, camPos)
-
-    vec3f_copy(c.focus, focusPos)
-    vec3f_copy(l.focus, focusPos)
-    vec3f_copy(l.goalFocus, focusPos)
-    camera_set_use_course_specific_settings(0)
-end
-
 local function set_camera_mode(_, mode, _)
     if mode == CAMERA_MODE_NONE or camera_config_is_free_cam_enabled() or not doodell_cam_enabled() then
         return true
@@ -412,6 +417,6 @@ end
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
 hook_event(HOOK_BEFORE_MARIO_UPDATE, input_update)
 hook_event(HOOK_UPDATE, camera_update)
---hook_event(HOOK_ON_LEVEL_INIT, on_level_init)
+hook_event(HOOK_ON_LEVEL_INIT, doodell_cam_snap)
 hook_event(HOOK_ON_SET_CAMERA_MODE, set_camera_mode)
 hook_event(HOOK_ON_CHANGE_CAMERA_ANGLE, change_camera_angle)
