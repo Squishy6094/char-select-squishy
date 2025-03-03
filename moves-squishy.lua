@@ -129,11 +129,12 @@ end
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
 
-local initPeakVel = 40
-local function update_speed_cap(m)
-    m.forwardVel = clamp_soft(m.forwardVel, -initPeakVel, initPeakVel, 0.1*math.floor(math.abs(m.forwardVel)/initPeakVel))
-    m.slideVelX = clamp_soft(m.slideVelX, -initPeakVel, initPeakVel, 0.1*math.floor(math.abs(m.slideVelX)/initPeakVel))
-    m.slideVelZ = clamp_soft(m.slideVelZ, -initPeakVel, initPeakVel, 0.1*math.floor(math.abs(m.slideVelZ)/initPeakVel))
+--local initPeakVel = 40
+local function update_speed_cap(m, peakVel)
+    if peakVel == nil then peakVel = 40 end
+    m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
+    m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
+    m.slideVelZ = clamp_soft(m.slideVelZ, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelZ)/peakVel))
 end
 
 local function update_squishy_sliding_angle(m, accel, lossFactor)
@@ -458,6 +459,7 @@ local function act_squishy_dive_slide(m)
     end
 
     common_slide_action(m, ACT_STOMACH_SLIDE_STOP, ACT_SQUISHY_DIVE, MARIO_ANIM_SLIDE_DIVE);
+    update_speed_cap(m, 10)
     m.actionTimer = m.actionTimer + 1;
 end
 
@@ -494,6 +496,7 @@ local function act_squishy_slide(m)
         set_mario_action(m, ACT_SLIDE_KICK_SLIDE_STOP, 0)
     end
     common_slide_action(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
+    update_speed_cap(m, 30)
     m.vel.x = m.slideVelX
     m.vel.z = m.slideVelZ
     m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
@@ -1436,7 +1439,9 @@ local function squishy_before_phys_step(m)
 
     if not omm_moveset_enabled(m) then
         -- Peaking Velocity
-        update_speed_cap(m)
+        if m.action & ACT_FLAG_BUTT_OR_STOMACH_SLIDE == 0 then
+            update_speed_cap(m)
+        end
     end
 end
 
