@@ -635,7 +635,7 @@ end
 
 --- @param m MarioState
 local function act_squishy_ground_pound_gravity(m)
-    m.vel.y = math.max(m.vel.y - 7, -200)
+    m.vel.y = math.max(m.vel.y - 7, -300)
 end
 
 --- @param m MarioState
