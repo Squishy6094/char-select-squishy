@@ -49,26 +49,27 @@ local cutsceneActExclude = {
     
     [ACT_RELEASING_BOWSER] = true,
 }
+
+local sOverrideCameraModes = {
+    [CAMERA_MODE_BEHIND_MARIO]      = true,
+    [CAMERA_MODE_WATER_SURFACE]     = true,
+    [CAMERA_MODE_RADIAL]            = true,
+    [CAMERA_MODE_OUTWARD_RADIAL]    = true,
+    [CAMERA_MODE_CLOSE]             = true,
+    [CAMERA_MODE_SLIDE_HOOT]        = true,
+    [CAMERA_MODE_PARALLEL_TRACKING] = true,
+    [CAMERA_MODE_FIXED]             = true,
+    [CAMERA_MODE_FREE_ROAM]         = true,
+    [CAMERA_MODE_SPIRAL_STAIRS]     = true,
+    [CAMERA_MODE_ROM_HACK]          = true,
+    [CAMERA_MODE_8_DIRECTIONS]      = true,
+    [CAMERA_MODE_BOSS_FIGHT]        = true,
+}
+
 local function is_mario_in_cutscene(m)
     if m.action & ACT_GROUP_MASK == ACT_GROUP_CUTSCENE and not cutsceneActExclude[m.action] then return true end
     if (m.area.camera and m.area.camera.cutscene ~= 0) then return true end
     return false
-end
-
--- Settings
-local OMM_SETTING_CAMERA = ""
--- Settings Toggles
-local OMM_SETTING_CAMERA_ON = -1
-if _G.OmmEnabled then
-    OMM_SETTING_CAMERA = _G.OmmApi["OMM_SETTING_CAMERA"]
-    OMM_SETTING_CAMERA_ON = _G.OmmApi["OMM_SETTING_CAMERA_ON"]
-end
-
-local function omm_camera_enabled(m)
-    if not _G.OmmEnabled then return false end
-    if _G.OmmApi.omm_get_setting(m, OMM_SETTING_CAMERA) == OMM_SETTING_CAMERA_ON then
-        return true
-    end
 end
 
 local function button_to_analog(m, negInput, posInput)
@@ -76,6 +77,29 @@ local function button_to_analog(m, negInput, posInput)
     num = num - (m.controller.buttonDown & negInput ~= 0 and 127 or 0)
     num = num + (m.controller.buttonDown & posInput ~= 0 and 127 or 0)
     return num
+end
+
+local function omm_camera_enabled()
+    if not _G.OmmEnabled then return false end
+    return _G.OmmApi.omm_get_setting(gMarioStates[0], OMM_SETTING_CAMERA) == OMM_SETTING_CAMERA_ON
+end
+
+local function doodell_cam_enabled()
+    local squishyCamToggle = _G.charSelect.get_options_status(OPTION_SQUISHYCAM)
+    local isSquishy = _G.charSelect.character_get_current_number() == CT_SQUISHY
+    return (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
+end
+
+function doodell_cam_active()
+    --djui_chat_message_create(tostring(doodell_cam_enabled()))
+    --djui_chat_message_create(tostring(not camera_config_is_free_cam_enabled()))
+    --djui_chat_message_create(tostring(not omm_camera_enabled()))
+    --djui_chat_message_create(tostring(gLakituState.mode == CAMERA_MODE_NONE))
+    --djui_chat_message_create(tostring(gMarioStates[0].area.camera ~= nil))
+    return doodell_cam_enabled() and
+    not camera_config_is_free_cam_enabled() and
+    not omm_camera_enabled() and
+    gMarioStates[0].area.camera ~= nil
 end
 
 local nonMomentumActs = {
@@ -97,11 +121,11 @@ local camAngle = 0
 local camScale = 3
 local camPitch = 0
 local camPan = 0
-local squishyCamActive = true
-local prevSquishyCamActive = false
-local camTweenSpeed = 0.1
-local camForwardDist = 10
+local camTweenSpeed = 0.3
+local camForwardDist = 5
 local camPanSpeed = 25
+local rawFocusPos = {x = 0, y = 0, z = 0}
+local rawCamPos = {x = 0, y = 0, z = 0}
 local focusPos = {x = 0, y = 0, z = 0}
 local camPos = {x = 0, y = 0, z = 0}
 local camFov = 50
@@ -117,14 +141,30 @@ local prevPos = {x = 0, y = 0, z = 0}
 local function camera_update()
     local m = gMarioStates[0]
     local l = gLakituState
-    local squishyCamToggle = _G.charSelect.get_options_status(OPTION_SQUISHYCAM)
-    local isSquishy = _G.charSelect.character_get_current_number() == CT_SQUISHY
-    if squishyCamActive then
+    local c = m.area.camera
+    if c == nil then return end
+
+    -- If turned off, restore camera mode
+    local mode = l.mode
+    if not doodell_cam_active() then
+        --omm_camera_exit_first_person(c, true)
+        if mode == CAMERA_MODE_NONE then
+            set_camera_mode(c, CAMERA_MODE_OUTWARD_RADIAL, 0)
+        end
+        return
+    end
+
+    -- Disable Lakitu
+    if sOverrideCameraModes[mode] ~= nil or m.action == ACT_SHOT_FROM_CANNON then
+        l.mode = CAMERA_MODE_NONE
+    end
+
+    if c.cutscene == 0 and l.mode == CAMERA_MODE_NONE then
         doodellState = doodellBlink and 1 or 0
-        camera_freeze()
+        --camera_freeze()
+        local controller = m.controller
+        local camSwitch = (controller.buttonDown & R_TRIG ~= 0)
         if not (is_game_paused() or eepyTimer > eepyStart) then
-            local controller = m.controller
-            local camSwitch = (controller.buttonDown & R_TRIG ~= 0)
             if camSwitch then
                 camSwitchHeld = camSwitchHeld + 1
             end
@@ -195,8 +235,6 @@ local function camera_update()
             end
         end
 
-        --l.mode = CAMERA_MODE_NONE
-
         local angle = camAngleRaw
         local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngleRaw)*m.forwardVel/150)*0x800)
         if not camSwitch then
@@ -224,16 +262,26 @@ local function camera_update()
 
         local camPanX = sins(convert_s16(camAngleRaw + 0x4000))*camPan
         local camPanZ = coss(convert_s16(camAngleRaw + 0x4000))*camPan
+
+        focusPos = approach_vec3f_asymptotic(l.focus, rawFocusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed)
+        camPos = approach_vec3f_asymptotic(l.pos, rawCamPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed)
+        vec3f_copy(c.pos, camPos)
+        vec3f_copy(l.pos, camPos)
+        vec3f_copy(l.goalPos, camPos)
+
+        vec3f_copy(c.focus, focusPos)
+        vec3f_copy(l.focus, focusPos)
+        vec3f_copy(l.goalFocus, focusPos)
         
-        focusPos = {
+        rawFocusPos = {
             x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + camPanX,
             y = m.pos.y + 150 + (not nonMomentumActs[m.action] and clamp(get_mario_y_vel_from_floor(m), -100, 100)*camForwardDist*0.8 or 0) - eepyCamOffset + camPitch,
             z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0) + camPanZ,
         }
-        camPos = {
-            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*7 or 0) + sins(angle) * 500 * camScale,
+        rawCamPos = {
+            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + sins(angle) * 500 * camScale,
             y = m.pos.y - (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*5 or 0) - 150 + 350 * camScale - eepyCamOffset,
-            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*7 or 0) + coss(angle) * 500 * camScale,
+            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0) + coss(angle) * 500 * camScale,
         }
         
         if camPitch >= 600*((camScale + 1)/3.5) and
@@ -248,10 +296,10 @@ local function camera_update()
         if eepyActs[m.action] then
             doodellState = 4
             eepyTimer = eepyTimer + 1
-            local camFloor = collision_find_surface_on_ray(camPos.x, camPos.y + eepyCamOffset, camPos.z, 0, -10000, 0).hitPos.y
+            local camFloor = collision_find_surface_on_ray(rawCamPos.x, rawCamPos.y + eepyCamOffset, rawCamPos.z, 0, -10000, 0).hitPos.y
             if eepyTimer > eepyStart then
                 doodellState = 5
-                if camPos.y > (camFloor + 150) then
+                if rawCamPos.y > (camFloor + 150) then
                     eepyCamOffset = eepyCamOffset + (math.sin(eepyTimer*0.1) + 1)*2
                 end
             end
@@ -260,17 +308,9 @@ local function camera_update()
             eepyTimer = 0
         end
 
-        if math.abs(math.sqrt(camPos.x^2 + camPos.z^2) - math.sqrt(l.pos.x^2 + l.pos.z^2)) < 1500*((camScale+1)*0.5) then
-            vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-            vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-        else
-            vec3f_copy(l.focus, focusPos)
-            vec3f_copy(l.pos, camPos)
-        end
         l.roll = lerp(l.roll, roll, 0.1)
         camFov = lerp(camFov, 50 + math.abs(m.forwardVel)*0.1, 0.1)
         set_override_fov(camFov)
-        prevSquishyCamActive = squishyCamActive
 
         if l.roll < -1000 then
             doodellState = 2
@@ -281,21 +321,8 @@ local function camera_update()
         vec3f_copy(prevPos, m.pos)
     end
     
-    if is_mario_in_cutscene(m) or nonCameraActs[m.action] or omm_camera_enabled(m) or camera_config_is_free_cam_enabled() then
-        squishyCamActive = false
-    else
-        squishyCamActive = (squishyCamToggle == 2 or (squishyCamToggle == 1 and isSquishy))
-    end
-    
-    if not squishyCamActive and prevSquishyCamActive ~= squishyCamActive then
-        camera_unfreeze()
-        vec3f_copy(l.focus, approach_vec3f_asymptotic(l.focus, focusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-        vec3f_copy(l.pos, approach_vec3f_asymptotic(l.pos, camPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed))
-        set_camera_mode(m.area.camera, CAMERA_MODE_NONE, 0)
-        prevSquishyCamActive = squishyCamActive
-    end
-    
     camAngle = atan2s(l.pos.z - l.focus.z, l.pos.x - l.focus.x)
+    m.statusForCamera.cameraEvent = m.statusForCamera.cameraEvent * (m.statusForCamera.cameraEvent ~= CAM_EVENT_DOOR and 1 or 0)
 end
 
 local TEX_DOODELL_CAM = get_texture_info("squishy-doodell-cam")
@@ -305,7 +332,7 @@ local doodellScale = 0
 local function hud_render()
     local m = gMarioStates[0]
     local l = gLakituState
-    if squishyCamActive then
+    if doodell_cam_active() then
         djui_hud_set_resolution(RESOLUTION_N64)
         local width = djui_hud_get_screen_width()
         local height = 240
@@ -333,17 +360,58 @@ end
 ---@param m MarioState
 local function input_update(m)
     if m.playerIndex ~= 0 then return end
-    if squishyCamActive and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 then
+    if doodell_cam_active() and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 then
         m.area.camera.yaw = camAngle
         m.intendedYaw = atan2s(-m.controller.stickY, m.controller.stickX) + camAngle
     end
 end
 
 local function on_level_init()
+    local m = gMarioStates[0]
+    local l = gLakituState
+    local c = m.area.camera
     camAngleRaw = round(gMarioStates[0].faceAngle.y/0x2000)*0x2000 - 0x6000
+    rawFocusPos = {
+        x = m.pos.x,
+        y = m.pos.y + 150,
+        z = m.pos.z,
+    }
+    rawCamPos = {
+        x = m.pos.x + sins(camAngleRaw) * 500 * camScale,
+        y = m.pos.y - 150 + 350 * camScale - eepyCamOffset,
+        z = m.pos.z + coss(camAngleRaw) * 500 * camScale,
+    }
+    vec3f_copy(camPos, rawCamPos)
+    vec3f_copy(focusPos, rawFocusPos)
+    vec3f_copy(c.pos, camPos)
+    vec3f_copy(l.pos, camPos)
+    vec3f_copy(l.goalPos, camPos)
+
+    vec3f_copy(c.focus, focusPos)
+    vec3f_copy(l.focus, focusPos)
+    vec3f_copy(l.goalFocus, focusPos)
+    camera_set_use_course_specific_settings(0)
+end
+
+local function set_camera_mode(_, mode, _)
+    if mode == CAMERA_MODE_NONE or camera_config_is_free_cam_enabled() or not doodell_cam_enabled() then
+        return true
+    end
+    if sOverrideCameraModes[mode] ~= nil or gMarioStates[0].action == ACT_SHOT_FROM_CANNON then
+        gLakituState.mode = CAMERA_MODE_NONE
+        return false
+    end
+end
+
+local function change_camera_angle(angle)
+    if angle == CAM_ANGLE_MARIO and not camera_config_is_free_cam_enabled() and doodell_cam_enabled() then
+        return false
+    end
 end
 
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
 hook_event(HOOK_BEFORE_MARIO_UPDATE, input_update)
 hook_event(HOOK_UPDATE, camera_update)
-hook_event(HOOK_ON_LEVEL_INIT, on_level_init)
+--hook_event(HOOK_ON_LEVEL_INIT, on_level_init)
+hook_event(HOOK_ON_SET_CAMERA_MODE, set_camera_mode)
+hook_event(HOOK_ON_CHANGE_CAMERA_ANGLE, change_camera_angle)
