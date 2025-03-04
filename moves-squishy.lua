@@ -486,7 +486,12 @@ local function act_squishy_slide(m)
         m.slideVelX = sins(m.faceAngle.y)*m.forwardVel
         m.slideVelZ = coss(m.faceAngle.y)*m.forwardVel
     end
-    e.yVelStore = get_mario_y_vel_from_floor(m)
+    local yVelFloor = get_mario_y_vel_from_floor(m)
+    if e.yVelStore > yVelFloor + 40 and yVelFloor > -10 then
+        m.vel.y = e.yVelStore
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, e.yVelStore)
+    end
+    e.yVelStore = yVelFloor
     if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
         m.slideVelX = m.slideVelX - sins(m.slideYaw)*3
         m.slideVelZ = m.slideVelZ - coss(m.slideYaw)*3

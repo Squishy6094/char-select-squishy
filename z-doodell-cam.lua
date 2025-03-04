@@ -142,7 +142,6 @@ local function doodell_cam_snap(levelInit)
     local levelNum = gNetworkPlayers[0].currLevelNum
     local c = m.area.camera
     if levelInit then
-        djui_chat_message_create(tostring(camSpawnAngles[levelNum]))
         camAngleRaw = round(gMarioStates[0].faceAngle.y/0x2000)*0x2000 - 0x8000 + (camSpawnAngles[levelNum] ~= nil and camSpawnAngles[levelNum] or 0)
         camAngle = camAngleRaw
         camScale = 3
