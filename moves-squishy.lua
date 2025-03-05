@@ -163,12 +163,13 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
     newFacingDYaw = facingDYaw;
 
     --! -0x4000 not handled - can slide down a slope while facing perpendicular to it
+    -- Fixed
     if (newFacingDYaw > 0 and newFacingDYaw <= 0x4000) then
         newFacingDYaw = (newFacingDYaw - 0x200)
         if (newFacingDYaw < 0) then
             newFacingDYaw = 0;
         end
-    elseif (newFacingDYaw > -0x4000 and newFacingDYaw < 0) then
+    elseif (newFacingDYaw >= -0x4000 and newFacingDYaw < 0) then
         newFacingDYaw = (newFacingDYaw + 0x200)
         if (newFacingDYaw > 0) then
             newFacingDYaw = 0;
@@ -287,6 +288,8 @@ local function update_squishy_walking_speed(m)
     end
     ]]
 
+    m.faceAngle.x = 0
+
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x800 - m.forwardVel*2, 0x800 - m.forwardVel*2);
     apply_slope_accel(m);
 end
@@ -307,10 +310,10 @@ end
 ACT_SQUISHY_WALKING = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_CROUCH_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
 ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_AIR)
-ACT_SQUISHY_DIVE_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING )
+ACT_SQUISHY_DIVE_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE)
 ACT_SQUISHY_LONG_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING )
 ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
-ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
+ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 ACT_SQUISHY_ROLLOUT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_GROUND_POUND = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_GROUND_POUND_LAND = allocate_mario_action(ACT_GROUP_STATIONARY | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
@@ -461,7 +464,7 @@ local function act_squishy_dive_slide(m)
     end
 
     common_slide_action(m, ACT_STOMACH_SLIDE_STOP, ACT_SQUISHY_DIVE, MARIO_ANIM_SLIDE_DIVE);
-    update_speed_cap(m, 10)
+    update_speed_cap(m, 3)
     m.actionTimer = m.actionTimer + 1;
 end
 
@@ -506,7 +509,7 @@ local function act_squishy_slide(m)
     update_speed_cap(m, 30)
     m.vel.x = m.slideVelX
     m.vel.z = m.slideVelZ
-    m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
+    --m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
     if mario_is_on_water(m) then
         m.pos.y = m.pos.y + 10
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
@@ -571,6 +574,10 @@ end
 local function act_squishy_rollout(m)
     local e = gSquishyExtraStates[m.playerIndex]
     if m.actionTimer == 0 then
+        if m.prevAction & ACT_FLAG_BUTT_OR_STOMACH_SLIDE ~= 0 then
+            m.vel.x = m.slideVelX
+            m.vel.z = m.slideVelZ
+        end
         if m.forwardVel > 70 then
             play_character_sound(m, CHAR_SOUND_WHOA)
         else
