@@ -3,6 +3,8 @@
 -- Moveset --
 -------------
 
+gGlobalSyncTable.squishySpeedMult = 1
+
 gSquishyExtraStates = {}
 for i = 0, MAX_PLAYERS - 1 do
     gSquishyExtraStates[i] = {
@@ -132,6 +134,7 @@ end
 --local initPeakVel = 40
 local function update_speed_cap(m, peakVel)
     if peakVel == nil then peakVel = 40 end
+    peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
     m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
     m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
     m.slideVelZ = clamp_soft(m.slideVelZ, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelZ)/peakVel))
@@ -1520,6 +1523,29 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_INTERACT, allow_interact)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
+
+-- Host Speed Multiplier Setting
+local function command_squishy_speed(msg)
+    msg = string.lower(msg)
+    if msg == "default" then
+        gGlobalSyncTable.squishySpeedMult = 1
+    elseif msg == "balanced" then
+        gGlobalSyncTable.squishySpeedMult = 0.8
+    elseif msg == "arena" then
+        gGlobalSyncTable.squishySpeedMult = 0.2
+    elseif tonumber(msg) ~= nil then
+        gGlobalSyncTable.squishySpeedMult = clamp(tonumber(msg), 0.1, 1)
+    else
+        djui_chat_message_create("Please enter a valid number")
+        return true
+    end
+    djui_chat_message_create("Squishy Speed Multiplier set to: " .. gGlobalSyncTable.squishySpeedMult)
+    return true
+end
+
+if network_is_server() then
+    hook_chat_command("squishy-speed", "Sets a speed multiplier for Squishy's speed between 0.1 and 1", command_squishy_speed)
+end
 
 --[[
 ---@param obj Object
