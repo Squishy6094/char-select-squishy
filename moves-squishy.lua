@@ -389,29 +389,26 @@ local function act_squishy_crouch_slide(m)
     if m.actionTimer == 0 then
         set_mario_animation(m, MARIO_ANIM_CROUCHING)
     end
-    e.forwardVelStore = m.forwardVel
-    e.forwardVelStore = e.forwardVelStore*0.95 + get_mario_floor_steepness(m)*4
+    m.forwardVel = m.forwardVel*0.95 + get_mario_floor_steepness(m)*4
 
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x200, 0x200)
-    m.slideVelX = sins(m.faceAngle.y)*e.forwardVelStore
-    m.slideVelZ = coss(m.faceAngle.y)*e.forwardVelStore
-    --m.forwardVel = e.forwardVelStore
+    m.slideVelX = sins(m.faceAngle.y)*m.forwardVel
+    m.slideVelZ = coss(m.faceAngle.y)*m.forwardVel
 
     if update_squishy_sliding(m, 4) then
         set_mario_action(m, ACT_CROUCHING, 0)
     end
     common_slide_action(m, ACT_CROUCHING, ACT_FREEFALL, MARIO_ANIM_CROUCHING)
     
-    if math.abs(e.forwardVelStore) < 1 then
+    if math.abs(m.forwardVel) < 1 then
         set_mario_action(m, ACT_CROUCHING, 0)
-        e.forwardVelStore = 0
+        m.forwardVel = 0
     end
     if m.pos.y > m.floorHeight then
         set_mario_action(m, ACT_FREEFALL, 0)
     end
     m.actionTimer = m.actionTimer + 1
     if m.input & INPUT_A_PRESSED ~= 0 then
-        --m.forwardVel = e.forwardVelStore
         set_mario_action(m, (m.forwardVel > 0 and ACT_SQUISHY_LONG_JUMP or ACT_LONG_JUMP), 0)
     end
     if m.input & INPUT_B_PRESSED ~= 0 then
@@ -432,7 +429,6 @@ local function act_squishy_dive(m)
     if m.actionTimer == 0 then
         mario_set_forward_vel(m, m.forwardVel + 12)
     end
-    e.forwardVelStore = m.forwardVel
     
     if mario_check_object_grab(m) ~= 0 then
         mario_grab_used_object(m)
@@ -1408,15 +1404,6 @@ local canWallkick = {
 local wallAngleLimit = 70
 local function squishy_before_phys_step(m)
     local e = gSquishyExtraStates[m.playerIndex]
-
-    -- Uncapped Actions
-    if m.action == ACT_SQUISHY_SLIDE then
-        m.forwardVel = e.forwardVelStore
-    end
-    if m.action == ACT_SQUISHY_CROUCH_SLIDE then
-        m.forwardVel = e.forwardVelStore
-    end
-
 
     -- Straining
     if strainingActs[m.action] and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and m.pos.y > m.floorHeight then
