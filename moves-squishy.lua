@@ -678,8 +678,8 @@ local function act_squishy_ground_pound_land(m)
                     m.vel.y = 60
                     m.forwardVel = speedBalanced*0.6
                 else
-                    m.vel.y = speedBalanced*0.6
-                    m.forwardVel = 0
+                    m.vel.y = math.max(speedBalanced*0.65, 70)
+                    m.forwardVel = speedBalanced*0.1
                 end
                 set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 m.faceAngle.y = m.intendedYaw
