@@ -392,6 +392,11 @@ end
 local function input_update(m)
     if m.playerIndex ~= 0 then return end
     if doodell_cam_active() and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 then
+        local camAngle = camAngleRaw
+        local analogToggle = camera_config_is_analog_cam_enabled()
+        if not analogToggle then
+            camAngle = (camAngle/0x1000)*0x1000
+        end
         m.area.camera.yaw = camAngle
         m.intendedYaw = atan2s(-m.controller.stickY, m.controller.stickX) + camAngle
     end
