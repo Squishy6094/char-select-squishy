@@ -138,6 +138,9 @@ local function update_speed_cap(m, peakVel)
     m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
     m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
     m.slideVelZ = clamp_soft(m.slideVelZ, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelZ)/peakVel))
+    if m.vel.y > 0 then
+        m.vel.y = clamp_soft(m.vel.y, -peakVel, peakVel, 0.1*math.floor(math.abs(m.vel.y)/peakVel))
+    end
 end
 
 local function update_squishy_sliding_angle(m, accel, lossFactor)
@@ -650,19 +653,13 @@ local function act_squishy_ground_pound_land(m)
         play_character_sound(m, CHAR_SOUND_HAHA)
         --play_mario_heavy_landing_sound(m)
         e.forwardVelStore = m.forwardVel
-        m.forwardVel = 0
-        m.vel.x = 0
-        m.vel.y = 0
         m.particleFlags = PARTICLE_HORIZONTAL_STAR | PARTICLE_MIST_CIRCLE
         set_environmental_camera_shake(SHAKE_ENV_EXPLOSION)
     end
-    if mario_get_floor_class(m) ~= SURFACE_CLASS_VERY_SLIPPERY then
-        m.vel.x = 0
-        m.vel.y = 0
-        common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_FREEFALL)
-    else
-        --set_mario_action(m, ACT_SQUISHY_SLIDE_ROLL, 0)
-    end
+    m.forwardVel = 0
+    m.vel.x = 0
+    m.vel.y = 0
+    common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_FREEFALL)
     set_mario_animation(m, MARIO_ANIM_GROUND_POUND_LANDING)
     
     m.forwardVel = 0
@@ -677,10 +674,13 @@ local function act_squishy_ground_pound_land(m)
                 set_mario_action(m, ACT_OMM_SPIN_JUMP, 0)
             else
                 local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
-                if e.forwardVelStore > 15 then
-                    m.forwardVel = math.max(e.forwardVelStore, speedBalanced)*0.6
+                if m.input & INPUT_NONZERO_ANALOG ~= 0 then
+                    m.vel.y = 60
+                    m.forwardVel = speedBalanced*0.6
+                else
+                    m.vel.y = speedBalanced*0.6
+                    m.forwardVel = 0
                 end
-                m.vel.y = math.max(speedBalanced, math.max(e.yVelStore, 150))*0.4
                 set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
                 m.faceAngle.y = m.intendedYaw
             end
@@ -1305,12 +1305,6 @@ local function squishy_update(m)
 
     if hitActs[m.action] then
         e.hasShell = false
-    end
-
-    if m.action & ACT_GROUP_SUBMERGED ~= 0 then
-        e.rhythmSwimTimer = e.rhythmSwimTimer + 1
-    else
-        e.rhythmSwimTimer = 0
     end
 end
 
