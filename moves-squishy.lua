@@ -482,13 +482,13 @@ end
 --- @param m MarioState
 local function act_squishy_slide(m)
     local e = gSquishyExtraStates[m.playerIndex]
+    local yVelFloor = get_mario_y_vel_from_floor(m)
     if m.actionTimer == 0 then
         m.slideVelX = sins(m.faceAngle.y)*m.forwardVel
         m.slideVelZ = coss(m.faceAngle.y)*m.forwardVel
     end
-    local yVelFloor = get_mario_y_vel_from_floor(m)
-    if e.yVelStore > yVelFloor + 40 and yVelFloor > -10 then
-        m.vel.y = e.yVelStore
+    
+    if ((e.yVelStore > yVelFloor + 20 and yVelFloor > -10) or (m.floorHeight ~= m.pos.y)) and m.actionTimer > 0 then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, e.yVelStore)
     end
     e.yVelStore = yVelFloor
@@ -500,7 +500,7 @@ local function act_squishy_slide(m)
     if update_squishy_sliding(m, 4) then
         set_mario_action(m, ACT_SLIDE_KICK_SLIDE_STOP, 0)
     end
-    common_slide_action(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_SQUISHY_SLIDE_AIR, MARIO_ANIM_SLIDE_KICK)
+    common_slide_action(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK)
     update_speed_cap(m, 30)
     m.vel.x = m.slideVelX
     m.vel.z = m.slideVelZ
@@ -540,6 +540,7 @@ local function act_squishy_slide_air(m)
         m.vel.y = e.yVelStore
         m.vel.z = m.slideVelZ
     end
+    e.yVelStore = 0
     if m.actionArg == 0 then
         if m.forwardVel > 30 and mario_is_on_water(m) and (m.flags & MARIO_METAL_CAP == 0) then
             set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, m.forwardVel*0.25)
