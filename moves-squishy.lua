@@ -206,7 +206,7 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
     
     --update_speed_cap(m)
 
-    if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) then
+    if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) and math.abs(m.forwardVel) < 1 then
         m.forwardVel = m.forwardVel * -1.0;
     end
 end
@@ -573,11 +573,10 @@ end
 --- @param m MarioState
 local function act_squishy_rollout(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    if m.actionTimer == 0 then
-        if m.prevAction & ACT_FLAG_BUTT_OR_STOMACH_SLIDE ~= 0 then
-            m.vel.x = m.slideVelX
-            m.vel.z = m.slideVelZ
-        end
+    if m.actionTimer == 1 then
+        djui_chat_message_create(tostring(m.forwardVel))
+        m.vel.x = m.slideVelX
+        m.vel.z = m.slideVelZ
         if m.forwardVel > 70 then
             play_character_sound(m, CHAR_SOUND_WHOA)
         else
@@ -586,6 +585,7 @@ local function act_squishy_rollout(m)
         if m.actionArg ~= 0 then
             m.forwardVel = m.forwardVel*0.8
         end
+        djui_chat_message_create(tostring(m.forwardVel))
     end
     --[[
     if m.actionTimer == 1 then
