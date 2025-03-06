@@ -47,33 +47,6 @@ function get_mario_y_vel_from_floor(m)
     end
 end
 
-local function pos_or_neg(num)
-    if num >= 1 then return 1 end
-    if num <= -1 then return -1 end
-    return 0
-end
-
-local function get_wall_raycasted(m)
-    local velFrames = 5
-    local wall = collision_find_surface_on_ray(m.pos.x, m.pos.y + 60, m.pos.z, m.vel.x*velFrames, 0, m.vel.z*velFrames).hitPos
-    spawn_non_sync_object(id_bhvSparkleSpawn, E_MODEL_NONE, wall.x, wall.y, wall.z, nil)
-    return resolve_and_return_wall_collisions(wall, 60, 50)
-end
-    
-
---[[
-local function set_mario_x_and_y_vel_from_floor_steepness(m, multiplier)
-    if multiplier == nil then multiplier = 1 end
-    local angle = m.floorAngle
-    local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
-    local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
-    local floorDif = floor - floorInFront 
-    if floorDif > 20 or floorDif < -20 then floorDif = 0 end
-    m.vel.x = m.vel.x + sins(angle)*floorDif*multiplier
-    m.vel.z = m.vel.z + coss(angle)*floorDif*multiplier
-end
-]]
-
 local function clamp(num, min, max)
     return math.min(math.max(num, min), max)
 end
@@ -91,6 +64,10 @@ end
 
 local function lerp(a, b, t)
     return a * (1 - t) + b * t
+end
+
+local function invlerp(x, a, b)
+    return clamp((x - a) / (b - a), 0.0, 1.0)
 end
 
 local function set_mario_action_and_y_vel(m, action, arg, velY)
@@ -294,36 +271,58 @@ local function update_squishy_walking_speed(m)
     apply_slope_accel(m);
 end
 
-local function revert_mario_bonk_reflection(m, negateSpeed)
-    if (m.wall ~= nil) then
-        local wallAngle = atan2s(m.wall.normal.z, m.wall.normal.x);
-        m.faceAngle.y = wallAngle + convert_s16(m.faceAngle.y + wallAngle);
+local function squishy_allow_midair_spin(m, allow)
+    if omm_moveset_enabled(m) and m.input & INPUT_A_PRESSED ~= 0 and allow ~= false then
+        set_mario_action(m, ACT_OMM_MIDAIR_SPIN, 0)
     end
+end
 
-    if (negateSpeed) then
-        mario_set_forward_vel(m, m.forwardVel);
-    else
-        m.faceAngle.y = m.faceAngle.y - 0x8000;
+local function squishy_allow_spin_jump(m, allow)
+    if omm_moveset_enabled(m) and m.controller.buttonDown & Y_BUTTON ~= 0 and allow ~= false then
+        if m.action & ACT_FLAG_AIR ~= 0 then
+            if m.vel.y <= 10 then
+                set_mario_action(m, ACT_OMM_SPIN_JUMP, 0)
+            end
+        else
+            set_mario_action(m, ACT_OMM_SPIN_GROUND, 0)
+        end
     end
+end
+
+local function update_omm_air_rotation(m)
+    if not omm_moveset_enabled(m) then return end
+    local vmin = 8
+    local vmax = 32
+    local hmin = 0x800
+    local hmax = 0x4000
+    if m.action & ACT_FLAG_AIR ~= 0 then
+        vmax = 24
+        hmin = 0x200
+        hmax = 0x2000
+    end
+    local vel = math.max(math.abs(m.forwardVel), 1)
+    local mag = m.intendedMag / (32)
+    local handling = ((hmin + (1.0 - invlerp(vel, vmin, vmax)^2) * (hmax - hmin)) * mag)
+    m.faceAngle.y = convert_s16(m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, handling, handling))
+    mario_set_forward_vel(m, m.forwardVel)
 end
 
 ACT_SQUISHY_WALKING = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
 ACT_SQUISHY_CROUCH_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
 ACT_SQUISHY_DIVE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_AIR)
 ACT_SQUISHY_DIVE_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE)
-ACT_SQUISHY_LONG_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING )
+ACT_SQUISHY_LONG_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_SLIDE = allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 ACT_SQUISHY_SLIDE_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
 ACT_SQUISHY_ROLLOUT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_GROUND_POUND = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_GROUND_POUND_LAND = allocate_mario_action(ACT_GROUP_STATIONARY | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
 ACT_SQUISHY_GROUND_POUND_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_CONTROL_JUMP_HEIGHT)
-ACT_SQUISHY_WALL_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
-ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING)
+ACT_SQUISHY_WALL_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_SWIM_IDLE = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
 ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
 ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
-ACT_SQUISHY_OMM_SLINGSHOT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 
 local function act_squishy_walking(m)
     local startPos = {x = 0, y = 0, z = 0}
@@ -346,6 +345,9 @@ local function act_squishy_walking(m)
     end
 
     if (check_ground_dive_or_punch(m) ~= 0) then
+        if omm_moveset_enabled(m) then
+            return set_mario_action_and_y_vel(m, ACT_JUMP_KICK, 0, 30)
+        end
         return true
     end
 
@@ -365,6 +367,7 @@ local function act_squishy_walking(m)
 
     vec3f_copy(startPos, m.pos);
     update_squishy_walking_speed(m)
+    squishy_allow_spin_jump(m)
 
     local switch = perform_ground_step(m)
     if switch == GROUND_STEP_LEFT_GROUND then
@@ -429,9 +432,8 @@ end
 --- @param m MarioState
 local function act_squishy_dive(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    local angle = m.faceAngle.y
     common_air_action_step(m, ACT_SQUISHY_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
-    m.faceAngle.y = angle
+    update_omm_air_rotation(m)
     if m.actionTimer == 0 then
         mario_set_forward_vel(m, m.forwardVel + 12)
     end
@@ -479,6 +481,8 @@ local function act_squishy_long_jump(m)
     end
     m.vel.y = m.vel.y + 2
     common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_NONE)
+    squishy_allow_midair_spin(m)
+    update_omm_air_rotation(m)
     e.gfxAnimX = e.gfxAnimX * 0.8
     m.marioObj.header.gfx.angle.x = e.gfxAnimX
     m.actionTimer = m.actionTimer + 1
@@ -565,7 +569,7 @@ local function act_squishy_slide_air(m)
     if m.input & INPUT_Z_DOWN ~= 0 then
         m.actionArg = 1
     end
-    if m.input & INPUT_A_PRESSED ~= 0 or m.actionTimer > 45 then
+    if m.input & INPUT_A_PRESSED ~= 0 then
         set_mario_action(m, ACT_SQUISHY_ROLLOUT, 0)
     end
 end
@@ -574,7 +578,6 @@ end
 local function act_squishy_rollout(m)
     local e = gSquishyExtraStates[m.playerIndex]
     if m.actionTimer == 1 then
-        djui_chat_message_create(tostring(m.forwardVel))
         m.vel.x = m.slideVelX
         m.vel.z = m.slideVelZ
         if m.forwardVel > 70 then
@@ -585,7 +588,6 @@ local function act_squishy_rollout(m)
         if m.actionArg ~= 0 then
             m.forwardVel = m.forwardVel*0.8
         end
-        djui_chat_message_create(tostring(m.forwardVel))
     end
     --[[
     if m.actionTimer == 1 then
@@ -595,6 +597,8 @@ local function act_squishy_rollout(m)
     end
     ]]
     common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_FORWARD_SPINNING_FLIP, AIR_STEP_NONE)
+    update_omm_air_rotation(m)
+    squishy_allow_spin_jump(m, m.actionArg == 0)
     m.peakHeight = m.pos.y
     --m.vel.y = m.vel.y + 0.5
     m.actionTimer = m.actionTimer + 1
@@ -614,6 +618,7 @@ local function act_squishy_ground_pound(m)
         anim = MARIO_ANIM_TWIRL
     end
     common_air_action_step(m, ACT_SQUISHY_GROUND_POUND_LAND, anim, AIR_STEP_NONE)
+    update_omm_air_rotation(m)
     -- setup when action starts (horizontal speed and voiceline)
     if m.actionTimer == 1 then
         play_character_sound(m, CHAR_SOUND_WAH2)
@@ -627,6 +632,7 @@ local function act_squishy_ground_pound(m)
     else
         if omm_moveset_enabled(m) and m.input & INPUT_B_PRESSED ~= 0 then
             m.faceAngle.y = m.intendedYaw
+            m.forwardVel = m.forwardVel + 15
             set_mario_action_and_y_vel(m, ACT_SQUISHY_DIVE, 0, 30)
         end
     end
@@ -667,7 +673,7 @@ local function act_squishy_ground_pound_land(m)
     m.vel.x = 0
     m.vel.y = 0
     common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_FREEFALL)
-    set_mario_animation(m, MARIO_ANIM_GROUND_POUND_LANDING)
+    squishy_allow_spin_jump(m)
     
     m.forwardVel = 0
 
@@ -677,20 +683,16 @@ local function act_squishy_ground_pound_land(m)
         e.groundPoundJump = true
     else
         if m.input & INPUT_A_PRESSED ~= 0 then
-            if omm_moveset_enabled(m) and m.controller.buttonDown & Y_BUTTON ~= 0 then
-                set_mario_action(m, ACT_OMM_SPIN_JUMP, 0)
+            local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
+            if m.input & INPUT_NONZERO_ANALOG ~= 0 then
+                m.vel.y = 60
+                m.forwardVel = speedBalanced*0.6
             else
-                local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
-                if m.input & INPUT_NONZERO_ANALOG ~= 0 then
-                    m.vel.y = 60
-                    m.forwardVel = speedBalanced*0.6
-                else
-                    m.vel.y = math.max(speedBalanced*0.65, 70)
-                    m.forwardVel = speedBalanced*0.1
-                end
-                set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
-                m.faceAngle.y = m.intendedYaw
+                m.vel.y = math.max(speedBalanced*0.65, 70)
+                m.forwardVel = speedBalanced*0.1
             end
+            set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
+            m.faceAngle.y = m.intendedYaw
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
             m.faceAngle.y = m.intendedYaw
@@ -705,6 +707,9 @@ end
 local function act_squishy_ground_pound_jump(m)
     local e = gSquishyExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_NONE)
+    update_omm_air_rotation(m)
+    squishy_allow_midair_spin(m)
+    squishy_allow_spin_jump(m)
     if m.actionTimer == 1 then
         play_character_sound(m, CHAR_SOUND_YAHOO_WAHA_YIPPEE)
         e.gfxAnimY = 0x20000
@@ -740,7 +745,7 @@ local function act_squishy_wall_slide(m)
     
     --mario_set_forward_vel(m, -m.forwardVel);
 
-    m.vel.y = clamp(m.vel.y - 0.2, -70, 150)
+    m.vel.y = clamp_soft(m.vel.y - 0.2, -70, 150, 3)
     m.particleFlags = PARTICLE_DUST
     if m.wall == nil then
         m.faceAngle.y = e.prevWallAngle
@@ -932,10 +937,6 @@ local function act_squishy_swim_attack(m)
     apply_water_current(m, m.vel)
 end
 
-local function act_squishy_omm_slingshot(m)
-    
-end
-
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -952,7 +953,6 @@ hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
 hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
-hook_mario_action(ACT_SQUISHY_OMM_SLINGSHOT, act_squishy_omm_slingshot)
 
 -------------------------
 -- Object Interactions --
@@ -1341,7 +1341,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
     end
     if m.wall ~= nil and nextAct == ACT_AIR_HIT_WALL or nextAct == ACT_OMM_WALL_SLIDE then
-        return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel*0.9 + math.max(m.vel.y*0.7, 0))
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel*0.9 + m.vel.y*0.7)
     end
     if nextAct == ACT_LONG_JUMP and m.forwardVel > 0 then
         return set_mario_action(m, ACT_SQUISHY_LONG_JUMP, 0)
