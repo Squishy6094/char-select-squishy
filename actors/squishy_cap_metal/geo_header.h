@@ -1,0 +1,9 @@
+extern const GeoLayout squishy_cap_metal_geo[];
+extern Lights1 squishy_cap_metal_Fast3D_Material_001_lights;
+extern u8 squishy_cap_metal_queer_metal_light_rgba16[];
+extern u8 squishy_cap_metal_queer_metal_shade_rgba16[];
+extern Vtx squishy_cap_metal_0000_displaylist_mesh_layer_1_vtx_0[159];
+extern Gfx squishy_cap_metal_0000_displaylist_mesh_layer_1_tri_0[];
+extern Gfx mat_squishy_cap_metal_Fast3D_Material_001[];
+extern Gfx mat_revert_squishy_cap_metal_Fast3D_Material_001[];
+extern Gfx squishy_cap_metal_0000_displaylist_mesh_layer_1[];

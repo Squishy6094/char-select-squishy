@@ -9377,7 +9377,7 @@ Gfx mat_squishy_metal_v3_001[] = {
 	gsSPSetGeometryMode(G_TEXTURE_GEN),
 	gsSPLight(&squishy_metal_v3_001_lights.l, 1),
     gsSPLight(&squishy_metal_v3_001_lights.a, 2),
-    gsSPCopyLightEXT(2, 5),
+    gsSPCopyLightEXT(2, 17),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(TEXEL0, 0, SHADE, TEXEL1, 0, 0, 0, ENVIRONMENT, TEXEL0, 0, SHADE, TEXEL1, 0, 0, 0, ENVIRONMENT),
 	gsDPSetAlphaDither(G_AD_NOISE),

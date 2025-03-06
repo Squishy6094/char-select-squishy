@@ -1,0 +1,14 @@
+extern const GeoLayout squishy_cap_geo[];
+extern Lights1 squishy_cap_SquishyCap_lights;
+extern Lights1 squishy_cap_SquishyCapEmblem_layer5_lights;
+extern u8 squishy_cap_hatemblem_ia8[];
+extern Vtx squishy_cap_0000_displaylist_mesh_layer_1_vtx_0[159];
+extern Gfx squishy_cap_0000_displaylist_mesh_layer_1_tri_0[];
+extern Vtx squishy_cap_0000_displaylist_mesh_layer_5_vtx_0[6];
+extern Gfx squishy_cap_0000_displaylist_mesh_layer_5_tri_0[];
+extern Gfx mat_squishy_cap_SquishyCap[];
+extern Gfx mat_revert_squishy_cap_SquishyCap[];
+extern Gfx mat_squishy_cap_SquishyCapEmblem_layer5[];
+extern Gfx mat_revert_squishy_cap_SquishyCapEmblem_layer5[];
+extern Gfx squishy_cap_0000_displaylist_mesh_layer_1[];
+extern Gfx squishy_cap_0000_displaylist_mesh_layer_5[];
