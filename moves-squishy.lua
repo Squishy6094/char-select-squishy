@@ -323,7 +323,7 @@ ACT_SQUISHY_FIRE_BURN = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVI
 ACT_SQUISHY_SWIM_IDLE = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
 ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
 ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
-
+ACT_SQUISHY_OMM_SLINGSHOT = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 
 local function act_squishy_walking(m)
     local startPos = {x = 0, y = 0, z = 0}
@@ -932,6 +932,10 @@ local function act_squishy_swim_attack(m)
     apply_water_current(m, m.vel)
 end
 
+local function act_squishy_omm_slingshot(m)
+    
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -948,6 +952,7 @@ hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
 hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_OMM_SLINGSHOT, act_squishy_omm_slingshot)
 
 -------------------------
 -- Object Interactions --
