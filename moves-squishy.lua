@@ -20,13 +20,14 @@ for i = 0, MAX_PLAYERS - 1 do
         spamBurnout = 0,
         forceDefaultWalk = false,
         prevWallAngle = 0,
-        hasShell = false,
         
         gfxAnimX = 0,
         gfxAnimY = 0,
         gfxAnimZ = 0,
     }
 end
+
+gPlayerSyncTable[0].squishyHasShell = false
 
 local spamBurnoutMax = 100
 
@@ -102,6 +103,14 @@ local function vec3f_non_nan(v)
     if v.x ~= v.x then v.x = 0 end
     if v.y ~= v.y then v.y = 0 end
     if v.z ~= v.z then v.z = 0 end
+end
+
+local function squishy_has_koopa_shell(m, setShellState)
+    if setShellState == nil then
+        return gPlayerSyncTable[m.playerIndex].squishyHasShell
+    else
+        gPlayerSyncTable[m.playerIndex].squishyHasShell = setShellState
+    end
 end
 
 ----------------------------------------
@@ -527,7 +536,7 @@ local function act_squishy_slide(m)
         end
     end
     if m.input & INPUT_B_PRESSED ~= 0 then
-        if e.hasShell then
+        if squishy_has_koopa_shell(m) then
             set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
         else
             set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
@@ -1169,7 +1178,7 @@ local function act_race_shell_ground(m)
                 m.pos.x, m.pos.y + 100, m.pos.z,
                 castDir.x, castDir.y, castDir.z)
         if info.surface ~= nil then
-            e.hasShell = false
+            squishy_has_koopa_shell(m, true)
             mario_stop_riding_object(m)
             play_sound(SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject)
             m.particleFlags = m.particleFlags | PARTICLE_VERTICAL_STAR
@@ -1307,7 +1316,7 @@ local function squishy_update(m)
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
         if m.forwardVel >= 50 then
             smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_RUN)
-            if not e.hasShell then
+            if not squishy_has_koopa_shell(m) then
                 m.marioBodyState.handState = MARIO_HAND_OPEN
             end
         elseif smlua_anim_util_get_current_animation_name(m.marioObj) == SQUISHY_ANIM_RUN then
@@ -1316,7 +1325,7 @@ local function squishy_update(m)
     end
 
     if hitActs[m.action] then
-        e.hasShell = false
+        squishy_has_koopa_shell(m, false)
     end
 end
 
@@ -1366,7 +1375,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action(m, ACT_SQUISHY_SLIDE_AIR, 0)
     end
     if nextAct == ACT_RIDING_SHELL_GROUND then
-        e.hasShell = true
+        squishy_has_koopa_shell(m, true)
         return set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
     end
     if (m.flags & MARIO_METAL_CAP == 0) then
