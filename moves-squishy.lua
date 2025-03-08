@@ -124,7 +124,8 @@ local function update_spam_burnout(m, burnTimer)
             gPlayerSyncTable[0].spamBurnout = burnTimer
         end
     else
-        return gPlayerSyncTable[m.playerIndex].spamBurnout
+        local netSpam = gPlayerSyncTable[m.playerIndex].spamBurnout
+        return (netSpam and netSpam or 0)
     end
 end
 
