@@ -32,23 +32,6 @@ gPlayerSyncTable[0].spamBurnout = 0
 
 local spamBurnoutMax = 100
 
-function get_mario_floor_steepness(m, angle)
-    if angle == nil then angle = m.faceAngle.y end
-    local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
-    local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
-    local floorDif = floor - floorInFront 
-    if floorDif > 20 or floorDif < -20 then floorDif = 0 end
-    return floorDif
-end
-
-function get_mario_y_vel_from_floor(m)
-    if m.pos.y == m.floorHeight then
-        return math.sqrt(m.vel.x^2 + m.vel.y^2)*-get_mario_floor_steepness(m)
-    else
-        return m.vel.y
-    end
-end
-
 local function clamp(num, min, max)
     return math.min(math.max(num, min), max)
 end
@@ -104,6 +87,26 @@ local function vec3f_non_nan(v)
     if v.x ~= v.x then v.x = 0 end
     if v.y ~= v.y then v.y = 0 end
     if v.z ~= v.z then v.z = 0 end
+end
+
+function get_mario_floor_steepness(m, angle)
+    if angle == nil then angle = m.faceAngle.y end
+    local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
+    local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
+    local floorDif = floor - floorInFront 
+    if floorDif > 20 or floorDif < -20 then floorDif = 0 end
+    return floorDif
+end
+
+function get_mario_y_vel_from_floor(m)
+    if m.pos.y == m.floorHeight then
+        local yVel = math.sqrt(m.vel.x^2 + m.vel.y^2)*get_mario_floor_steepness(m)
+        local velAngle = (math.sqrt(m.vel.z^2 + m.vel.x^2) > 0 and atan2s(m.vel.z, m.vel.x) or m.faceAngle.y)
+        local angleDif = convert_s16(velAngle - m.faceAngle.y)
+        return yVel * ((angleDif > 0x4000 or angleDif < -0x4000) and 1 or -1)
+    else
+        return m.vel.y
+    end
 end
 
 local function squishy_has_koopa_shell(m, setShellState)
@@ -506,33 +509,39 @@ end
 --- @param m MarioState
 local function act_squishy_slide(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    local yVelFloor = get_mario_y_vel_from_floor(m)
     if m.actionTimer == 0 then
         m.slideVelX = sins(m.faceAngle.y)*m.forwardVel
         m.slideVelZ = coss(m.faceAngle.y)*m.forwardVel
     end
     
-    if ((e.yVelStore > yVelFloor + 20 and yVelFloor > -10) or (m.floorHeight ~= m.pos.y)) and m.actionTimer > 0 then
-        return set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, clamp(e.yVelStore*0.6, 50, 50))
-    end
-    e.yVelStore = yVelFloor
     if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
-        m.slideVelX = m.slideVelX - sins(m.slideYaw)*3
-        m.slideVelZ = m.slideVelZ - coss(m.slideYaw)*3
+        update_speed_cap(m, 3)
         m.particleFlags = PARTICLE_FIRE
+    else
+        update_speed_cap(m, 25)
     end
+
+    -- Ramp physics
+    local yVelFloor = get_mario_y_vel_from_floor(m)
+    if m.actionTimer > 0 and ((e.yVelStore > 0 and yVelFloor <= 0 and e.yVelStore + yVelFloor > 10) or m.pos.y ~= m.floorHeight) then
+        local yVel = e.yVelStore
+        e.yVelStore = yVelFloor
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, yVel)
+    else
+        e.yVelStore = yVelFloor
+    end
+
     if update_squishy_sliding(m, 4) then
         set_mario_action(m, ACT_SLIDE_KICK_SLIDE_STOP, 0)
     end
     common_slide_action(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK)
-    update_speed_cap(m, 25)
-    m.vel.x = m.slideVelX
-    m.vel.z = m.slideVelZ
-    --m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
+
+    -- Start Water skipping
     if mario_is_on_water(m) then
         m.pos.y = m.pos.y + 10
         set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 50)
     end
+
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x80, 0x80)
     if m.input & INPUT_A_PRESSED ~= 0 then
         if m.actionArg == 1 then
@@ -559,12 +568,6 @@ local function act_squishy_slide_air(m)
     local e = gSquishyExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK, AIR_STEP_NONE)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
-    if m.actionTimer == 0 and m.prevAction == ACT_SQUISHY_SLIDE then
-        m.vel.x = m.slideVelX
-        m.vel.y = e.yVelStore
-        m.vel.z = m.slideVelZ
-    end
-    e.yVelStore = 0
     if m.actionArg == 0 then
         if m.forwardVel > 30 and mario_is_on_water(m) and (m.flags & MARIO_METAL_CAP == 0) then
             set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, m.forwardVel*0.25)
