@@ -133,9 +133,8 @@ end
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
 
---local initPeakVel = 40
 local function update_speed_cap(m, peakVel)
-    if peakVel == nil then peakVel = 40 end
+    if peakVel == nil then peakVel = 30 end
     peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
     m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
     m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
@@ -197,20 +196,13 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
     mario_update_moving_sand(m);
     mario_update_windy_ground(m);
 
-    --! Speed is capped a frame late (butt slide HSG)
-    m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
     --[[
-    if (m.forwardVel > 100.0) then
-        m.slideVelX = m.slideVelX * 100.0 / m.forwardVel;
-        m.slideVelZ = m.slideVelZ * 100.0 / m.forwardVel;
-    end
-    ]]
-    
-    --update_speed_cap(m)
+    m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
 
-    if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) and math.abs(m.forwardVel) < 1 then
+    if (newFacingDYaw < -0x7000 or newFacingDYaw > 0x7000) and math.abs(m.forwardVel) < 1 then
         m.forwardVel = m.forwardVel * -1.0;
     end
+    ]]
 end
 
 local function update_squishy_sliding(m, stopSpeed)
@@ -446,7 +438,7 @@ local function act_squishy_crouch_slide(m)
         set_mario_action(m, (m.forwardVel > 0 and ACT_SQUISHY_LONG_JUMP or ACT_LONG_JUMP), 0)
     end
     if m.input & INPUT_B_PRESSED ~= 0 then
-        m.forwardVel = m.forwardVel + 30
+        m.forwardVel = m.forwardVel + 20
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
     if m.input & INPUT_Z_DOWN == 0 then
@@ -523,7 +515,7 @@ local function act_squishy_slide(m)
     end
     
     if ((e.yVelStore > yVelFloor + 20 and yVelFloor > -10) or (m.floorHeight ~= m.pos.y)) and m.actionTimer > 0 then
-        return set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, e.yVelStore)
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, clamp(e.yVelStore*0.6, 50, 50))
     end
     e.yVelStore = yVelFloor
     if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
@@ -535,7 +527,7 @@ local function act_squishy_slide(m)
         set_mario_action(m, ACT_SLIDE_KICK_SLIDE_STOP, 0)
     end
     common_slide_action(m, ACT_SLIDE_KICK_SLIDE_STOP, ACT_SQUISHY_SLIDE, MARIO_ANIM_SLIDE_KICK)
-    update_speed_cap(m, 30)
+    update_speed_cap(m, 25)
     m.vel.x = m.slideVelX
     m.vel.z = m.slideVelZ
     --m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
@@ -721,7 +713,7 @@ local function act_squishy_ground_pound_land(m)
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
             m.faceAngle.y = m.intendedYaw
-            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.8
+            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.7
             set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
             e.groundPoundJump = true
         end
@@ -795,8 +787,8 @@ local function act_squishy_wall_slide(m)
         play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK,
                 m.marioObj.header.gfx.cameraToObject);
 
-        m.forwardVel = math.abs(m.vel.y)
-        set_mario_action_and_y_vel(m, ACT_WALL_KICK_AIR, 0, math.max(m.vel.y * 0.7, 30))
+        m.forwardVel = math.abs(m.vel.y)*0.6
+        set_mario_action_and_y_vel(m, ACT_WALL_KICK_AIR, 0, m.vel.y * 0.5)
     end
 
     m.actionTimer = m.actionTimer + 1
