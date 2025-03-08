@@ -196,13 +196,11 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
     mario_update_moving_sand(m);
     mario_update_windy_ground(m);
 
-    --[[
     m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
 
-    if (newFacingDYaw < -0x7000 or newFacingDYaw > 0x7000) and math.abs(m.forwardVel) < 1 then
+    if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) then
         m.forwardVel = m.forwardVel * -1.0;
     end
-    ]]
 end
 
 local function update_squishy_sliding(m, stopSpeed)
