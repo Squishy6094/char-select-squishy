@@ -391,7 +391,7 @@ end
 ---@param m MarioState
 local function input_update(m)
     if m.playerIndex ~= 0 then return end
-    if doodell_cam_active() and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 then
+    if doodell_cam_active() and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and gLakituState.mode == CAMERA_MODE_NONE then
         local camAngle = camAngleRaw
         local analogToggle = camera_config_is_analog_cam_enabled()
         if not analogToggle then
