@@ -183,7 +183,6 @@ local function update_speedrun_timers()
     timerPerLobby = timerPerLobby + 1
     if timerCheckpoint ~= 0 then
         timerCheckpointDisplay = timerCheckpointDisplay + 1
-        djui_chat_message_create(tostring(timerCheckpointDisplay))
         if timerCheckpointDisplay > 60 then
             timerCheckpointDisplay = 0
             timerCheckpoint = 0
