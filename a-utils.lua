@@ -38,3 +38,37 @@ function omm_moveset_enabled(m)
         return true
     end
 end
+
+---------------------
+-- Romhack Support --
+---------------------
+
+ROMHACK_NONE = 0
+ROMHACK_UNKNOWN = 1
+ROMHACK_SOMARI = 2
+
+currRomhack = ROMHACK_NONE
+
+for i in pairs(gActiveMods) do
+    local mod = gActiveMods[i]
+    local modTag = ""
+    if mod.incompatible ~= nil then
+        modTag = modTag .. " " .. mod.incompatible
+    end
+    if mod.category ~= nil then
+        modTag = modTag .. " " .. mod.category
+    end
+    if modTag ~= "" then
+        if modTag:find("romhack") then
+            if mod.name:find("Somari") then
+                currRomhack = ROMHACK_SOMARI
+            else
+                currRomhack = ROMHACK_UNKNOWN
+            end
+        end
+    end
+end
+
+function network_is_romhack()
+    return currRomhack ~= ROMHACK_NONE
+end

@@ -136,7 +136,11 @@ end
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
 
-local function update_speed_cap(m, peakVel)
+local function update_speed_cap(m, peakVel, force)
+    if force == nil then force = false end
+    if not force then
+        if currRomhack == ROMHACK_SOMARI then return end
+    end
     if peakVel == nil then peakVel = 30 end
     peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
     m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
@@ -515,7 +519,7 @@ local function act_squishy_slide(m)
     end
     
     if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
-        update_speed_cap(m, 3)
+        update_speed_cap(m, 3, true)
         m.particleFlags = PARTICLE_FIRE
     else
         update_speed_cap(m, 25)
