@@ -31,6 +31,7 @@ local function clamp(num, min, max)
 end
 
 local OPTION_SQUISHYCAM = _G.charSelect.add_option("Doodell Cam", 1, 2, {"Off", "Squishy Only", "On"}, {"Toggles the unique camera", "built for Squishy's Moveset", (_G.OmmEnabled and "(Inactive with OMM Camera)" or "")}, true)
+local OPTION_SQUISHYTIMER = _G.charSelect.add_option("Doodell Timer", 0, 2, {"Off", "Per-Level", "Per-Lobby"}, {"Toggles Doodell's Personal Timer"}, true)
 
 local cutsceneActExclude = {
     [ACT_WARP_DOOR_SPAWN] = true,
@@ -172,10 +173,82 @@ local function doodell_cam_snap(levelInit)
     camera_set_use_course_specific_settings(0)
 end
 
+local timerPerLevel = 0
+local timerPerLobby = 0
+local timerCheckpoint = 0
+local timerCheckpointDisplay = 0
+
+local function update_speedrun_timers()
+    timerPerLevel = timerPerLevel + 1
+    timerPerLobby = timerPerLobby + 1
+    if timerCheckpoint ~= 0 then
+        timerCheckpointDisplay = timerCheckpointDisplay + 1
+        djui_chat_message_create(tostring(timerCheckpointDisplay))
+        if timerCheckpointDisplay > 60 then
+            timerCheckpointDisplay = 0
+            timerCheckpoint = 0
+        end
+    end
+end
+
+local function speedrun_timer_active()
+    local squishyTimerToggle = _G.charSelect.get_options_status(OPTION_SQUISHYTIMER)
+    if squishyTimerToggle == 0 then return false end
+    return true
+end
+
+local function speedrun_timer_get()
+    if not speedrun_timer_active then return nil end
+    local squishyTimerToggle = _G.charSelect.get_options_status(OPTION_SQUISHYTIMER)
+    if timerCheckpoint ~= 0 then
+        if math.floor(timerCheckpointDisplay/5)%2 == 1 then
+            return nil
+        else
+            return timerCheckpoint
+        end
+    end
+    if squishyTimerToggle == 1 then
+        return timerPerLevel
+    elseif squishyTimerToggle == 2 then
+        return timerPerLobby
+    end
+end
+
+local function speedrun_timer_checkpoint()
+    local squishyTimerToggle = _G.charSelect.get_options_status(OPTION_SQUISHYTIMER)
+    if squishyTimerToggle == 1 then
+        timerCheckpoint = timerPerLevel
+    elseif squishyTimerToggle == 2 then
+        timerCheckpoint = timerPerLobby
+    end
+end
+
+local function speedrun_timer_format(frameTime)
+    return string.format("%s:%s.%s", string.format("%02d", math.floor(frameTime/30/60)), string.format("%02d", math.floor(frameTime/30)%60), string.format("%02d", math.floor((frameTime*(10/3))%100)))
+end
+
+local prevAction = 0
+local function speedrun_timer_check_checkpoint(m)
+    if m.playerIndex ~= 0 then return end
+    if prevAction ~= m.action then
+        if m.action == ACT_FALL_AFTER_STAR_GRAB then
+            speedrun_timer_checkpoint()
+        end
+        if m.prevAction ~= ACT_FALL_AFTER_STAR_GRAB then
+            if (m.action == ACT_STAR_DANCE_EXIT or m.action == ACT_STAR_DANCE_NO_EXIT or m.action == ACT_STAR_DANCE_WATER) then
+                speedrun_timer_checkpoint()
+            end
+        end
+
+        prevAction = m.action
+    end
+end
+
 local function camera_update()
     local m = gMarioStates[0]
     local l = gLakituState
     local c = m.area.camera
+    update_speedrun_timers()
     if c == nil then return end
 
     -- If turned off, restore camera mode
@@ -363,10 +436,11 @@ local doodellScale = 0
 local function hud_render()
     local m = gMarioStates[0]
     local l = gLakituState
+    djui_hud_set_resolution(RESOLUTION_N64)
+    local width = djui_hud_get_screen_width()
+    local height = 240
+
     if doodell_cam_active() then
-        djui_hud_set_resolution(RESOLUTION_N64)
-        local width = djui_hud_get_screen_width()
-        local height = 240
         doodellTimer = (doodellTimer + 1)%20
         local animFrame = math.floor(doodellTimer*0.1)
 
@@ -386,6 +460,13 @@ local function hud_render()
     else
         _G.charSelect.hud_show_element(HUD_DISPLAY_FLAG_CAMERA)
     end
+
+    if speedrun_timer_get() ~= nil then
+        djui_hud_set_font(FONT_RECOLOR_HUD)
+        djui_hud_set_color(107, 95, 255, 255)
+        local timerString = speedrun_timer_format(speedrun_timer_get())
+        djui_hud_print_text(timerString, width - djui_hud_measure_text(timerString)*0.8 - 8, height - 26, 0.8)
+    end
 end
 
 ---@param m MarioState
@@ -400,6 +481,12 @@ local function input_update(m)
         m.area.camera.yaw = camAngle
         m.intendedYaw = atan2s(-m.controller.stickY, m.controller.stickX) + camAngle
     end
+end
+
+local function on_level_init()
+    speedrun_timer_checkpoint()
+    timerPerLevel = 0
+    doodell_cam_snap(true)
 end
 
 local function set_camera_mode(_, mode, _)
@@ -419,8 +506,9 @@ local function change_camera_angle(angle)
 end
 
 hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
+hook_event(HOOK_MARIO_UPDATE, speedrun_timer_check_checkpoint)
 hook_event(HOOK_BEFORE_MARIO_UPDATE, input_update)
 hook_event(HOOK_UPDATE, camera_update)
-hook_event(HOOK_ON_LEVEL_INIT, doodell_cam_snap)
+hook_event(HOOK_ON_LEVEL_INIT, on_level_init)
 hook_event(HOOK_ON_SET_CAMERA_MODE, set_camera_mode)
 hook_event(HOOK_ON_CHANGE_CAMERA_ANGLE, change_camera_angle)
