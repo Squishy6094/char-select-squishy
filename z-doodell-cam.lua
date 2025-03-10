@@ -183,7 +183,7 @@ local function update_speedrun_timers()
     timerPerLobby = timerPerLobby + 1
     if timerCheckpoint ~= 0 then
         timerCheckpointDisplay = timerCheckpointDisplay + 1
-        if timerCheckpointDisplay > 60 then
+        if timerCheckpointDisplay > 70 then
             timerCheckpointDisplay = 0
             timerCheckpoint = 0
         end
