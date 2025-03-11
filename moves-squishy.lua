@@ -1014,6 +1014,68 @@ local function act_squishy_side_flip(m)
     m.actionTimer = m.actionTimer + 1
 end
 
+--[[
+local function act_squishy_ledge_grab(m)
+    local heightAboveFloor;
+    local intendedDYaw = convert_s16(m.intendedYaw - m.faceAngle[1]);
+    local hasSpaceForMario = (m.ceilHeight - m.floorHeight >= 160.0f);
+
+    if (m.actionTimer < 10) then
+        m.actionTimer = m.actionTimer + 1;
+    end
+
+    -- Remove false ledge grabs
+    --[[
+    if (m.floor.normal.y < 0.9063078) then
+        return let_go_of_ledge(m);
+    end
+    
+
+    if (m.input & (INPUT_Z_PRESSED | INPUT_OFF_FLOOR)) then
+        return let_go_of_ledge(m);
+    end
+
+    if ((m.input & INPUT_A_PRESSED) and hasSpaceForMario) then
+        return set_mario_action(m, ACT_LEDGE_CLIMB_FAST, 0);
+    end
+
+    if (m.input & INPUT_STOMPED) then
+        if (m.marioObj.oInteractStatus & INT_STATUS_MARIO_KNOCKBACK_DMG) then
+            m.hurtCounter += (m.flags & MARIO_CAP_ON_HEAD) ? 12 : 18;
+        end
+        return let_go_of_ledge(m);
+    end
+    if (m.actionTimer == 10 && (m.input & INPUT_NONZERO_ANALOG)
+#ifdef VERSION_EU
+        // On EU, you can't slow climb up ledges while holding A.
+        && !(m.input & INPUT_A_DOWN)
+#endif
+    ) {
+        if (intendedDYaw >= -0x4000 && intendedDYaw <= 0x4000) then
+            if (hasSpaceForMario) then
+                return set_mario_action(m, ACT_LEDGE_CLIMB_SLOW_1, 0);
+            end
+        } else {
+            return let_go_of_ledge(m);
+        end
+    end
+
+    heightAboveFloor = m.pos[1] - find_floor_height_relative_polar(m, -0x8000, 30.0f);
+    if (hasSpaceForMario && heightAboveFloor < 100.0f) then
+        return set_mario_action(m, ACT_LEDGE_CLIMB_FAST, 0);
+    end
+
+    if (m.actionArg == 0) then
+        play_sound_if_no_flag(m, SOUND_MARIO_WHOA, MARIO_MARIO_SOUND_PLAYED);
+    end
+
+    stop_and_set_height_to_floor(m);
+    set_mario_animation(m, MARIO_ANIM_IDLE_ON_LEDGE);
+
+    return 0;
+end
+]]
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1032,6 +1094,7 @@ hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_movin
 hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, act_squishy_wall_kick_air)
 hook_mario_action(ACT_SQUISHY_SIDE_FLIP, act_squishy_side_flip)
+hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, act_squishy_ledge_grab)
 
 -------------------------
 -- Object Interactions --
