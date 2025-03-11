@@ -347,6 +347,7 @@ ACT_SQUISHY_SWIM_IDLE = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWI
 ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
 ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
 ACT_SQUISHY_WALL_KICK_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_SIDE_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 
 local function act_squishy_walking(m)
     local startPos = {x = 0, y = 0, z = 0}
@@ -804,8 +805,7 @@ local function act_squishy_wall_slide(m)
         play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK,
                 m.marioObj.header.gfx.cameraToObject);
 
-        m.forwardVel = math.max(35, math.abs(m.vel.y*0.7)) --math.abs(e.forwardVelStore*0.8)
-        set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_KICK_AIR, 0, math.max(m.vel.y*0.7, 40))
+        set_mario_action(m, ACT_SQUISHY_WALL_KICK_AIR, 0)
     end
 
     m.actionTimer = m.actionTimer + 1
@@ -972,6 +972,11 @@ local function act_squishy_swim_attack(m)
 end
 
 local function act_squishy_wall_kick_air(m)
+    if m.actionTimer == 1 then
+        m.forwardVel = math.max(35, math.abs(m.vel.y*0.7)) --math.abs(e.forwardVelStore*0.8)
+        m.vel.y = math.max(m.vel.y*0.7, 40)
+    end
+
     if (m.input & INPUT_B_PRESSED ~= 0) then
         return set_mario_action(m, ACT_SQUISHY_DIVE, 0);
     end
@@ -982,6 +987,31 @@ local function act_squishy_wall_kick_air(m)
 
     play_mario_jump_sound(m);
     common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_SLIDEJUMP, AIR_STEP_CHECK_LEDGE_GRAB);
+    m.actionTimer = m.actionTimer + 1
+end
+
+local function act_squishy_side_flip(m)
+    if m.actionTimer == 0 then
+        m.vel.y = math.max(math.abs(m.forwardVel), 60)
+        m.forwardVel = 20
+        m.faceAngle.y = m.faceAngle.y + 0x8000
+    end
+
+    if (m.input & INPUT_B_PRESSED ~= 0) then
+        return set_mario_action(m, ACT_SQUISHY_DIVE, 0);
+    end
+
+    if (m.input & INPUT_Z_PRESSED ~= 0) then
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 0, 60);
+    end
+
+    play_mario_jump_sound(m);
+
+    if (common_air_action_step(m, ACT_SIDE_FLIP_LAND, MARIO_ANIM_SLIDEFLIP, AIR_STEP_CHECK_LEDGE_GRAB) ~= AIR_STEP_GRABBED_LEDGE) then
+        m.marioObj.header.gfx.angle.y = m.marioObj.header.gfx.angle.y + 0x8000;
+    end
+
+    m.actionTimer = m.actionTimer + 1
 end
 
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
@@ -1001,6 +1031,7 @@ hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
 hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, act_squishy_wall_kick_air)
+hook_mario_action(ACT_SQUISHY_SIDE_FLIP, act_squishy_side_flip)
 
 -------------------------
 -- Object Interactions --
@@ -1431,6 +1462,9 @@ local function squishy_before_action(m, nextAct)
     end
     if nextAct == ACT_WALL_KICK_AIR then
         return set_mario_action(m, ACT_SQUISHY_WALL_KICK_AIR, 0)
+    end
+    if nextAct == ACT_SIDE_FLIP then
+        return set_mario_action(m, ACT_SQUISHY_SIDE_FLIP, 0)
     end
 end
 
