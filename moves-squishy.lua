@@ -348,6 +348,7 @@ ACT_SQUISHY_SWIM_MOVING = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_S
 ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
 ACT_SQUISHY_WALL_KICK_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_SIDE_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_LEDGE_GRAB = allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
 
 local function act_squishy_walking(m)
     local startPos = {x = 0, y = 0, z = 0}
@@ -505,7 +506,7 @@ local function act_squishy_long_jump(m)
         m.vel.y = 30
     end
     m.vel.y = m.vel.y + 2
-    common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_CHECK_LEDGE_GRAB)
     squishy_allow_midair_spin(m)
     update_omm_air_rotation(m)
     e.gfxAnimX = e.gfxAnimX * 0.8
@@ -550,22 +551,24 @@ local function act_squishy_slide(m)
     end
 
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x80, 0x80)
-    if m.input & INPUT_A_PRESSED ~= 0 then
-        if m.actionArg == 1 then
-            set_mario_action(m, ACT_DOUBLE_JUMP, 0)
-        else
-            set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
+    if m.actionTimer > 0 then
+        if m.input & INPUT_A_PRESSED ~= 0 then
+            if m.actionArg == 1 then
+                set_mario_action(m, ACT_DOUBLE_JUMP, 0)
+            else
+                set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
+            end
         end
-    end
-    if m.input & INPUT_B_PRESSED ~= 0 then
-        if squishy_has_koopa_shell(m) then
-            set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
-        else
-            set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
+        if m.input & INPUT_B_PRESSED ~= 0 then
+            if squishy_has_koopa_shell(m) then
+                set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
+            else
+                set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
+            end
         end
-    end
-    if omm_moveset_enabled(m) and m.controller.buttonPressed & X_BUTTON ~= 0 then
-        set_mario_action(m, ACT_OMM_CAPPY_THROW_GROUND, 0)
+        if omm_moveset_enabled(m) and m.controller.buttonPressed & X_BUTTON ~= 0 then
+            set_mario_action(m, ACT_OMM_CAPPY_THROW_GROUND, 0)
+        end
     end
     m.actionTimer = m.actionTimer + 1
 end
@@ -621,7 +624,7 @@ local function act_squishy_rollout(m)
         m.pos.y = m.pos.y + 1
     end
     ]]
-    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_FORWARD_SPINNING_FLIP, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_FORWARD_SPINNING_FLIP, AIR_STEP_CHECK_LEDGE_GRAB)
     update_omm_air_rotation(m)
     squishy_allow_spin_jump(m, m.actionArg == 0)
     m.peakHeight = m.pos.y
@@ -642,7 +645,7 @@ local function act_squishy_ground_pound(m)
     if m.actionArg == 2 then
         anim = MARIO_ANIM_TWIRL
     end
-    common_air_action_step(m, ACT_SQUISHY_GROUND_POUND_LAND, anim, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_SQUISHY_GROUND_POUND_LAND, anim, AIR_STEP_CHECK_LEDGE_GRAB)
     update_omm_air_rotation(m)
     -- setup when action starts (horizontal speed and voiceline)
     if m.actionTimer == 1 then
@@ -731,7 +734,7 @@ end
 --- @param m MarioState
 local function act_squishy_ground_pound_jump(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_CHECK_LEDGE_GRAB)
     update_omm_air_rotation(m)
     squishy_allow_midair_spin(m)
     squishy_allow_spin_jump(m)
@@ -994,7 +997,7 @@ local function act_squishy_side_flip(m)
     if m.actionTimer == 0 then
         m.vel.y = math.max(math.abs(m.forwardVel), 60)
         m.forwardVel = 20
-        m.faceAngle.y = m.faceAngle.y + 0x8000
+        m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
     end
 
     if (m.input & INPUT_B_PRESSED ~= 0) then
@@ -1014,14 +1017,15 @@ local function act_squishy_side_flip(m)
     m.actionTimer = m.actionTimer + 1
 end
 
---[[
 local function act_squishy_ledge_grab(m)
+    local e = gSquishyExtraStates[m.playerIndex]
     local heightAboveFloor;
-    local intendedDYaw = convert_s16(m.intendedYaw - m.faceAngle[1]);
-    local hasSpaceForMario = (m.ceilHeight - m.floorHeight >= 160.0f);
+    local intendedDYaw = convert_s16(m.intendedYaw - m.faceAngle.y);
+    local hasSpaceForMario = (m.ceilHeight - m.floorHeight >= 160.0);
 
-    if (m.actionTimer < 10) then
-        m.actionTimer = m.actionTimer + 1;
+    if m.actionTimer == 1 then
+        e.forwardVelStore = math.max(math.sqrt(m.forwardVel^2 + m.vel.y^2), 30)
+        djui_chat_message_create(tostring(e.forwardVelStore))
     end
 
     -- Remove false ledge grabs
@@ -1029,39 +1033,43 @@ local function act_squishy_ledge_grab(m)
     if (m.floor.normal.y < 0.9063078) then
         return let_go_of_ledge(m);
     end
-    
+    ]]    
 
-    if (m.input & (INPUT_Z_PRESSED | INPUT_OFF_FLOOR)) then
+    if (m.input & (INPUT_Z_PRESSED | INPUT_OFF_FLOOR) ~= 0) then
         return let_go_of_ledge(m);
     end
 
-    if ((m.input & INPUT_A_PRESSED) and hasSpaceForMario) then
-        return set_mario_action(m, ACT_LEDGE_CLIMB_FAST, 0);
+    if ((m.input & INPUT_A_PRESSED ~= 0) and hasSpaceForMario) then
+        m.forwardVel = e.forwardVelStore*0.3
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, e.forwardVelStore*0.7);
     end
 
-    if (m.input & INPUT_STOMPED) then
-        if (m.marioObj.oInteractStatus & INT_STATUS_MARIO_KNOCKBACK_DMG) then
-            m.hurtCounter += (m.flags & MARIO_CAP_ON_HEAD) ? 12 : 18;
+    if ((m.input & INPUT_B_PRESSED ~= 0) and hasSpaceForMario) then
+        m.forwardVel = e.forwardVelStore*0.8
+        return set_mario_action(m, ACT_SQUISHY_SLIDE, 0);
+    end
+
+    --[[
+    if (m.input & INPUT_STOMPED ~= 0) then
+        if (m.marioObj.oInteractStatus & INT_STATUS_MARIO_KNOCKBACK_DMG ~= 0) then
+            m.hurtCounter = m.hurtCounter + (m.flags & MARIO_CAP_ON_HEAD ~= 0) and 12 or 18;
         end
         return let_go_of_ledge(m);
     end
-    if (m.actionTimer == 10 && (m.input & INPUT_NONZERO_ANALOG)
-#ifdef VERSION_EU
-        // On EU, you can't slow climb up ledges while holding A.
-        && !(m.input & INPUT_A_DOWN)
-#endif
-    ) {
-        if (intendedDYaw >= -0x4000 && intendedDYaw <= 0x4000) then
+    ]]
+
+    if (m.actionTimer == 10 and (m.input & INPUT_NONZERO_ANALOG ~= 0)) then
+        if (intendedDYaw >= -0x4000 and intendedDYaw <= 0x4000) then
             if (hasSpaceForMario) then
                 return set_mario_action(m, ACT_LEDGE_CLIMB_SLOW_1, 0);
             end
-        } else {
+        else
             return let_go_of_ledge(m);
         end
     end
 
-    heightAboveFloor = m.pos[1] - find_floor_height_relative_polar(m, -0x8000, 30.0f);
-    if (hasSpaceForMario && heightAboveFloor < 100.0f) then
+    heightAboveFloor = m.pos.y - find_floor_height_relative_polar(m, -0x8000, 30.0);
+    if (hasSpaceForMario and heightAboveFloor < 100.0) then
         return set_mario_action(m, ACT_LEDGE_CLIMB_FAST, 0);
     end
 
@@ -1072,9 +1080,10 @@ local function act_squishy_ledge_grab(m)
     stop_and_set_height_to_floor(m);
     set_mario_animation(m, MARIO_ANIM_IDLE_ON_LEDGE);
 
+    m.actionTimer = m.actionTimer + 1;
+    e.forwardVelStore = math.max(e.forwardVelStore - 0.1, 0)
     return 0;
 end
-]]
 
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
@@ -1528,6 +1537,9 @@ local function squishy_before_action(m, nextAct)
     end
     if nextAct == ACT_SIDE_FLIP then
         return set_mario_action(m, ACT_SQUISHY_SIDE_FLIP, 0)
+    end
+    if nextAct == ACT_LEDGE_GRAB then
+        return set_mario_action(m, ACT_SQUISHY_LEDGE_GRAB, 0)
     end
 end
 
