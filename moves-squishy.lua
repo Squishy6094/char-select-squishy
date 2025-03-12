@@ -21,6 +21,7 @@ for i = 0, MAX_PLAYERS - 1 do
         forceDefaultWalk = false,
         prevWallAngle = 0,
         groundpoundCancels = 0,
+        panicking = false,
         
         gfxAnimX = 0,
         gfxAnimY = 0,
@@ -138,12 +139,16 @@ end
 ----------------------------------------
 
 local function update_speed_cap(m, peakVel, force)
+    local e = gSquishyExtraStates[m.playerIndex]
     if force == nil then force = false end
     if not force then
         if currRomhack == ROMHACK_SOMARI then return end
     end
     if peakVel == nil then peakVel = 30 end
     peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
+    if e.panicking then
+        peakVel = peakVel * 1.5
+    end
     m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
     m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
     m.slideVelZ = clamp_soft(m.slideVelZ, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelZ)/peakVel))
@@ -1025,7 +1030,6 @@ local function act_squishy_ledge_grab(m)
 
     if m.actionTimer == 1 then
         e.forwardVelStore = math.max(math.sqrt(m.forwardVel^2 + m.vel.y^2), 30)
-        djui_chat_message_create(tostring(e.forwardVelStore))
     end
 
     -- Remove false ledge grabs
@@ -1416,6 +1420,7 @@ local hitActs = {
 
 local function squishy_update(m)
     local e = gSquishyExtraStates[m.playerIndex]
+    e.panicking = false
     if m.action & ACT_FLAG_AIR == 0 then
         e.groundpoundCancels = 0
     end
@@ -1457,6 +1462,11 @@ local function squishy_update(m)
             update_spam_burnout(m, 0)
         end
         update_spam_burnout(m, e.spamBurnout - 1)
+        e.panicking = true
+    end
+
+    if m.health <= 0x300 then
+        e.panicking = true
     end
 
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
