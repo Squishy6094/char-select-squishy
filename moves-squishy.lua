@@ -1705,19 +1705,31 @@ local function command_squishy_speed(msg)
     elseif msg == "balanced" then
         gGlobalSyncTable.squishySpeedMult = 0.8
     elseif msg == "arena" then
-        gGlobalSyncTable.squishySpeedMult = 0.2
+        gGlobalSyncTable.squishySpeedMult = 0.3
     elseif tonumber(msg) ~= nil then
-        gGlobalSyncTable.squishySpeedMult = clamp(tonumber(msg), 0.1, 1)
+        gGlobalSyncTable.squishySpeedMult = clamp(tonumber(msg), 0.1, 1.5)
     else
         djui_chat_message_create("Please enter a valid number")
         return true
     end
-    djui_chat_message_create("Squishy Speed Multiplier set to: " .. gGlobalSyncTable.squishySpeedMult)
+    local speedMult = gGlobalSyncTable.squishySpeedMult
+    local speedMultString = "Default"
+    if speedMult < 1 then
+        if speedMult < 0.5 then
+            speedMultString = "Nerfed"
+        else
+            speedMultString = "Balanced"
+        end
+    elseif speedMult > 1 then
+        speedMultString = "Buffed"
+    end
+    djui_chat_message_create("Squishy Speed Multiplier set to: " .. speedMultString .. " (" .. speedMult .. ")")
+    djui_popup_create_global("Character Select:\nSquishy Speed Multiplier set to:\n" .. speedMultString .. " (" .. speedMult .. ")", 2)
     return true
 end
 
 if network_is_server() then
-    hook_chat_command("squishy-speed", "Sets a speed multiplier for Squishy's speed between 0.1 and 1", command_squishy_speed)
+    hook_chat_command("squishy-speed", "Sets a speed multiplier for Squishy's speed between 0.1 and 1.5", command_squishy_speed)
 end
 
 --[[
