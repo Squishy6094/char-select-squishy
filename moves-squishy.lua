@@ -1085,7 +1085,7 @@ local function act_squishy_ledge_grab(m)
     set_mario_animation(m, MARIO_ANIM_IDLE_ON_LEDGE);
 
     m.actionTimer = m.actionTimer + 1;
-    e.forwardVelStore = math.max(e.forwardVelStore - 0.1, 0)
+    e.forwardVelStore = math.max(e.forwardVelStore*0.95, 30)
     return 0;
 end
 
