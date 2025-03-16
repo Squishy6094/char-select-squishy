@@ -211,7 +211,6 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
 
     m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
 
-    djui_chat_message_create(tostring(newFacingDYaw))
     if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) then
         m.forwardVel = m.forwardVel * -1.0;
     end
