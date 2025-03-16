@@ -279,13 +279,30 @@ local function update_squishy_walking_speed(m)
     end
     ]]
 
-    if (m.forwardVel <= 0.0) then
-        m.forwardVel = m.forwardVel + 1.1;
-    elseif (m.forwardVel <= targetSpeed) then
-        m.forwardVel = m.forwardVel + 1.1 - m.forwardVel / 43.0;
-    elseif (m.floor.normal.y >= 0.95) then
-        m.forwardVel = m.forwardVel - 1.0;
+    if currRomhack ~= ROMHACK_SOMARI then
+        if (m.forwardVel <= 0.0) then
+            m.forwardVel = m.forwardVel + 1.1;
+        elseif (m.forwardVel <= targetSpeed) then
+            m.forwardVel = m.forwardVel + 1.1 - m.forwardVel / 43.0;
+        elseif (m.floor.normal.y >= 0.95) then
+            m.forwardVel = m.forwardVel - 1.0;
+        end
+    else
+        -- Acceleration
+        if m.forwardVel <= 32 then
+            m.forwardVel = m.forwardVel + 1.5
+        else
+            m.forwardVel = m.forwardVel + 0.2
+        end
+        -- Limit the maxand min speed
+        if m.forwardVel > 1200 then
+            m.forwardVel = 1200
+        elseif m.forwardVel < -100 then
+            m.forwardVel = -100
+        end
     end
+
+    
 
     --[[
     if (m.forwardVel > 48.0) then
@@ -323,11 +340,13 @@ local function update_omm_air_rotation(m)
     local vmax = 32
     local hmin = 0x800
     local hmax = 0x4000
+    --[[
     if m.action & ACT_FLAG_AIR ~= 0 then
         vmax = 24
         hmin = 0x200
         hmax = 0x2000
     end
+    ]]
     local vel = math.max(math.abs(m.forwardVel), 1)
     local mag = m.intendedMag / (32)
     local handling = ((hmin + (1.0 - invlerp(vel, vmin, vmax)^2) * (hmax - hmin)) * mag)
@@ -769,7 +788,8 @@ end
 --- @param m MarioState
 local function act_squishy_wall_slide(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    perform_air_step(m, AIR_STEP_NONE)
+    local airStep = m.vel.y < 30 and AIR_STEP_CHECK_LEDGE_GRAB or AIR_STEP_NONE
+    perform_air_step(m, airStep)
     set_mario_animation(m, MARIO_ANIM_START_WALLKICK)
 
     if m.actionTimer == 0 then
@@ -1484,6 +1504,9 @@ local function squishy_update(m)
 
     if hitActs[m.action] then
         squishy_has_koopa_shell(m, false)
+    end
+    if m.action == ACT_SHOT_FROM_CANNON and m.vel.y < 0 then
+        set_mario_action(m, ACT_SQUISHY_ROLLOUT, 1)
     end
 end
 

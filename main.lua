@@ -75,10 +75,20 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
+--[[
+local ANIMS_SQUISHY = {
+    [MARIO_ANIM_IDLE_HEAD_LEFT] = 'idlingman',
+    [MARIO_ANIM_IDLE_HEAD_RIGHT] = 'idlingman',
+    [MARIO_ANIM_IDLE_HEAD_CENTER] = 'idlingman',
+    [MARIO_ANIM_FIRST_PERSON] = 'idlingman',
+}
+]]
+
 CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
+--_G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")

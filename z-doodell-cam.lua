@@ -89,7 +89,8 @@ function doodell_cam_active()
     return doodell_cam_enabled() and
     not camera_config_is_free_cam_enabled() and
     not omm_camera_enabled() and
-    gMarioStates[0].area.camera ~= nil
+    gMarioStates[0].area.camera ~= nil and
+    gMarioStates[0].statusForCamera.cameraEvent ~= CAM_EVENT_DOOR
 end
 
 local nonMomentumActs = {
@@ -106,7 +107,7 @@ local camScale = 3
 local camPitch = 0
 local camPan = 0
 local camTweenSpeed = 0.3
-local camForwardDist = 5
+local camForwardDist = 3
 local camPanSpeed = 25
 local rawFocusPos = {x = 0, y = 0, z = 0}
 local rawCamPos = {x = 0, y = 0, z = 0}
@@ -366,7 +367,7 @@ local function camera_update()
         local camPanX = sins(convert_s16(camAngleRaw + 0x4000))*camPan
         local camPanZ = coss(convert_s16(camAngleRaw + 0x4000))*camPan
 
-        focusPos = approach_vec3f_asymptotic(l.focus, rawFocusPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed)
+        focusPos = approach_vec3f_asymptotic(l.focus, rawFocusPos, camTweenSpeed, camTweenSpeed, camTweenSpeed)
         camPos = approach_vec3f_asymptotic(l.pos, rawCamPos, camTweenSpeed, camTweenSpeed*0.5, camTweenSpeed)
         vec3f_copy(c.pos, camPos)
         vec3f_copy(l.pos, camPos)
@@ -375,16 +376,20 @@ local function camera_update()
         vec3f_copy(c.focus, focusPos)
         vec3f_copy(l.focus, focusPos)
         vec3f_copy(l.goalFocus, focusPos)
+
+        if m.action == ACT_SQUISHY_GROUND_POUND_LAND then return end
+
+        local velPan = not nonMomentumActs[m.action]
         
         rawFocusPos = {
-            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + camPanX,
-            y = m.pos.y + 150 + (not nonMomentumActs[m.action] and clamp(get_mario_y_vel_from_floor(m), -100, 100)*camForwardDist*0.8 or 0) - eepyCamOffset + camPitch,
-            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0) + camPanZ,
+            x = m.pos.x + camPanX + (velPan  and posVel.x*camForwardDist or 0),
+            y = m.pos.y + camPitch + 100 + 100*camScale*0.5 + (velPan and clamp(get_mario_y_vel_from_floor(m), -100, 100)*camForwardDist or 0) - eepyCamOffset,
+            z = m.pos.z + camPanZ + (velPan and posVel.z*camForwardDist or 0),
         }
         rawCamPos = {
-            x = m.pos.x + (not nonMomentumActs[m.action] and posVel.x*camForwardDist or 0) + sins(angle) * 500 * camScale,
-            y = m.pos.y - (not nonMomentumActs[m.action] and get_mario_y_vel_from_floor(m)*5 or 0) - 150 + 350 * camScale - eepyCamOffset,
-            z = m.pos.z + (not nonMomentumActs[m.action] and posVel.z*camForwardDist or 0) + coss(angle) * 500 * camScale,
+            x = m.pos.x + (velPan and posVel.x*camForwardDist*2 or 0) + sins(angle) * 500 * camScale,
+            y = m.pos.y - (velPan and get_mario_y_vel_from_floor(m)*camForwardDist*1.5 or 0) - 150 + 350 * camScale - eepyCamOffset,
+            z = m.pos.z + (velPan and posVel.z*camForwardDist*2 or 0) + coss(angle) * 500 * camScale,
         }
         
         if camPitch >= 600*((camScale + 1)/3.5) and
@@ -425,7 +430,6 @@ local function camera_update()
     end
     
     camAngle = atan2s(l.pos.z - l.focus.z, l.pos.x - l.focus.x)
-    m.statusForCamera.cameraEvent = m.statusForCamera.cameraEvent * (m.statusForCamera.cameraEvent ~= CAM_EVENT_DOOR and 1 or 0)
 end
 
 local TEX_DOODELL_CAM = get_texture_info("squishy-doodell-cam")
@@ -471,8 +475,12 @@ end
 ---@param m MarioState
 local function input_update(m)
     if m.playerIndex ~= 0 then return end
-    if doodell_cam_active() and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and gLakituState.mode == CAMERA_MODE_NONE then
-        local camAngle = camAngleRaw
+    if doodell_cam_active() and gLakituState.mode == CAMERA_MODE_NONE and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and gLakituState.mode == CAMERA_MODE_NONE then
+        local camAngle = camAngle
+        local intAngle = m.intendedYaw - camAngle
+        if (intAngle > 0x3000 and intAngle < 0x5000) or (intAngle > -0x3000 and intAngle < -0x5000) then
+            camAngle = camAngleRaw
+        end
         local analogToggle = camera_config_is_analog_cam_enabled()
         if not analogToggle then
             camAngle = (camAngle/0x1000)*0x1000
