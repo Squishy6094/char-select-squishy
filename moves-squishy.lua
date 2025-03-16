@@ -173,29 +173,29 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
 
     m.slideYaw = atan2s(m.slideVelZ, m.slideVelX);
 
-    facingDYaw = m.faceAngle.y - m.slideYaw;
+    facingDYaw = convert_s16(m.faceAngle.y - m.slideYaw);
     newFacingDYaw = facingDYaw;
 
     --! -0x4000 not handled - can slide down a slope while facing perpendicular to it
     -- Fixed
     if (newFacingDYaw > 0 and newFacingDYaw <= 0x4000) then
-        newFacingDYaw = (newFacingDYaw - 0x200)
-        if (newFacingDYaw < 0) then
+        newFacingDYaw = newFacingDYaw - 0x200
+        if ((newFacingDYaw) < 0) then
             newFacingDYaw = 0;
         end
-    elseif (newFacingDYaw >= -0x4000 and newFacingDYaw < 0) then
-        newFacingDYaw = (newFacingDYaw + 0x200)
-        if (newFacingDYaw > 0) then
+    elseif (newFacingDYaw > -0x4000 and newFacingDYaw < 0) then
+        newFacingDYaw = newFacingDYaw + 0x200
+        if ((newFacingDYaw) > 0) then
             newFacingDYaw = 0;
         end
     elseif (newFacingDYaw > 0x4000 and newFacingDYaw < 0x8000) then
-        newFacingDYaw = (newFacingDYaw + 0x200)
-        if (newFacingDYaw > 0x8000) then
+        newFacingDYaw = newFacingDYaw + 0x200
+        if ((newFacingDYaw) > 0x8000) then
             newFacingDYaw = 0x8000;
         end
     elseif (newFacingDYaw > -0x8000 and newFacingDYaw < -0x4000) then
-        newFacingDYaw = (newFacingDYaw - 0x200)
-        if (newFacingDYaw < -0x8000) then
+        newFacingDYaw = newFacingDYaw - 0x200
+        if ((newFacingDYaw) < -0x8000) then
             newFacingDYaw = -0x8000;
         end
     end
@@ -211,6 +211,7 @@ local function update_squishy_sliding_angle(m, accel, lossFactor)
 
     m.forwardVel = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
 
+    djui_chat_message_create(tostring(newFacingDYaw))
     if (newFacingDYaw < -0x4000 or newFacingDYaw > 0x4000) then
         m.forwardVel = m.forwardVel * -1.0;
     end
@@ -786,7 +787,7 @@ local function act_squishy_wall_slide(m)
         if m.pos.y == m.floorHeight and e.prevFloorDist < 100 then
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
         else
-            m.faceAngle.y = m.faceAngle.y + 0x8000
+            m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
             set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, m.vel.y)
             m.pos.y = m.pos.y + 10
             m.forwardVel = m.forwardVel * 0.4
@@ -1004,6 +1005,8 @@ local function act_squishy_side_flip(m)
         m.forwardVel = 20
         m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
     end
+    if m.actionTimer == 1 then
+    end
 
     if (m.input & INPUT_B_PRESSED ~= 0) then
         return set_mario_action(m, ACT_SQUISHY_DIVE, 0);
@@ -1096,7 +1099,7 @@ hook_mario_action(ACT_SQUISHY_DIVE_SLIDE, { every_frame = act_squishy_dive_slide
 hook_mario_action(ACT_SQUISHY_LONG_JUMP, { every_frame = act_squishy_long_jump})
 hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
-hook_mario_action(ACT_SQUISHY_ROLLOUT, act_squishy_rollout)
+hook_mario_action(ACT_SQUISHY_ROLLOUT, {every_frame = act_squishy_rollout})
 hook_mario_action(ACT_SQUISHY_GROUND_POUND, { every_frame = act_squishy_ground_pound, gravity = act_squishy_ground_pound_gravity}, INT_GROUND_POUND)
 hook_mario_action(ACT_SQUISHY_GROUND_POUND_JUMP, { every_frame = act_squishy_ground_pound_jump})
 hook_mario_action(ACT_SQUISHY_GROUND_POUND_LAND, act_squishy_ground_pound_land, INT_GROUND_POUND)
@@ -1105,9 +1108,9 @@ hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
 hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
-hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, act_squishy_wall_kick_air)
-hook_mario_action(ACT_SQUISHY_SIDE_FLIP, act_squishy_side_flip)
-hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, act_squishy_ledge_grab)
+hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, {every_frame = act_squishy_wall_kick_air})
+hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
+hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
 
 -------------------------
 -- Object Interactions --
@@ -1613,7 +1616,7 @@ local function squishy_before_phys_step(m)
         if (m.forwardVel >= 16) and (canWallkick[m.action] ~= nil) then
             if (wallDYaw >= limitPositive) or (wallDYaw <= limitNegative) then
                 --mario_bonk_reflection(m, 0);
-                m.faceAngle.y = m.faceAngle.y + 0x8000;
+                m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
                 set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 1)
             end
         end
