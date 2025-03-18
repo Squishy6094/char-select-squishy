@@ -1024,8 +1024,6 @@ local function act_squishy_side_flip(m)
         m.forwardVel = 20
         m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
     end
-    if m.actionTimer == 1 then
-    end
 
     if (m.input & INPUT_B_PRESSED ~= 0) then
         return set_mario_action(m, ACT_SQUISHY_DIVE, 0);
@@ -1039,6 +1037,11 @@ local function act_squishy_side_flip(m)
 
     if (common_air_action_step(m, ACT_SIDE_FLIP_LAND, MARIO_ANIM_SLIDEFLIP, AIR_STEP_CHECK_LEDGE_GRAB) ~= AIR_STEP_GRABBED_LEDGE) then
         m.marioObj.header.gfx.angle.y = m.marioObj.header.gfx.angle.y + 0x8000;
+    end
+
+    if (m.marioObj.header.gfx.animInfo.animFrame == 6) then
+        play_sound(SOUND_ACTION_SIDE_FLIP_UNK, m.marioObj.header.gfx.cameraToObject);
+        return false;
     end
 
     m.actionTimer = m.actionTimer + 1
@@ -1732,7 +1735,7 @@ local function command_squishy_speed(msg)
     elseif msg == "arena" then
         gGlobalSyncTable.squishySpeedMult = 0.3
     elseif tonumber(msg) ~= nil then
-        gGlobalSyncTable.squishySpeedMult = clamp(tonumber(msg), 0.1, 1.5)
+        gGlobalSyncTable.squishySpeedMult = clamp(tonumber(msg), 0.2, 3)
     else
         djui_chat_message_create("Please enter a valid number")
         return true
@@ -1747,14 +1750,17 @@ local function command_squishy_speed(msg)
         end
     elseif speedMult > 1 then
         speedMultString = "Buffed"
+        if speedMult > 1.5 then
+        speedMultString = "Cracked"
+        end
     end
     djui_chat_message_create("Squishy Speed Multiplier set to: " .. speedMultString .. " (" .. speedMult .. ")")
-    djui_popup_create_global("Character Select:\nSquishy Speed Multiplier set to:\n" .. speedMultString .. " (" .. speedMult .. ")", 2)
+    djui_popup_create_global("Character Select:\nSquishy Speed Multiplier set to:\n" .. speedMultString .. " (" .. speedMult .. ")", 3)
     return true
 end
 
 if network_is_server() then
-    hook_chat_command("squishy-speed", "Sets a speed multiplier for Squishy's speed between 0.1 and 1.5", command_squishy_speed)
+    hook_chat_command("squishy-speed", "Sets a speed multiplier for Squishy's speed between 0.2 and 3.0", command_squishy_speed)
 end
 
 --[[
