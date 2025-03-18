@@ -127,6 +127,7 @@ local function update_spam_burnout(m, burnTimer)
         else
             e.spamBurnout = burnTimer
             gPlayerSyncTable[0].spamBurnout = burnTimer
+            add_debug_display(m, "Burn: " .. burnTimer)
         end
     else
         local netSpam = gPlayerSyncTable[m.playerIndex].spamBurnout
@@ -142,19 +143,26 @@ local function update_speed_cap(m, peakVel, force)
     local e = gSquishyExtraStates[m.playerIndex]
     if force == nil then force = false end
     if not force then
-        if currRomhack == ROMHACK_SOMARI then return end
+        if currRomhack == ROMHACK_SOMARI then
+            add_debug_display(m, "Somari H: " .. math.floor(m.forwardVel))
+            add_debug_display(m, "Somari V: " .. math.floor(m.vel.y))
+            return
+        end
     end
     if peakVel == nil then peakVel = 30 end
     peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
     if e.panicking then
         peakVel = peakVel * 1.5
+        add_debug_display(m, "Panicking!!!")
     end
     m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
     m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
     m.slideVelZ = clamp_soft(m.slideVelZ, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelZ)/peakVel))
     if m.vel.y > 0 then
-        m.vel.y = clamp_soft(m.vel.y, -peakVel, peakVel, 0.1*math.floor(math.abs(m.vel.y)/peakVel))
+        m.vel.y = clamp_soft(m.vel.y, -peakVel*2, peakVel*2, 0.1*math.floor(math.abs(m.vel.y)/peakVel*2))
     end
+    add_debug_display(m, "Speed H: " .. math.floor(m.forwardVel) .. "/" .. peakVel .. " (" .. -0.1*math.floor(math.abs(m.forwardVel)/peakVel) .. ")")
+    add_debug_display(m, "Speed V: " .. math.floor(m.vel.y) .. "/" .. peakVel*2 .. " (" .. -0.1*math.floor(math.abs(m.vel.y)/peakVel*2) .. ")")
 end
 
 local function update_squishy_sliding_angle(m, accel, lossFactor)
@@ -820,11 +828,13 @@ local function act_squishy_wall_slide(m)
             velAngle = velAngle + wallAngleDiff
             m.vel.x = vel * sins(velAngle)
             m.vel.z = vel * coss(velAngle)
+            add_debug_display(m, "Wall Angle Diff: " .. debug_num_to_hex(wallAngleDiff))
         end
         e.prevWallAngle = wallAngle
         m.marioObj.header.gfx.angle.y = atan2s(m.wall.normal.z, m.wall.normal.x)
         e.prevFloorDist = m.pos.y - m.floorHeight
         play_sound(SOUND_MOVING_TERRAIN_SLIDE + m.terrainSoundAddend, m.marioObj.header.gfx.cameraToObject);
+        add_debug_display(m, "Wall Angle: " .. debug_num_to_hex(wallAngle))
     end
     
     if m.input & INPUT_A_PRESSED ~= 0 then
