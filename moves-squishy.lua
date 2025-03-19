@@ -1138,7 +1138,7 @@ local function act_squishy_trick(m)
             m.vel.y = math.max(m.vel.y, 0)
         end
         if not burning then
-            m.actionArg = math.random(1, 4)
+            m.actionArg = math.random(1, 5)
             if m.actionArg == 1 then
                 e.trickAnim = MARIO_ANIM_DOUBLE_JUMP_RISE
                 e.gfxAnimY = 0xFFFF*2
@@ -1153,6 +1153,10 @@ local function act_squishy_trick(m)
             if m.actionArg == 4 then
                 e.trickAnim = MARIO_ANIM_TWIRL
                 e.gfxAnimY = 0xFFFF*3
+            end
+            if m.actionArg == 5 then
+                e.trickAnim = SQUISHY_ANIM_TRICK_SONIC
+                e.gfxAnimX = -0xFFFF*1
             end
         else
             m.actionArg = math.random(1, 2)
@@ -1186,12 +1190,16 @@ local function act_squishy_trick(m)
             end
         end
     end
-    set_mario_animation(m, e.trickAnim)
+    if type(e.trickAnim) == "string" then
+        smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_TRICK_SONIC)
+    else
+        set_mario_animation(m, e.trickAnim)
+    end
     update_omm_air_rotation(m)
 
-    e.gfxAnimX = e.gfxAnimX*0.9
-    e.gfxAnimY = e.gfxAnimY*0.9
-    e.gfxAnimZ = e.gfxAnimZ*0.9
+    e.gfxAnimX = e.gfxAnimX*0.85
+    e.gfxAnimY = e.gfxAnimY*0.85
+    e.gfxAnimZ = e.gfxAnimZ*0.85
     
     m.marioObj.header.gfx.angle.x = m.faceAngle.x + e.gfxAnimX
     m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfxAnimY
