@@ -22,6 +22,10 @@ for i = 0, MAX_PLAYERS - 1 do
         prevWallAngle = 0,
         groundpoundCancels = 0,
         panicking = false,
+        trickAnim = 0,
+        trickCount = 0,
+        actionTick = 0,
+        prevFrameAction = 0,
         
         gfxAnimX = 0,
         gfxAnimY = 0,
@@ -324,12 +328,6 @@ local function update_squishy_walking_speed(m)
     apply_slope_accel(m);
 end
 
-local function squishy_allow_midair_spin(m, allow)
-    if omm_moveset_enabled(m) and m.input & INPUT_A_PRESSED ~= 0 and allow ~= false then
-        set_mario_action(m, ACT_OMM_MIDAIR_SPIN, 0)
-    end
-end
-
 local function squishy_allow_spin_jump(m, allow)
     if omm_moveset_enabled(m) and m.controller.buttonDown & Y_BUTTON ~= 0 and allow ~= false then
         if m.action & ACT_FLAG_AIR ~= 0 then
@@ -381,6 +379,7 @@ ACT_SQUISHY_SWIM_ATTACK = allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_S
 ACT_SQUISHY_WALL_KICK_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_SIDE_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_LEDGE_GRAB = allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
+ACT_SQUISHY_TRICK = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 
 local function act_squishy_walking(m)
     local startPos = {x = 0, y = 0, z = 0}
@@ -539,7 +538,6 @@ local function act_squishy_long_jump(m)
     end
     m.vel.y = m.vel.y + 2
     common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_CHECK_LEDGE_GRAB)
-    squishy_allow_midair_spin(m)
     update_omm_air_rotation(m)
     e.gfxAnimX = e.gfxAnimX * 0.8
     m.marioObj.header.gfx.angle.x = e.gfxAnimX
@@ -768,7 +766,6 @@ local function act_squishy_ground_pound_jump(m)
     local e = gSquishyExtraStates[m.playerIndex]
     common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_CHECK_LEDGE_GRAB)
     update_omm_air_rotation(m)
-    squishy_allow_midair_spin(m)
     squishy_allow_spin_jump(m)
     if m.actionTimer == 1 then
         play_character_sound(m, CHAR_SOUND_YAHOO_WAHA_YIPPEE)
@@ -1124,6 +1121,79 @@ local function act_squishy_ledge_grab(m)
     return 0;
 end
 
+local function act_squishy_trick(m)
+    local e = gSquishyExtraStates[m.playerIndex]
+    if m.actionTimer == 0 then
+        -- Reset Anim Stuffs
+        e.gfxAnimX = 0
+        e.gfxAnimY = 0
+        e.gfxAnimZ = 0
+        m.faceAngle.x = 0
+        m.faceAngle.z = 0
+        m.marioObj.header.gfx.animInfo.animID = -1
+
+        e.trickCount = e.trickCount + 1
+        if omm_moveset_enabled(m) then
+            m.vel.y = math.max(m.vel.y, 0)
+        end
+        m.actionArg = math.random(1, 4)
+        if m.actionArg == 1 then
+            e.trickAnim = MARIO_ANIM_DOUBLE_JUMP_RISE
+            e.gfxAnimY = 0xFFFF*2
+        end
+        if m.actionArg == 2 then
+            e.trickAnim = MARIO_ANIM_BREAKDANCE
+            e.gfxAnimY = 0xFFFF
+        end
+        if m.actionArg == 3 then
+            e.trickAnim = MARIO_ANIM_BACKFLIP
+        end
+        if m.actionArg == 4 then
+            e.trickAnim = MARIO_ANIM_TWIRL
+            e.gfxAnimY = 0xFFFF*3
+        end
+
+        play_sound(SOUND_GENERAL_GRAND_STAR_JUMP, m.marioObj.header.gfx.cameraToObject)
+    end
+    m.vel.y = m.vel.y + 2/e.trickCount
+
+    if m.pos.y <= m.floorHeight and m.actionTimer < 15 then
+        set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
+    end
+
+    update_air_without_turn(m);
+
+    local step = perform_air_step(m, AIR_STEP_CHECK_LEDGE_GRAB)
+    if step == AIR_STEP_LANDED then
+        if m.pos.y <= m.floorHeight and m.actionTimer < 10 then
+            set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
+        else
+            set_mario_action(m, ACT_FREEFALL_LAND, 0)
+        end
+    end
+    set_mario_animation(m, e.trickAnim)
+    update_omm_air_rotation(m)
+
+    e.gfxAnimX = e.gfxAnimX*0.9
+    e.gfxAnimY = e.gfxAnimY*0.9
+    e.gfxAnimZ = e.gfxAnimZ*0.9
+    
+    m.marioObj.header.gfx.angle.x = m.faceAngle.x + e.gfxAnimX
+    m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfxAnimY
+    m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfxAnimZ
+    
+    m.actionTimer = m.actionTimer + 1
+    if m.actionTimer < 8 then
+        set_mario_particle_flags(m, PARTICLE_SPARKLES, 0)
+    end
+    if m.actionTimer > 8 and m.input & INPUT_A_PRESSED ~= 0 then
+        set_mario_action(m, ACT_SQUISHY_TRICK, 0)
+    end
+    if m.actionTimer > 15 then
+        set_mario_action(m, ACT_FREEFALL, 0)
+    end
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1143,6 +1213,7 @@ hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attac
 hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, {every_frame = act_squishy_wall_kick_air})
 hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
+hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
 
 -------------------------
 -- Object Interactions --
@@ -1453,12 +1524,33 @@ local hitActs = {
     [ACT_SOFT_BACKWARD_GROUND_KB] = true,
 }
 
+local trickBlacklist = {
+    [ACT_SQUISHY_TRICK] = true,
+    [ACT_SQUISHY_GROUND_POUND] = true,
+}
+
 local function squishy_update(m)
     local e = gSquishyExtraStates[m.playerIndex]
+
+    -- Global Action Timer 
+    e.actionTick = e.actionTick + 1
+    if e.prevFrameAction ~= m.action then
+        e.prevFrameAction = m.action
+        e.actionTick = 0
+    end
+    add_debug_display(m, "Action Tick: " .. (e.actionTick))
+
     e.panicking = false
     if m.action & ACT_FLAG_AIR == 0 then
         e.groundpoundCancels = 0
+        m.forwardVel = m.forwardVel + clamp(e.trickCount*10, 0, 70)
+        e.trickCount = 0
+    elseif e.actionTick > 3 and m.input & INPUT_A_PRESSED ~= 0 and not trickBlacklist[m.action] then
+        set_mario_action(m, ACT_SQUISHY_TRICK, 0)
     end
+    add_debug_display(m, "Tricks: " .. (e.trickCount))
+
+
     m.vel.y = m.vel.y - math.max(e.groundpoundCancels - 1, 0)*0.6
 
     if (m.action == ACT_SQUISHY_LONG_JUMP or m.action == ACT_SQUISHY_DIVE) and m.input & INPUT_Z_PRESSED ~= 0 then
@@ -1560,6 +1652,9 @@ local function squishy_before_action(m, nextAct)
         end
         if nextAct == ACT_OMM_ROLL then
             return set_mario_action(m, ACT_SQUISHY_SLIDE, 2)
+        end
+        if nextAct == ACT_OMM_MIDAIR_SPIN then
+            return set_mario_action(m, ACT_SQUISHY_TRICK, 2)
         end
     end
     if nextAct == ACT_CROUCH_SLIDE then

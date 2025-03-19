@@ -338,7 +338,7 @@ local function camera_update()
         local angle = camAngleRaw
         local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngleRaw)*m.forwardVel/150)*0x800)
         if not camSwitch then
-            if m.action & ACT_FLAG_SWIMMING_OR_FLYING ~= 0 and m.action ~= ACT_TWIRLING and m.action ~= ACT_TWIRL_LAND then
+            if m.action == ACT_FLYING then
                 angle = m.faceAngle.y - 0x8000
                 if m.controller.buttonDown & L_CBUTTONS ~= 0 then
                     angle = angle - 0x2000
@@ -475,7 +475,7 @@ end
 ---@param m MarioState
 local function input_update(m)
     if m.playerIndex ~= 0 then return end
-    if doodell_cam_active() and gLakituState.mode == CAMERA_MODE_NONE and m.action & ACT_FLAG_SWIMMING_OR_FLYING == 0 and gLakituState.mode == CAMERA_MODE_NONE then
+    if doodell_cam_active() and m.action ~= ACT_FLYING and gLakituState.mode == CAMERA_MODE_NONE then
         local camAngle = camAngle
         local intAngle = m.intendedYaw - camAngle
         if (intAngle > 0x3000 and intAngle < 0x5000) or (intAngle > -0x3000 and intAngle < -0x5000) then
