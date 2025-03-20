@@ -1123,7 +1123,6 @@ end
 
 local function act_squishy_trick(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    local burning = update_spam_burnout(m) ~= 0
     if m.actionTimer == 0 then
         -- Reset Anim Stuffs
         e.gfxAnimX = 0
@@ -1137,36 +1136,25 @@ local function act_squishy_trick(m)
         if omm_moveset_enabled(m) then
             m.vel.y = math.max(m.vel.y, 0)
         end
-        if not burning then
-            m.actionArg = math.random(1, 5)
-            if m.actionArg == 1 then
-                e.trickAnim = MARIO_ANIM_DOUBLE_JUMP_RISE
-                e.gfxAnimY = 0xFFFF*2
-            end
-            if m.actionArg == 2 then
-                e.trickAnim = MARIO_ANIM_BREAKDANCE
-                e.gfxAnimY = 0xFFFF
-            end
-            if m.actionArg == 3 then
-                e.trickAnim = MARIO_ANIM_BACKFLIP
-            end
-            if m.actionArg == 4 then
-                e.trickAnim = MARIO_ANIM_TWIRL
-                e.gfxAnimY = 0xFFFF*3
-            end
-            if m.actionArg == 5 then
-                e.trickAnim = SQUISHY_ANIM_TRICK_SONIC
-                e.gfxAnimX = -0xFFFF*1
-            end
-        else
-            m.actionArg = math.random(1, 2)
-            e.trickAnim = MARIO_ANIM_FIRE_LAVA_BURN
-            if m.actionArg == 1 then
-                e.gfxAnimY = 0xFFFF*2
-            end
-            if m.actionArg == 2 then
-                e.gfxAnimY = -0xFFFF*2
-            end
+        m.actionArg = math.random(1, 5)
+        if m.actionArg == 1 then
+            e.trickAnim = MARIO_ANIM_DOUBLE_JUMP_RISE
+            e.gfxAnimY = 0xFFFF*2
+        end
+        if m.actionArg == 2 then
+            e.trickAnim = MARIO_ANIM_BREAKDANCE
+            e.gfxAnimY = 0xFFFF
+        end
+        if m.actionArg == 3 then
+            e.trickAnim = MARIO_ANIM_BACKFLIP
+        end
+        if m.actionArg == 4 then
+            e.trickAnim = MARIO_ANIM_TWIRL
+            e.gfxAnimY = 0xFFFF*3
+        end
+        if m.actionArg == 5 then
+            e.trickAnim = SQUISHY_ANIM_TRICK_SONIC
+            e.gfxAnimX = -0xFFFF*1
         end
 
         play_sound(SOUND_GENERAL_GRAND_STAR_JUMP, m.marioObj.header.gfx.cameraToObject)
@@ -1174,24 +1162,17 @@ local function act_squishy_trick(m)
     m.vel.y = m.vel.y + 2/e.trickCount
 
     update_air_without_turn(m);
-    if burning then
-        m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
-    end
 
     local step = perform_air_step(m, AIR_STEP_NONE)
     if step == AIR_STEP_LANDED then
         if m.actionTimer < 10 then
             set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
         else
-            if not burning then
-                set_mario_action(m, ACT_FREEFALL_LAND, 0)
-            else
-                set_mario_action(m, ACT_SQUISHY_FIRE_BURN, 0)
-            end
+            set_mario_action(m, ACT_FREEFALL_LAND, 0)
         end
     end
     if type(e.trickAnim) == "string" then
-        smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_TRICK_SONIC)
+        smlua_anim_util_set_animation(m.marioObj, e.trickAnim)
     else
         set_mario_animation(m, e.trickAnim)
     end
@@ -1213,11 +1194,7 @@ local function act_squishy_trick(m)
         set_mario_action(m, ACT_SQUISHY_TRICK, 0)
     end
     if m.actionTimer > 15 then
-        if not burning then
-            set_mario_action(m, ACT_FREEFALL, 0)
-        else
-            set_mario_action(m, ACT_SQUISHY_FIRE_BURN, 0)
-        end
+        set_mario_action(m, ACT_FREEFALL, 0)
     end
 end
 
@@ -1554,6 +1531,8 @@ local hitActs = {
 local trickBlacklist = {
     [ACT_SQUISHY_TRICK] = true,
     [ACT_SQUISHY_GROUND_POUND] = true,
+    [ACT_SQUISHY_FIRE_BURN] = true,
+    [ACT_FLYING] = true,
 }
 
 local function squishy_update(m)
