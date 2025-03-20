@@ -1136,7 +1136,7 @@ local function act_squishy_trick(m)
         if omm_moveset_enabled(m) then
             m.vel.y = math.max(m.vel.y, 0)
         end
-        m.actionArg = math.random(1, 5)
+        m.actionArg = math.random(1, 6)
         if m.actionArg == 1 then
             e.trickAnim = MARIO_ANIM_DOUBLE_JUMP_RISE
             e.gfxAnimY = 0xFFFF*2
@@ -1155,6 +1155,10 @@ local function act_squishy_trick(m)
         if m.actionArg == 5 then
             e.trickAnim = SQUISHY_ANIM_TRICK_SONIC
             e.gfxAnimX = -0xFFFF*1
+        end
+        if m.actionArg == 6 then
+            e.trickAnim = SQUISHY_ANIM_TRICK_GLEE_CO
+            e.gfxAnimY = -0xFFFF*1
         end
 
         play_sound(SOUND_GENERAL_GRAND_STAR_JUMP, m.marioObj.header.gfx.cameraToObject)
