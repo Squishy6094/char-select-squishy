@@ -1121,8 +1121,19 @@ local function act_squishy_ledge_grab(m)
     return 0;
 end
 
+local trickAnims = {
+    [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = 0xFFFF*2},
+    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = 0xFFFF*2},
+    {anim = MARIO_ANIM_BREAKDANCE,       faceAngleY = 0xFFFF},
+    {anim = MARIO_ANIM_BACKFLIP},
+    {anim = MARIO_ANIM_TWIRL,            faceAngleY = 0xFFFF*3},
+    {anim = SQUISHY_ANIM_TRICK_SONIC,    faceAngleX = -0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,  faceAngleY = -0xFFFF*1},
+}
+
 local function act_squishy_trick(m)
     local e = gSquishyExtraStates[m.playerIndex]
+    local index = network_global_index_from_local(m.playerIndex)
     if m.actionTimer == 0 then
         -- Reset Anim Stuffs
         e.gfxAnimX = 0
@@ -1132,34 +1143,19 @@ local function act_squishy_trick(m)
         m.faceAngle.z = 0
         m.marioObj.header.gfx.animInfo.animID = -1
 
+       
+
         e.trickCount = e.trickCount + 1
         if omm_moveset_enabled(m) then
             m.vel.y = math.max(m.vel.y, 0)
         end
-        m.actionArg = math.random(1, 6)
-        if m.actionArg == 1 then
-            e.trickAnim = MARIO_ANIM_DOUBLE_JUMP_RISE
-            e.gfxAnimY = 0xFFFF*2
-        end
-        if m.actionArg == 2 then
-            e.trickAnim = MARIO_ANIM_BREAKDANCE
-            e.gfxAnimY = 0xFFFF
-        end
-        if m.actionArg == 3 then
-            e.trickAnim = MARIO_ANIM_BACKFLIP
-        end
-        if m.actionArg == 4 then
-            e.trickAnim = MARIO_ANIM_TWIRL
-            e.gfxAnimY = 0xFFFF*3
-        end
-        if m.actionArg == 5 then
-            e.trickAnim = SQUISHY_ANIM_TRICK_SONIC
-            e.gfxAnimX = -0xFFFF*1
-        end
-        if m.actionArg == 6 then
-            e.trickAnim = SQUISHY_ANIM_TRICK_GLEE_CO
-            e.gfxAnimY = -0xFFFF*1
-        end
+        math.randomseed(index*9999 + get_global_timer())
+        m.actionArg = math.random(1, #trickAnims)
+        local trickData = trickAnims[m.actionArg]
+        e.trickAnim = trickData.anim and trickData.anim or MARIO_ANIM_DOUBLE_JUMP_RISE
+        e.gfxAnimY = trickData.faceAngleY and trickData.faceAngleY or 0
+        e.gfxAnimX = trickData.faceAngleX and trickData.faceAngleX or 0
+        e.gfxAnimZ = trickData.faceAngleZ and trickData.faceAngleZ or 0
 
         play_sound(SOUND_GENERAL_GRAND_STAR_JUMP, m.marioObj.header.gfx.cameraToObject)
     end
@@ -1190,7 +1186,9 @@ local function act_squishy_trick(m)
     m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfxAnimY
     m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfxAnimZ
     
-    m.actionTimer = m.actionTimer + 1
+    if m.actionArg ~= 0 then
+        m.actionTimer = m.actionTimer + 1
+    end
     if m.actionTimer < 8 then
         set_mario_particle_flags(m, PARTICLE_SPARKLES, 0)
     end
