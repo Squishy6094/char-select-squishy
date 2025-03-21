@@ -1172,7 +1172,9 @@ local function act_squishy_trick(m)
             m.vel.y = math.max(m.vel.y, 0)
         end
         --math.randomseed(index*9999 + get_global_timer())
-        m.actionArg = math.random(1, #trickAnims)
+        if m.playerIndex == 0 then
+            m.actionArg = math.random(1, #trickAnims)
+        end
         local trickData = trickAnims[m.actionArg]
         e.trickAnim = trickData.anim and trickData.anim or MARIO_ANIM_DOUBLE_JUMP_RISE
         e.gfxAnimY = trickData.faceAngleY and trickData.faceAngleY or 0
@@ -1936,12 +1938,12 @@ end
 id_bhvCustomMips = hook_behavior(id_bhvMips, OBJ_LIST_PUSHABLE, false, nil, bhv_custom_mips_loop)
 ]]
 
-local stallPacket = 0
+--local stallPacket = 0
 local function update()
-    stallPacket = (stallPacket+1)%3 -- refresh rate (to reduce stress)
-    if stallPacket == 0 then
+    --stallPacket = (stallPacket+1)%3 -- refresh rate (to reduce stress)
+    --if stallPacket == 0 then
         network_send(false, gSquishyExtraStates[0])
-    end
+    --end
 end
 
 local function on_packet_recieve(data)
