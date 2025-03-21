@@ -1123,24 +1123,23 @@ end
 
 local trickSpin = 0x10000
 local trickAnims = {
-    [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = trickSpin*2},
-    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   faceAngleY =  trickSpin*2},
-    {anim = MARIO_ANIM_BREAKDANCE,         faceAngleY =  trickSpin},
-    {anim = MARIO_ANIM_BACKFLIP},
-    {anim = MARIO_ANIM_TWIRL,              faceAngleY =  trickSpin*3},
-    {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   faceAngleY =  trickSpin*1},
-
-    {anim = SQUISHY_ANIM_TRICK_SONIC,      faceAngleX = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   faceAngleY =  trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, faceAngleY =  trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_HOTLINE,    faceAngleX =  trickSpin*1.5},
-    {anim = SQUISHY_ANIM_TRICK_MIKU,       faceAngleY = -trickSpin*2},
-    {anim = SQUISHY_ANIM_TRICK_TEMPRR,     faceAngleY =  trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_SURGE,      faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_TETO,       faceAngleY = -trickSpin*1},
+    [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, name = "Spin", faceAngleY = trickSpin*2}, -- Failsafe Anim
+    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2},
+    {anim = MARIO_ANIM_BREAKDANCE,         name = "Breakdance",      faceAngleY =  trickSpin},
+    {anim = MARIO_ANIM_BACKFLIP},          name = "Backflip",
+    {anim = MARIO_ANIM_TWIRL,              name = "Twirl",           faceAngleY =  trickSpin*3},
+    {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   name = "nil",             faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_SONIC,      name = "Adventure",       faceAngleX = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    name = "Glee Co.",        faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   name = "Mic Spin",        faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   name = "Speaker Spin",    faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, name = "Uzi Spin",        faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, name = "Knife Spin",      faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_HOTLINE,    name = "Hotline",         faceAngleX =  trickSpin*1.5},
+    {anim = SQUISHY_ANIM_TRICK_MIKU,       name = "AKAGE",           faceAngleY = -trickSpin*2},
+    {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "PUSH UR TEMPRR",  faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric Tenrec", faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Teto",            faceAngleY = -trickSpin*1},
 }
 
 local trickSounds = {
@@ -1181,6 +1180,7 @@ local function act_squishy_trick(m)
 
         audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, 1)
     end
+    add_debug_display(m, trickAnims[m.actionArg].name .. " - " .. m.actionArg)
     m.vel.y = m.vel.y + 2.5/e.trickCount
 
     update_air_without_turn(m);
