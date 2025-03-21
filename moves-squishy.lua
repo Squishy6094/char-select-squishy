@@ -8,6 +8,7 @@ gGlobalSyncTable.squishySpeedMult = 1
 gSquishyExtraStates = {}
 for i = 0, MAX_PLAYERS - 1 do
     gSquishyExtraStates[i] = {
+        index = network_global_index_from_local(i),
         forwardVelStore = 0,
         yVelStore = 0,
         groundPoundJump = true,
@@ -1126,7 +1127,7 @@ local trickAnims = {
     [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, name = "Spin", faceAngleY = trickSpin*2}, -- Failsafe Anim
     {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2},
     {anim = MARIO_ANIM_BREAKDANCE,         name = "Breakdance",      faceAngleY =  trickSpin},
-    {anim = MARIO_ANIM_BACKFLIP},          name = "Backflip",
+    {anim = MARIO_ANIM_BACKFLIP,          name = "Backflip"},
     {anim = MARIO_ANIM_TWIRL,              name = "Twirl",           faceAngleY =  trickSpin*3},
     {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   name = "nil",             faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SONIC,      name = "Adventure",       faceAngleX = -trickSpin*1},
@@ -1180,7 +1181,7 @@ local function act_squishy_trick(m)
 
         audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, 1)
     end
-    add_debug_display(m, trickAnims[m.actionArg].name .. " - " .. m.actionArg)
+    add_debug_display(m, (trickAnims[m.actionArg].name and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
     m.vel.y = m.vel.y + 2.5/e.trickCount
 
     update_air_without_turn(m);
@@ -1934,3 +1935,19 @@ end
 -- hook the behavior
 id_bhvCustomMips = hook_behavior(id_bhvMips, OBJ_LIST_PUSHABLE, false, nil, bhv_custom_mips_loop)
 ]]
+
+local stallPacket = 0
+local function update()
+    stallPacket = (stallPacket+1)%3 -- refresh rate (to reduce stress)
+    if stallPacket == 0 then
+        network_send(false, gSquishyExtraStates[0])
+    end
+end
+
+local function on_packet_recieve(data)
+    local index = network_local_index_from_global(data.index)
+    gSquishyExtraStates[index] = data
+end
+
+hook_event(HOOK_ON_PACKET_RECEIVE, on_packet_recieve)
+hook_event(HOOK_UPDATE, update)

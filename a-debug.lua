@@ -47,7 +47,6 @@ local function render_squishy_debug()
         clear_debug()
         return
     end
-    djui_chat_message_create(tostring(get_debug_enabled()))
     djui_hud_set_resolution(RESOLUTION_N64)
     djui_hud_set_color(0, 0, 0, 150)
     local measure = 0
