@@ -1,7 +1,7 @@
 if not _G.charSelectExists then return end
 
 local function get_debug_enabled()
-    return _G.charSelect.get_option(_G.charSelect.optionTableRef.debugInfo) ~= 0
+    return _G.charSelect.get_options_status(_G.charSelect.optionTableRef.debugInfo) ~= 0
 end
 
 local debugLines = {"Squishy Debugging:"}
@@ -43,10 +43,11 @@ local y = 40
 local scale = 0.3
 local spacing = 9
 local function render_squishy_debug()
-    if not get_debug_enabled() and #debugLines <= 1 then
+    if not get_debug_enabled() or #debugLines <= 1 then
         clear_debug()
         return
     end
+    djui_chat_message_create(tostring(get_debug_enabled()))
     djui_hud_set_resolution(RESOLUTION_N64)
     djui_hud_set_color(0, 0, 0, 150)
     local measure = 0
