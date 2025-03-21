@@ -1123,12 +1123,18 @@ end
 
 local trickAnims = {
     [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = 0xFFFF*2},
-    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = 0xFFFF*2},
-    {anim = MARIO_ANIM_BREAKDANCE,       faceAngleY = 0xFFFF},
+    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   faceAngleY =  0xFFFF*2},
+    {anim = MARIO_ANIM_BREAKDANCE,         faceAngleY =  0xFFFF},
     {anim = MARIO_ANIM_BACKFLIP},
-    {anim = MARIO_ANIM_TWIRL,            faceAngleY = 0xFFFF*3},
-    {anim = SQUISHY_ANIM_TRICK_SONIC,    faceAngleX = -0xFFFF*1},
-    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,  faceAngleY = -0xFFFF*1},
+    {anim = MARIO_ANIM_TWIRL,              faceAngleY =  0xFFFF*3},
+    {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   faceAngleY =  0xFFFF*1},
+
+    {anim = SQUISHY_ANIM_TRICK_SONIC,      faceAngleX = -0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    faceAngleY = -0xFFFF*1},
+    --{anim = SQUISHY_ANIM_TRICK_BF_STYLE,   faceAngleY =  0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   faceAngleY = -0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, faceAngleY =  0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, faceAngleY = -0xFFFF*1},
 }
 
 local function act_squishy_trick(m)
@@ -1142,8 +1148,6 @@ local function act_squishy_trick(m)
         m.faceAngle.x = 0
         m.faceAngle.z = 0
         m.marioObj.header.gfx.animInfo.animID = -1
-
-       
 
         e.trickCount = e.trickCount + 1
         if omm_moveset_enabled(m) then
