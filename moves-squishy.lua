@@ -1131,11 +1131,23 @@ local trickAnims = {
 
     {anim = SQUISHY_ANIM_TRICK_SONIC,      faceAngleX = -0xFFFF*1},
     {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    faceAngleY = -0xFFFF*1},
-    --{anim = SQUISHY_ANIM_TRICK_BF_STYLE,   faceAngleY =  0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   faceAngleY =  0xFFFF*1},
     {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   faceAngleY = -0xFFFF*1},
     {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, faceAngleY =  0xFFFF*1},
     {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, faceAngleY = -0xFFFF*1},
 }
+
+local trickSounds = {
+    [1] = audio_sample_load("trick1.ogg"),
+    [2] = audio_sample_load("trick2.ogg"),
+    [3] = audio_sample_load("trick3.ogg"),
+    [4] = audio_sample_load("trick4.ogg"),
+    [5] = audio_sample_load("trick5.ogg"),
+    [6] = audio_sample_load("trick6.ogg"),
+}
+local SOUND_TRICK_BAD = audio_sample_load("trickResultB.ogg")
+local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
+local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
 
 local function act_squishy_trick(m)
     local e = gSquishyExtraStates[m.playerIndex]
@@ -1153,7 +1165,7 @@ local function act_squishy_trick(m)
         if omm_moveset_enabled(m) then
             m.vel.y = math.max(m.vel.y, 0)
         end
-        math.randomseed(index*9999 + get_global_timer())
+        --math.randomseed(index*9999 + get_global_timer())
         m.actionArg = math.random(1, #trickAnims)
         local trickData = trickAnims[m.actionArg]
         e.trickAnim = trickData.anim and trickData.anim or MARIO_ANIM_DOUBLE_JUMP_RISE
@@ -1161,15 +1173,17 @@ local function act_squishy_trick(m)
         e.gfxAnimX = trickData.faceAngleX and trickData.faceAngleX or 0
         e.gfxAnimZ = trickData.faceAngleZ and trickData.faceAngleZ or 0
 
-        play_sound(SOUND_GENERAL_GRAND_STAR_JUMP, m.marioObj.header.gfx.cameraToObject)
+        audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, 1)
     end
-    m.vel.y = m.vel.y + 2/e.trickCount
+    m.vel.y = m.vel.y + 2.5/e.trickCount
 
     update_air_without_turn(m);
 
     local step = perform_air_step(m, AIR_STEP_NONE)
     if step == AIR_STEP_LANDED then
         if m.actionTimer < 10 then
+            e.trickCount = 0
+            audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
             set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
         else
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
@@ -1553,11 +1567,12 @@ local function squishy_update(m)
     add_debug_display(m, "Action Tick: " .. (e.actionTick))
 
     e.panicking = false
-    if m.action & ACT_FLAG_AIR == 0 then
+    if m.action & ACT_FLAG_AIR == 0 and e.trickCount > 0 then
         e.groundpoundCancels = 0
         m.forwardVel = m.forwardVel + clamp(e.trickCount*10, 0, 70)
+        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, 1)
         e.trickCount = 0
-    elseif e.actionTick > 3 and m.input & INPUT_A_PRESSED ~= 0 and not trickBlacklist[m.action] then
+    elseif e.actionTick > 3 and m.input & INPUT_A_PRESSED ~= 0 and not trickBlacklist[m.action] and not hitActs[m.action] then
         set_mario_action(m, ACT_SQUISHY_TRICK, 0)
     end
     add_debug_display(m, "Tricks: " .. (e.trickCount))
