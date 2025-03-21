@@ -1121,20 +1121,26 @@ local function act_squishy_ledge_grab(m)
     return 0;
 end
 
+local trickSpin = 0x10000
 local trickAnims = {
-    [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = 0xFFFF*2},
-    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   faceAngleY =  0xFFFF*2},
-    {anim = MARIO_ANIM_BREAKDANCE,         faceAngleY =  0xFFFF},
+    [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, faceAngleY = trickSpin*2},
+    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   faceAngleY =  trickSpin*2},
+    {anim = MARIO_ANIM_BREAKDANCE,         faceAngleY =  trickSpin},
     {anim = MARIO_ANIM_BACKFLIP},
-    {anim = MARIO_ANIM_TWIRL,              faceAngleY =  0xFFFF*3},
-    {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   faceAngleY =  0xFFFF*1},
+    {anim = MARIO_ANIM_TWIRL,              faceAngleY =  trickSpin*3},
+    {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   faceAngleY =  trickSpin*1},
 
-    {anim = SQUISHY_ANIM_TRICK_SONIC,      faceAngleX = -0xFFFF*1},
-    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    faceAngleY = -0xFFFF*1},
-    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   faceAngleY =  0xFFFF*1},
-    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   faceAngleY = -0xFFFF*1},
-    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, faceAngleY =  0xFFFF*1},
-    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, faceAngleY = -0xFFFF*1},
+    {anim = SQUISHY_ANIM_TRICK_SONIC,      faceAngleX = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_HOTLINE,    faceAngleX =  trickSpin*1.5},
+    {anim = SQUISHY_ANIM_TRICK_MIKU,       faceAngleY = -trickSpin*2},
+    {anim = SQUISHY_ANIM_TRICK_TEMPRR,     faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_SURGE,      faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_TETO,       faceAngleY = -trickSpin*1},
 }
 
 local trickSounds = {
@@ -1546,6 +1552,11 @@ local hitActs = {
     [ACT_HARD_BACKWARD_GROUND_KB] = true,
     [ACT_SOFT_FORWARD_GROUND_KB] = true,
     [ACT_SOFT_BACKWARD_GROUND_KB] = true,
+    [ACT_DEATH_EXIT] = true,
+    [ACT_DEATH_EXIT_LAND] = true,
+    [ACT_UNUSED_DEATH_EXIT] = true,
+    [ACT_FALLING_DEATH_EXIT] = true,
+    [ACT_SPECIAL_DEATH_EXIT] = true,
 }
 
 local trickBlacklist = {
@@ -1567,10 +1578,15 @@ local function squishy_update(m)
     add_debug_display(m, "Action Tick: " .. (e.actionTick))
 
     e.panicking = false
-    if m.action & ACT_FLAG_AIR == 0 and e.trickCount > 0 then
+    if m.action & ACT_FLAG_AIR == 0 then
         e.groundpoundCancels = 0
-        m.forwardVel = m.forwardVel + clamp(e.trickCount*10, 0, 70)
-        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, 1)
+        if e.trickCount > 0 then
+            m.forwardVel = m.forwardVel + clamp(e.trickCount*10, 0, 70)
+            audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, 1)
+            e.trickCount = 0
+        end
+    elseif e.trickCount > 0 and hitActs[m.action] then
+        audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
         e.trickCount = 0
     elseif e.actionTick > 3 and m.input & INPUT_A_PRESSED ~= 0 and not trickBlacklist[m.action] and not hitActs[m.action] then
         set_mario_action(m, ACT_SQUISHY_TRICK, 0)
