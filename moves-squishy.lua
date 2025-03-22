@@ -1272,6 +1272,10 @@ hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
 hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
 
+if _G.doorBust then
+    _G.doorBust.add_door_bust_action(ACT_SQUISHY_SLIDE)
+end
+
 -------------------------
 -- Object Interactions --
 -------------------------
