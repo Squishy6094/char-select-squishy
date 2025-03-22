@@ -1127,20 +1127,20 @@ local trickAnims = {
     [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, name = "Spin", faceAngleY = trickSpin*2}, -- Failsafe Anim
     {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2},
     {anim = MARIO_ANIM_BREAKDANCE,         name = "Breakdance",      faceAngleY =  trickSpin},
-    {anim = MARIO_ANIM_BACKFLIP,          name = "Backflip"},
+    {anim = MARIO_ANIM_BACKFLIP,           name = "Backflip"},
     {anim = MARIO_ANIM_TWIRL,              name = "Twirl",           faceAngleY =  trickSpin*3},
     {anim = MARIO_ANIM_IDLE_HEAD_CENTER,   name = "nil",             faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SONIC,      name = "Adventure",       faceAngleX = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_GLEE_CO,    name = "Glee Co.",        faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   name = "Mic Spin",        faceAngleY =  trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   name = "Speaker Spin",    faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, name = "Uzi Spin",        faceAngleY =  trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, name = "Knife Spin",      faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_BF_STYLE,   name = "Mic",             faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   name = "Speaker",         faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, name = "Uzi",             faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, name = "Knife",           faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_HOTLINE,    name = "Hotline",         faceAngleX =  trickSpin*1.5},
     {anim = SQUISHY_ANIM_TRICK_MIKU,       name = "AKAGE",           faceAngleY = -trickSpin*2},
-    {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "PUSH UR TEMPRR",  faceAngleY =  trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric Tenrec", faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Teto",            faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "TEMPRR",          faceAngleY =  trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric",        faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
 }
 
 local trickSounds = {
@@ -1151,6 +1151,7 @@ local trickSounds = {
     [5] = audio_sample_load("trick5.ogg"),
     [6] = audio_sample_load("trick6.ogg"),
 }
+
 local SOUND_TRICK_BAD = audio_sample_load("trickResultB.ogg")
 local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
 local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
@@ -1808,13 +1809,9 @@ end
 
 local function hud_render()
     djui_hud_set_resolution(RESOLUTION_N64)
-
     for i = 0, MAX_PLAYERS - 1 do
         local m = gMarioStates[i]
         local e = gSquishyExtraStates[i]
-
-        local width = djui_hud_get_screen_width()
-        local height = djui_hud_get_screen_height()
 
         local burning = update_spam_burnout(m)/spamBurnoutMax
         if burning > 0 then
@@ -1828,6 +1825,133 @@ local function hud_render()
             djui_hud_render_rect(pos.x + 1, pos.y + 1, 4, 23*burning)
         end
     end
+end
+
+local trickPrefixes = {
+    "",
+    "Bi",
+    "Tri",
+    "Quadri",
+    "Quinque",
+    "Sexa",
+    "Septi",
+    "Octo",
+    "Novem",
+    "Dec",
+    "Fucki",
+}
+
+
+local rainbowColor = { r = 255, g = 0, b = 0 }
+local rainbowState = 0
+local function djui_hud_set_trick_color(a, speed)
+    if speed == nil then speed = 1 end
+    if rainbowState == 0 then
+        rainbowColor.r = rainbowColor.r + speed
+        if rainbowColor.r >= 255 then rainbowState = 1 end
+    elseif rainbowState == 1 then
+        rainbowColor.b = rainbowColor.b - speed
+        if rainbowColor.b <= 0 then rainbowState = 2 end
+    elseif rainbowState == 2 then
+        rainbowColor.g = rainbowColor.g + speed
+        if rainbowColor.g >= 255 then rainbowState = 3 end
+    elseif rainbowState == 3 then
+        rainbowColor.r = rainbowColor.r - speed
+        if rainbowColor.r <= 0 then rainbowState = 4 end
+    elseif rainbowState == 4 then
+        rainbowColor.b = rainbowColor.b + speed
+        if rainbowColor.b >= 255 then rainbowState = 5 end
+    elseif rainbowState == 5 then
+        rainbowColor.g = rainbowColor.g - speed
+        if rainbowColor.g <= 0 then rainbowState = 0 end
+    end
+    rainbowColor.r = clamp(rainbowColor.r, 0, 255)
+    rainbowColor.g = clamp(rainbowColor.g, 0, 255)
+    rainbowColor.b = clamp(rainbowColor.b, 0, 255)
+    return djui_hud_set_color(rainbowColor.r*0.5 + 127, rainbowColor.g*0.5 + 127, rainbowColor.b*0.5 + 127, a)
+end
+
+local trickTextY = 0
+local trickTextVel = 0
+local prevTrickCount = 0
+local trickList = {}
+local trickName = ""
+local trickScore = 0
+local opacity = 0
+local function hud_render_moveset()
+    djui_hud_set_resolution(RESOLUTION_N64)
+    local width = djui_hud_get_screen_width()
+    local height = djui_hud_get_screen_height()
+    local m = gMarioStates[0]
+    local e = gSquishyExtraStates[0]
+
+    if prevTrickCount < e.trickCount then
+        trickTextVel = 10
+        prevTrickCount = e.trickCount
+    end
+    trickTextY = trickTextY + trickTextVel*0.2
+    trickTextVel = trickTextVel - 2
+    if trickTextY < 0 then
+        trickTextY = 0
+        trickTextVel = 0
+    end
+    if m.action == ACT_SQUISHY_TRICK and m.actionTimer == 1 then
+        local trickDataName = trickAnims[m.actionArg].name
+        local trickListFound = false
+        if e.trickCount == 1 then
+            trickList = {}
+        end
+        if #trickList > 0 then
+            for i = 1, #trickList do
+                if trickList[i].name == trickAnims[m.actionArg].name then
+                    trickList[i].count = trickList[i].count + 1
+                    trickListFound = true
+                end
+            end
+        end
+        if not trickListFound then
+            table.insert(trickList, {name = trickDataName, count = 1})
+        end
+        trickName = ""
+        for i = 1, #trickList do
+            local trickData = trickList[i]
+            local prefix = trickPrefixes[clamp(trickData.count, 1, #trickPrefixes)]
+            trickName = trickName .. (prefix ~= "" and prefix .. "-" or "") .. trickData.name .. " "
+        end
+        trickName = trickName .. "Trick"
+    end
+    if e.trickCount == 0 then
+        if prevTrickCount ~= e.trickCount then
+            if m.action == ACT_FORWARD_GROUND_KB then
+                trickName = "Failed " .. trickName
+                trickScore = trickScore*0.5
+                rainbowColor = { r = 255, g = 0, b = 0 }
+                rainbowState = 0
+            end
+            prevTrickCount = e.trickCount
+        end
+        trickScore = math.floor(math.max(trickScore - 21, 0))
+    else
+        trickScore = e.trickCount*200
+    end
+
+    if trickScore > 0 then
+        opacity = opacity + 20
+    else
+        opacity = opacity - 3
+    end
+    opacity = clamp(opacity, 0, 255)
+
+    djui_hud_set_trick_color(opacity, trickScore/50)
+    djui_hud_set_font(FONT_RECOLOR_HUD)
+    local trickNameLength = djui_hud_measure_text(trickName)
+    local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)
+    local x = width*0.5 - trickNameLength*trickTextScale*0.5
+    local y = height - 64 - trickTextY
+    djui_hud_print_text(trickName, x, y + (1 - trickTextScale)*32, trickTextScale)
+
+    local trickScoreText = "SCORE: " .. trickScore
+    djui_hud_print_text(trickScoreText, width*0.5 - djui_hud_measure_text(trickScoreText)*0.5, y + 20, 1)
 end
 
 local function level_init()
@@ -1869,7 +1993,8 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
-    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render_moveset)
+    hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, level_init)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_INTERACT, on_interact)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_INTERACT, allow_interact)
