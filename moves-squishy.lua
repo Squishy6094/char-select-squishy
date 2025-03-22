@@ -140,6 +140,41 @@ local function update_spam_burnout(m, burnTimer)
     end
 end
 
+local OPTION_TRICKSOUNDS = _G.charSelect.add_option("Squishy Trick Sounds", 2, 2, {"Off", "Local Only", "On"}, {"Toggles Squishy's Trick Sounds"}, true)
+
+local trickSounds = {
+    [1] = audio_sample_load("trick1.ogg"),
+    [2] = audio_sample_load("trick2.ogg"),
+    [3] = audio_sample_load("trick3.ogg"),
+    [4] = audio_sample_load("trick4.ogg"),
+    [5] = audio_sample_load("trick5.ogg"),
+    [6] = audio_sample_load("trick6.ogg"),
+}
+
+local SOUND_TRICK_BAD = audio_sample_load("trickResultB.ogg")
+local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
+local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
+
+local function audio_squishy_taunt_sound(m)
+    local e = gSquishyExtraStates[m.playerIndex]
+    soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
+    if soundToggle == 0 then return end
+    if soundToggle == 1 and m.playerIndex ~= 0 then return end
+    audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, 1)
+end
+
+local function audio_squishy_taunt_land(m, failed)
+    local e = gSquishyExtraStates[m.playerIndex]
+    soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
+    if soundToggle == 0 then return end
+    if soundToggle == 1 and m.playerIndex ~= 0 then return end
+    if failed then
+        audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
+    else
+        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, 1)
+    end
+end
+
 ----------------------------------------
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
@@ -611,7 +646,7 @@ local function act_squishy_slide_air(m)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
     if m.actionArg == 0 then
         if m.forwardVel > 30 and mario_is_on_water(m) and (m.flags & MARIO_METAL_CAP == 0) then
-            set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, m.forwardVel*0.25)
+            set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, -100)
             m.forwardVel = m.forwardVel - 2
             m.particleFlags = PARTICLE_SHALLOW_WATER_SPLASH
             m.actionTimer = 0
@@ -1141,20 +1176,8 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "TEMPRR",          faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric",        faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_DOCTOR,       name = "Doctor",      faceAngleY = trickSpin*1},
 }
-
-local trickSounds = {
-    [1] = audio_sample_load("trick1.ogg"),
-    [2] = audio_sample_load("trick2.ogg"),
-    [3] = audio_sample_load("trick3.ogg"),
-    [4] = audio_sample_load("trick4.ogg"),
-    [5] = audio_sample_load("trick5.ogg"),
-    [6] = audio_sample_load("trick6.ogg"),
-}
-
-local SOUND_TRICK_BAD = audio_sample_load("trickResultB.ogg")
-local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
-local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
 
 local function act_squishy_trick(m)
     local e = gSquishyExtraStates[m.playerIndex]
@@ -1182,7 +1205,7 @@ local function act_squishy_trick(m)
         e.gfxAnimX = trickData.faceAngleX and trickData.faceAngleX or 0
         e.gfxAnimZ = trickData.faceAngleZ and trickData.faceAngleZ or 0
 
-        audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, 1)
+        audio_squishy_taunt_sound(m)
     end
     add_debug_display(m, (trickAnims[m.actionArg].name and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
     m.vel.y = m.vel.y + 2.5/e.trickCount
@@ -1193,7 +1216,7 @@ local function act_squishy_trick(m)
     if step == AIR_STEP_LANDED then
         if m.actionTimer < 10 then
             e.trickCount = 0
-            audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
+            audio_squishy_taunt_land(m, true)
             set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
         else
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
@@ -1586,7 +1609,7 @@ local function squishy_update(m)
         e.groundpoundCancels = 0
         if e.trickCount > 0 then
             m.forwardVel = m.forwardVel + clamp(e.trickCount*10, 0, 70)
-            audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, 1)
+            audio_squishy_taunt_land(m)
             e.trickCount = 0
         end
     elseif e.trickCount > 0 and hitActs[m.action] then
