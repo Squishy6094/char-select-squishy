@@ -49,7 +49,7 @@ if not _G.charSelectExists then
     return 0
 end
 
-local E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
+E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
 

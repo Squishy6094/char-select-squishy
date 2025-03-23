@@ -140,43 +140,6 @@ local function update_spam_burnout(m, burnTimer)
     end
 end
 
-local OPTION_TRICKSOUNDS = _G.charSelect.add_option("Squishy Trick Sounds", 2, 2, {"Off", "Local Only", "On"}, {"Toggles Squishy's Trick Sounds"}, true)
-
-local trickSounds = {
-    [1] = audio_sample_load("trick1.ogg"),
-    [2] = audio_sample_load("trick2.ogg"),
-    [3] = audio_sample_load("trick3.ogg"),
-    [4] = audio_sample_load("trick4.ogg"),
-    [5] = audio_sample_load("trick5.ogg"),
-    [6] = audio_sample_load("trick6.ogg"),
-}
-
-local SOUND_TRICK_BAD = audio_sample_load("trickResultB.ogg")
-local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
-local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
-
-local function audio_squishy_taunt_sound(m)
-    if not network_mario_is_in_area(m.playerIndex) then return end
-    local e = gSquishyExtraStates[m.playerIndex]
-    soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
-    if soundToggle == 0 then return end
-    if soundToggle == 1 and m.playerIndex ~= 0 then return end
-    audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, m.playerIndex == 0 and 1 or 0.5)
-end
-
-local function audio_squishy_taunt_land(m, failed)
-    if not network_mario_is_in_area(m.playerIndex) then return end
-    local e = gSquishyExtraStates[m.playerIndex]
-    soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
-    if soundToggle == 0 then return end
-    if soundToggle == 1 and m.playerIndex ~= 0 then return end
-    if failed then
-        audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
-    else
-        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, m.playerIndex == 0 and 1 or 0.5)
-    end
-end
-
 local function set_squishy_particles(m, particle)
     if not network_mario_is_in_area(m.playerIndex) then return end
     m.particleFlags = m.particleFlags | particle
@@ -1185,6 +1148,9 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_DOCTOR,     name = "Doctor",          faceAngleY = trickSpin*1},
 }
+table.insert(trickAnims, {model = E_MODEL_SQUISHY, name = "Poker", faceAngleY = trickSpin*0.5, sound = audio_sample_load("balatro-mult-hit.ogg"), mult = 0})
+local jokerTaunt = #trickAnims
+
 local trickPrefixes = {
     "",
     "Bi",
@@ -1200,7 +1166,8 @@ local trickPrefixes = {
 }
 
 local trickList = {}
-local function squishy_trick_combo_add(m, name)
+local function squishy_trick_combo_add(m, name, mult)
+    if mult == nil then mult = 0 end
     local e = gSquishyExtraStates[m.playerIndex]
     local trickListFound = false
     if e.trickCount == 1 then
@@ -1210,12 +1177,13 @@ local function squishy_trick_combo_add(m, name)
         for i = 1, #trickList do
             if trickList[i].name == name then
                 trickList[i].count = trickList[i].count + 1
+                trickList[i].mult = trickList[i].mult + mult
                 trickListFound = true
             end
         end
     end
     if not trickListFound then
-        table.insert(trickList, {name = name, count = 1})
+        table.insert(trickList, {name = name, count = 1, mult = mult})
     end
 end
 
@@ -1241,7 +1209,6 @@ local function squishy_trick_combo_combine(combine, name)
     if #uniqueFound == #combine then
         for i = 1, #uniqueFound do
             local found = uniqueFound[i]
-            djui_chat_message_create(tostring(found))
             if trickList[found] ~= nil then
                 trickList[found].count = trickList[found].count - 1
                 if trickList[found].count <= 0 then
@@ -1249,7 +1216,7 @@ local function squishy_trick_combo_combine(combine, name)
                 end
             end
         end
-        squishy_trick_combo_add(gMarioStates[0], name)
+        squishy_trick_combo_add(gMarioStates[0], name, 1)
     end
 end
 
@@ -1264,6 +1231,51 @@ local function squishy_trick_combo_get()
         trickName = trickName .. (prefix ~= "" and prefix .. "-" or "") .. trickData.name .. " "
     end
     return trickName .. "Trick"
+end
+
+local function squishy_trick_combo_get_mult()
+    local trickMult = 1
+    for i = 1, #trickList do
+        trickMult = trickMult + trickList[i].mult
+    end
+    return trickMult
+end
+
+local OPTION_TRICKSOUNDS = _G.charSelect.add_option("Squishy Trick Sounds", 2, 2, {"Off", "Local Only", "On"}, {"Toggles Squishy's Trick Sounds"}, true)
+
+local trickSounds = {
+    [1] = audio_sample_load("trick1.ogg"),
+    [2] = audio_sample_load("trick2.ogg"),
+    [3] = audio_sample_load("trick3.ogg"),
+    [4] = audio_sample_load("trick4.ogg"),
+    [5] = audio_sample_load("trick5.ogg"),
+}
+
+local SOUND_TRICK_BAD = audio_sample_load("trickResultB.ogg")
+local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
+local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
+
+local function audio_squishy_taunt_sound(m, sound)
+    if not network_mario_is_in_area(m.playerIndex) then return end
+    local e = gSquishyExtraStates[m.playerIndex]
+    soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
+    if soundToggle == 0 then return end
+    if soundToggle == 1 and m.playerIndex ~= 0 then return end
+    if sound == nil then sound = trickSounds[clamp(e.trickCount, 1, #trickSounds)] end
+    audio_sample_play(sound, m.pos, m.playerIndex == 0 and 1 or 0.5)
+end
+
+local function audio_squishy_taunt_land(m, failed)
+    if not network_mario_is_in_area(m.playerIndex) then return end
+    local e = gSquishyExtraStates[m.playerIndex]
+    soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
+    if soundToggle == 0 then return end
+    if soundToggle == 1 and m.playerIndex ~= 0 then return end
+    if failed then
+        audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
+    else
+        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, m.playerIndex == 0 and 1 or 0.5)
+    end
 end
 
 local function act_squishy_trick(m)
@@ -1283,6 +1295,8 @@ local function act_squishy_trick(m)
             m.vel.y = math.max(m.vel.y, 0)
         end
         if m.playerIndex == 0 then
+            -- +1 Mult for every Taunt in hand
+            trickAnims[jokerTaunt].mult = e.trickCount
             m.actionArg = math.random(2, #trickAnims)
         else
             m.actionArg = 1
@@ -1292,9 +1306,11 @@ local function act_squishy_trick(m)
         e.gfxAnimY = trickData.faceAngleY and trickData.faceAngleY or 0
         e.gfxAnimX = trickData.faceAngleX and trickData.faceAngleX or 0
         e.gfxAnimZ = trickData.faceAngleZ and trickData.faceAngleZ or 0
-        squishy_trick_combo_add(m, trickData.name)
-
-        audio_squishy_taunt_sound(m)
+        if trickData.model ~= nil then
+            _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, trickData.model)
+        end
+        squishy_trick_combo_add(m, trickData.name, trickData.mult)
+        audio_squishy_taunt_sound(m, trickData.sound)
     end
     add_debug_display(m, ((trickAnims[m.actionArg] and trickAnims[m.actionArg].name) and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
     m.vel.y = m.vel.y + 2.5/e.trickCount
@@ -1303,6 +1319,7 @@ local function act_squishy_trick(m)
 
     local step = perform_air_step(m, AIR_STEP_NONE)
     if step == AIR_STEP_LANDED then
+        _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, E_MODEL_SQUISHY)
         if m.actionTimer < 10 then
             e.trickCount = 0
             audio_squishy_taunt_land(m, true)
@@ -1329,11 +1346,13 @@ local function act_squishy_trick(m)
     if m.actionArg ~= 0 then
         m.actionTimer = m.actionTimer + 1
     end
-    if m.actionTimer < 8 then
+    if m.actionTimer <= 8 then
         set_mario_particle_flags(m, PARTICLE_SPARKLES, 0)
-    end
-    if m.actionTimer > 8 and m.input & INPUT_A_PRESSED ~= 0 then
-        set_mario_action(m, ACT_SQUISHY_TRICK, 0)
+    else
+        if m.input & INPUT_A_PRESSED ~= 0 then
+            set_mario_action(m, ACT_SQUISHY_TRICK, 0)
+        end
+        _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, E_MODEL_SQUISHY)
     end
     if m.actionTimer > 15 then
         set_mario_action(m, ACT_FREEFALL, 0)
@@ -1946,6 +1965,7 @@ local rainbowColor = { r = 255, g = 0, b = 0 }
 local rainbowState = 0
 local function djui_hud_set_trick_color(a, speed)
     if speed == nil then speed = 1 end
+    speed = clamp(speed, 0, 70)
     if rainbowState == 0 then
         rainbowColor.r = rainbowColor.r + speed
         if rainbowColor.r >= 255 then rainbowState = 1 end
@@ -2001,11 +2021,12 @@ local function hud_render_moveset()
                 trickScore = trickScore*0.5
                 rainbowColor = { r = 255, g = 0, b = 0 }
                 rainbowState = 0
+            else
+                trickScore = trickScore * math.max(squishy_trick_combo_get_mult(), 1)
             end
             prevTrickCount = e.trickCount
-            djui_chat_message_create(trickName)
         end
-        trickScore = math.floor(math.max(trickScore - 21, 0))
+        trickScore = math.floor(math.max(trickScore*0.95, 0))
     else
         trickName = squishy_trick_combo_get()
         trickScore = e.trickCount*200
@@ -2018,7 +2039,8 @@ local function hud_render_moveset()
     end
     trickOpacity = clamp(trickOpacity, 0, 255)
 
-    djui_hud_set_trick_color(trickOpacity, trickScore/50)
+    local trickMult = (e.trickCount > 0 and squishy_trick_combo_get_mult() or 0)
+    djui_hud_set_trick_color(trickOpacity, trickScore/50 * trickMult)
     djui_hud_set_font(FONT_RECOLOR_HUD)
     local trickNameLength = djui_hud_measure_text(trickName)
     local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)
@@ -2026,7 +2048,7 @@ local function hud_render_moveset()
     local y = height - 64 - trickTextY
     djui_hud_print_text(trickName, x, y + (1 - trickTextScale)*32, trickTextScale)
 
-    local trickScoreText = "SCORE: " .. trickScore
+    local trickScoreText = "SCORE: " .. trickScore .. (trickMult > 1 and " x " .. trickMult or "")
     djui_hud_print_text(trickScoreText, width*0.5 - djui_hud_measure_text(trickScoreText)*0.5, y + 20, 1)
 end
 
