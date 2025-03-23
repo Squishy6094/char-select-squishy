@@ -156,14 +156,16 @@ local SOUND_TRICK_GOOD = audio_sample_load("trickResultG.ogg")
 local SOUND_TRICK_PERFECT = audio_sample_load("trickResultP.ogg")
 
 local function audio_squishy_taunt_sound(m)
+    if not network_mario_is_in_area(m.playerIndex) then return end
     local e = gSquishyExtraStates[m.playerIndex]
     soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
     if soundToggle == 0 then return end
     if soundToggle == 1 and m.playerIndex ~= 0 then return end
-    audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, 1)
+    audio_sample_play(trickSounds[clamp(e.trickCount, 1, 6)], m.pos, m.playerIndex == 0 and 1 or 0.5)
 end
 
 local function audio_squishy_taunt_land(m, failed)
+    if not network_mario_is_in_area(m.playerIndex) then return end
     local e = gSquishyExtraStates[m.playerIndex]
     soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
     if soundToggle == 0 then return end
@@ -171,8 +173,13 @@ local function audio_squishy_taunt_land(m, failed)
     if failed then
         audio_sample_play(SOUND_TRICK_BAD, m.pos, 1)
     else
-        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, 1)
+        audio_sample_play(e.trickCount < 6 and SOUND_TRICK_GOOD or SOUND_TRICK_PERFECT, m.pos, m.playerIndex == 0 and 1 or 0.5)
     end
+end
+
+local function set_squishy_particles(m, particle)
+    if not network_mario_is_in_area(m.playerIndex) then return end
+    m.particleFlags = m.particleFlags | particle
 end
 
 ----------------------------------------
@@ -470,7 +477,7 @@ local function act_squishy_walking(m)
     elseif switch == GROUND_STEP_NONE then
         anim_and_audio_for_walk(m)
         if (m.intendedMag - m.forwardVel > 16.0) then
-            m.particleFlags = PARTICLE_DUST;
+            set_squishy_particles(m, PARTICLE_DUST);
         end
         return
     elseif switch == GROUND_STEP_HIT_WALL then
@@ -590,7 +597,7 @@ local function act_squishy_slide(m)
     
     if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
         update_speed_cap(m, 3, true)
-        m.particleFlags = PARTICLE_FIRE
+        set_squishy_particles(m, PARTICLE_FIRE)
     else
         update_speed_cap(m, 25)
     end
@@ -648,7 +655,7 @@ local function act_squishy_slide_air(m)
         if m.forwardVel > 30 and mario_is_on_water(m) and (m.flags & MARIO_METAL_CAP == 0) then
             set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, -100)
             m.forwardVel = m.forwardVel - 2
-            m.particleFlags = PARTICLE_SHALLOW_WATER_SPLASH
+            set_squishy_particles(m, PARTICLE_SHALLOW_WATER_SPLASH)
             m.actionTimer = 0
             m.marioObj.header.gfx.angle.x = -0xB0*clamp(m.vel.y, -40, 40)
         end
@@ -734,7 +741,7 @@ local function act_squishy_ground_pound(m)
         m.vel.x = 0
         m.vel.z = 0
         m.forwardVel = 0
-        m.particleFlags = PARTICLE_SPARKLES
+        set_squishy_particles(m, PARTICLE_SPARKLES)
     end
     e.yVelStore = m.vel.y
     m.actionTimer = m.actionTimer + 1
@@ -760,7 +767,7 @@ local function act_squishy_ground_pound_land(m)
         play_character_sound(m, CHAR_SOUND_HAHA)
         --play_mario_heavy_landing_sound(m)
         e.forwardVelStore = m.forwardVel
-        m.particleFlags = PARTICLE_HORIZONTAL_STAR | PARTICLE_MIST_CIRCLE
+        set_squishy_particles(m, PARTICLE_HORIZONTAL_STAR | PARTICLE_MIST_CIRCLE)
         set_environmental_camera_shake(SHAKE_ENV_EXPLOSION)
     end
     m.forwardVel = 0
@@ -841,7 +848,7 @@ local function act_squishy_wall_slide(m)
     end
 
     m.vel.y = clamp_soft(m.vel.y + 0.3, -70, 150, 2)
-    m.particleFlags = PARTICLE_DUST
+    set_squishy_particles(m, PARTICLE_DUST)
     if m.wall == nil then
         m.faceAngle.y = e.prevWallAngle
         if m.pos.y == m.floorHeight and e.prevFloorDist < 100 then
@@ -1159,7 +1166,7 @@ end
 
 local trickSpin = 0x10000
 local trickAnims = {
-    [0] = {anim = MARIO_ANIM_DOUBLE_JUMP_RISE, name = "Spin", faceAngleY = trickSpin*2}, -- Failsafe Anim
+    {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2}, -- Failsafe Anim
     {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2},
     {anim = MARIO_ANIM_BREAKDANCE,         name = "Breakdance",      faceAngleY =  trickSpin},
     {anim = MARIO_ANIM_BACKFLIP,           name = "Backflip"},
@@ -1171,13 +1178,93 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_GF_STYLE,   name = "Speaker",         faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_PICO_STYLE, name = "Uzi",             faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, name = "Knife",           faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_HOTLINE,    name = "Hotline",         faceAngleX =  trickSpin*1.5},
+    {anim = SQUISHY_ANIM_TRICK_HOTLINE,    name = "Hotline",         faceAngleX =  trickSpin*0.5},
     {anim = SQUISHY_ANIM_TRICK_MIKU,       name = "AKAGE",           faceAngleY = -trickSpin*2},
     {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "TEMPRR",          faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric",        faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_DOCTOR,       name = "Doctor",      faceAngleY = trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_DOCTOR,     name = "Doctor",          faceAngleY = trickSpin*1},
 }
+local trickPrefixes = {
+    "",
+    "Bi",
+    "Tri",
+    "Quadri",
+    "Quinque",
+    "Sexa",
+    "Septi",
+    "Octo",
+    "Novem",
+    "Dec",
+    "Fucki",
+}
+
+local trickList = {}
+local function squishy_trick_combo_add(m, name)
+    local e = gSquishyExtraStates[m.playerIndex]
+    local trickListFound = false
+    if e.trickCount == 1 then
+        trickList = {}
+    end
+    if #trickList > 0 then
+        for i = 1, #trickList do
+            if trickList[i].name == name then
+                trickList[i].count = trickList[i].count + 1
+                trickListFound = true
+            end
+        end
+    end
+    if not trickListFound then
+        table.insert(trickList, {name = name, count = 1})
+    end
+end
+
+local function squishy_trick_combo_combine(combine, name)
+    uniqueFound = {}
+    if #trickList > 0 then
+        for t = 1, #combine do
+            for i = 1, #trickList do
+                if combine[t] == trickList[i].name then
+                    local unique = true
+                    for u = 1, #uniqueFound do
+                        if uniqueFound[u] == i then
+                            unique = false
+                        end
+                    end
+                    if unique then
+                        table.insert(uniqueFound, i)
+                    end
+                end
+            end
+        end
+    end
+    if #uniqueFound == #combine then
+        for i = 1, #uniqueFound do
+            local found = uniqueFound[i]
+            djui_chat_message_create(tostring(found))
+            if trickList[found] ~= nil then
+                trickList[found].count = trickList[found].count - 1
+                if trickList[found].count <= 0 then
+                    table.remove(trickList, found)
+                end
+            end
+        end
+        squishy_trick_combo_add(gMarioStates[0], name)
+    end
+end
+
+local function squishy_trick_combo_get()
+    local trickName = ""
+    squishy_trick_combo_combine({"Spin", "Breakdance", "Backflip", "Twirl"}, "SM64")
+    squishy_trick_combo_combine({"Mic", "Speaker", "Uzi", "Knife"}, "Funkin'")
+    squishy_trick_combo_combine({"AKAGE", "Drill-Hair"}, "Baka")
+    for i = 1, #trickList do
+        local trickData = trickList[i]
+        local prefix = trickPrefixes[clamp(trickData.count, 1, #trickPrefixes)]
+        trickName = trickName .. (prefix ~= "" and prefix .. "-" or "") .. trickData.name .. " "
+    end
+    return trickName .. "Trick"
+end
 
 local function act_squishy_trick(m)
     local e = gSquishyExtraStates[m.playerIndex]
@@ -1195,19 +1282,21 @@ local function act_squishy_trick(m)
         if omm_moveset_enabled(m) then
             m.vel.y = math.max(m.vel.y, 0)
         end
-        --math.randomseed(index*9999 + get_global_timer())
         if m.playerIndex == 0 then
-            m.actionArg = math.random(1, #trickAnims)
+            m.actionArg = math.random(2, #trickAnims)
+        else
+            m.actionArg = 1
         end
-        local trickData = trickAnims[m.actionArg]
+        local trickData = trickAnims[clamp(m.actionArg, 1, #trickAnims)]
         e.trickAnim = trickData.anim and trickData.anim or MARIO_ANIM_DOUBLE_JUMP_RISE
         e.gfxAnimY = trickData.faceAngleY and trickData.faceAngleY or 0
         e.gfxAnimX = trickData.faceAngleX and trickData.faceAngleX or 0
         e.gfxAnimZ = trickData.faceAngleZ and trickData.faceAngleZ or 0
+        squishy_trick_combo_add(m, trickData.name)
 
         audio_squishy_taunt_sound(m)
     end
-    add_debug_display(m, (trickAnims[m.actionArg].name and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
+    add_debug_display(m, ((trickAnims[m.actionArg] and trickAnims[m.actionArg].name) and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
     m.vel.y = m.vel.y + 2.5/e.trickCount
 
     update_air_without_turn(m);
@@ -1271,7 +1360,6 @@ hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, {every_frame = act_squishy_wall_kic
 hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
 hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
-
 if _G.doorBust then
     _G.doorBust.add_door_bust_action(ACT_SQUISHY_SLIDE)
 end
@@ -1494,7 +1582,7 @@ local function act_race_shell_ground(m)
             squishy_has_koopa_shell(m, true)
             mario_stop_riding_object(m)
             play_sound(SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject)
-            m.particleFlags = m.particleFlags | PARTICLE_VERTICAL_STAR
+            set_squishy_particles(m, PARTICLE_VERTICAL_STAR)
             m.forwardVel = 0
             set_mario_action(m, ACT_BACKWARD_GROUND_KB, 0)
         end
@@ -1650,7 +1738,7 @@ local function squishy_update(m)
     end
     if update_spam_burnout(m) > 0 then
         if (m.flags & MARIO_METAL_CAP == 0) then
-            m.particleFlags = PARTICLE_FIRE
+            set_squishy_particles(m, PARTICLE_FIRE)
             m.health = m.health - 10
         end
         play_sound(SOUND_AIR_BLOW_FIRE, m.pos)
@@ -1854,21 +1942,6 @@ local function hud_render()
     end
 end
 
-local trickPrefixes = {
-    "",
-    "Bi",
-    "Tri",
-    "Quadri",
-    "Quinque",
-    "Sexa",
-    "Septi",
-    "Octo",
-    "Novem",
-    "Dec",
-    "Fucki",
-}
-
-
 local rainbowColor = { r = 255, g = 0, b = 0 }
 local rainbowState = 0
 local function djui_hud_set_trick_color(a, speed)
@@ -1901,10 +1974,9 @@ end
 local trickTextY = 0
 local trickTextVel = 0
 local prevTrickCount = 0
-local trickList = {}
 local trickName = ""
 local trickScore = 0
-local opacity = 0
+local trickOpacity = 0
 local function hud_render_moveset()
     djui_hud_set_resolution(RESOLUTION_N64)
     local width = djui_hud_get_screen_width()
@@ -1922,31 +1994,6 @@ local function hud_render_moveset()
         trickTextY = 0
         trickTextVel = 0
     end
-    if m.action == ACT_SQUISHY_TRICK and m.actionTimer == 1 then
-        local trickDataName = trickAnims[m.actionArg].name
-        local trickListFound = false
-        if e.trickCount == 1 then
-            trickList = {}
-        end
-        if #trickList > 0 then
-            for i = 1, #trickList do
-                if trickList[i].name == trickAnims[m.actionArg].name then
-                    trickList[i].count = trickList[i].count + 1
-                    trickListFound = true
-                end
-            end
-        end
-        if not trickListFound then
-            table.insert(trickList, {name = trickDataName, count = 1})
-        end
-        trickName = ""
-        for i = 1, #trickList do
-            local trickData = trickList[i]
-            local prefix = trickPrefixes[clamp(trickData.count, 1, #trickPrefixes)]
-            trickName = trickName .. (prefix ~= "" and prefix .. "-" or "") .. trickData.name .. " "
-        end
-        trickName = trickName .. "Trick"
-    end
     if e.trickCount == 0 then
         if prevTrickCount ~= e.trickCount then
             if m.action == ACT_FORWARD_GROUND_KB then
@@ -1956,20 +2003,22 @@ local function hud_render_moveset()
                 rainbowState = 0
             end
             prevTrickCount = e.trickCount
+            djui_chat_message_create(trickName)
         end
         trickScore = math.floor(math.max(trickScore - 21, 0))
     else
+        trickName = squishy_trick_combo_get()
         trickScore = e.trickCount*200
     end
 
     if trickScore > 0 then
-        opacity = opacity + 20
+        trickOpacity = trickOpacity + 20
     else
-        opacity = opacity - 3
+        trickOpacity = trickOpacity - 3
     end
-    opacity = clamp(opacity, 0, 255)
+    trickOpacity = clamp(trickOpacity, 0, 255)
 
-    djui_hud_set_trick_color(opacity, trickScore/50)
+    djui_hud_set_trick_color(trickOpacity, trickScore/50)
     djui_hud_set_font(FONT_RECOLOR_HUD)
     local trickNameLength = djui_hud_measure_text(trickName)
     local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)

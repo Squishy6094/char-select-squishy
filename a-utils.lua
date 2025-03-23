@@ -72,3 +72,13 @@ end
 function network_is_romhack()
     return currRomhack ~= ROMHACK_NONE
 end
+
+function network_mario_is_in_area(index)
+    if index == 0 then return true end
+    local n0 = gNetworkPlayers[0]
+    local np = gNetworkPlayers[index]
+    if np.currAreaIndex ~= n0.currAreaIndex then return false end
+    if np.currLevelNum ~= n0.currLevelNum then return false end
+    if np.currActNum ~= n0.currActNum then return false end
+    return true
+end
