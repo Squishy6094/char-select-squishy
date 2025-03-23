@@ -933,7 +933,7 @@ local function act_squishy_swim_moving(m)
         m.faceAngle.x = atan2s(m.forwardVel, m.vel.y)
     end
 
-    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x400, 0x400)
 
     if m.input & INPUT_NONZERO_ANALOG ~= 0 or m.input & INPUT_A_DOWN ~= 0 or m.input & INPUT_Z_DOWN ~= 0 then
         if m.forwardVel < 25 then
@@ -941,9 +941,9 @@ local function act_squishy_swim_moving(m)
         elseif m.forwardVel > 30 then
             m.forwardVel = m.forwardVel - 2
         end
-        m.faceAngle.x = clamp_soft(m.faceAngle.x, 0, 0, 0x100)
+        m.faceAngle.x = clamp_soft(m.faceAngle.x, 0, 0, 0x180)
     else
-        m.forwardVel = m.forwardVel - 3
+        m.forwardVel = math.max(m.forwardVel - 3, 0)
         if m.forwardVel < 10 then
             set_mario_action(m, ACT_SQUISHY_SWIM_IDLE, 0)
         end
@@ -1035,7 +1035,7 @@ local function act_squishy_side_flip(m)
     if m.actionTimer == 0 then
         m.vel.y = math.max(math.abs(m.forwardVel), 60)
         m.forwardVel = 20
-        m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
+        m.faceAngle.y = m.intendedYaw
     end
 
     if (m.input & INPUT_B_PRESSED ~= 0) then
