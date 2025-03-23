@@ -1241,7 +1241,7 @@ local function squishy_trick_combo_get_mult()
     return trickMult
 end
 
-local OPTION_TRICKSOUNDS = _G.charSelect.add_option("Squishy Trick Sounds", 2, 2, {"Off", "Local Only", "On"}, {"Toggles Squishy's Trick Sounds"}, true)
+local OPTION_TRICKSOUNDS = _G.charSelect.add_option("Squishy Trick Sounds", 2, 2, {"Minimal", "Local Only", "On"}, {"Toggles Squishy's Trick Sounds"}, true)
 
 local trickSounds = {
     [1] = audio_sample_load("trick1.ogg"),
@@ -1259,7 +1259,9 @@ local function audio_squishy_taunt_sound(m, sound)
     if not network_mario_is_in_area(m.playerIndex) then return end
     local e = gSquishyExtraStates[m.playerIndex]
     soundToggle = _G.charSelect.get_options_status(OPTION_TRICKSOUNDS)
-    if soundToggle == 0 then return end
+    if soundToggle == 0 then
+        return play_sound(SOUND_GENERAL_GRAND_STAR_JUMP, m.pos)
+    end
     if soundToggle == 1 and m.playerIndex ~= 0 then return end
     if sound == nil then sound = trickSounds[clamp(e.trickCount, 1, #trickSounds)] end
     audio_sample_play(sound, m.pos, m.playerIndex == 0 and 1 or 0.5)
@@ -1991,6 +1993,8 @@ local function djui_hud_set_trick_color(a, speed)
     return djui_hud_set_color(rainbowColor.r*0.5 + 127, rainbowColor.g*0.5 + 127, rainbowColor.b*0.5 + 127, a)
 end
 
+local OPTION_TRICKDISPLAY = _G.charSelect.add_option("Squishy Trick Display", 0, 1, nil, {"Toggles Squishy's Trick Display"}, true)
+
 local trickTextY = 0
 local trickTextVel = 0
 local prevTrickCount = 0
@@ -2004,52 +2008,54 @@ local function hud_render_moveset()
     local m = gMarioStates[0]
     local e = gSquishyExtraStates[0]
 
-    if prevTrickCount < e.trickCount then
-        trickTextVel = 10
-        prevTrickCount = e.trickCount
-    end
-    trickTextY = trickTextY + trickTextVel*0.2
-    trickTextVel = trickTextVel - 2
-    if trickTextY < 0 then
-        trickTextY = 0
-        trickTextVel = 0
-    end
-    if e.trickCount == 0 then
-        if prevTrickCount ~= e.trickCount then
-            if m.action == ACT_FORWARD_GROUND_KB then
-                trickName = "Failed " .. trickName
-                trickScore = trickScore*0.5
-                rainbowColor = { r = 255, g = 0, b = 0 }
-                rainbowState = 0
-            else
-                trickScore = trickScore * math.max(squishy_trick_combo_get_mult(), 1)
-            end
+    if _G.charSelect.get_options_status(OPTION_TRICKDISPLAY) == 1 then
+        if prevTrickCount < e.trickCount then
+            trickTextVel = 10
             prevTrickCount = e.trickCount
         end
-        trickScore = math.floor(math.max(trickScore*0.95, 0))
-    else
-        trickName = squishy_trick_combo_get()
-        trickScore = e.trickCount*200
+        trickTextY = trickTextY + trickTextVel*0.2
+        trickTextVel = trickTextVel - 2
+        if trickTextY < 0 then
+            trickTextY = 0
+            trickTextVel = 0
+        end
+        if e.trickCount == 0 then
+            if prevTrickCount ~= e.trickCount then
+                if m.action == ACT_FORWARD_GROUND_KB then
+                    trickName = "Failed " .. trickName
+                    trickScore = trickScore*0.5
+                    rainbowColor = { r = 255, g = 0, b = 0 }
+                    rainbowState = 0
+                else
+                    trickScore = trickScore * math.max(squishy_trick_combo_get_mult(), 1)
+                end
+                prevTrickCount = e.trickCount
+            end
+            trickScore = math.floor(math.max(trickScore*0.95, 0))
+        else
+            trickName = squishy_trick_combo_get()
+            trickScore = e.trickCount*200
+        end
+
+        if trickScore > 0 then
+            trickOpacity = trickOpacity + 20
+        else
+            trickOpacity = trickOpacity - 3
+        end
+        trickOpacity = clamp(trickOpacity, 0, 255)
+
+        local trickMult = (e.trickCount > 0 and squishy_trick_combo_get_mult() or 0)
+        djui_hud_set_trick_color(trickOpacity, trickScore/50 * trickMult)
+        djui_hud_set_font(FONT_RECOLOR_HUD)
+        local trickNameLength = djui_hud_measure_text(trickName)
+        local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)
+        local x = width*0.5 - trickNameLength*trickTextScale*0.5
+        local y = height - 64 - trickTextY
+        djui_hud_print_text(trickName, x, y + (1 - trickTextScale)*32, trickTextScale)
+
+        local trickScoreText = "SCORE: " .. trickScore .. (trickMult > 1 and " x " .. trickMult or "")
+        djui_hud_print_text(trickScoreText, width*0.5 - djui_hud_measure_text(trickScoreText)*0.5, y + 20, 1)
     end
-
-    if trickScore > 0 then
-        trickOpacity = trickOpacity + 20
-    else
-        trickOpacity = trickOpacity - 3
-    end
-    trickOpacity = clamp(trickOpacity, 0, 255)
-
-    local trickMult = (e.trickCount > 0 and squishy_trick_combo_get_mult() or 0)
-    djui_hud_set_trick_color(trickOpacity, trickScore/50 * trickMult)
-    djui_hud_set_font(FONT_RECOLOR_HUD)
-    local trickNameLength = djui_hud_measure_text(trickName)
-    local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)
-    local x = width*0.5 - trickNameLength*trickTextScale*0.5
-    local y = height - 64 - trickTextY
-    djui_hud_print_text(trickName, x, y + (1 - trickTextScale)*32, trickTextScale)
-
-    local trickScoreText = "SCORE: " .. trickScore .. (trickMult > 1 and " x " .. trickMult or "")
-    djui_hud_print_text(trickScoreText, width*0.5 - djui_hud_measure_text(trickScoreText)*0.5, y + 20, 1)
 end
 
 local function level_init()
