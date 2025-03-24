@@ -1127,6 +1127,7 @@ local function act_squishy_ledge_grab(m)
     return 0;
 end
 
+local E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
 local trickSpin = 0x10000
 local trickAnims = {
     {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2}, -- Failsafe Anim
@@ -1148,7 +1149,7 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_DOCTOR,     name = "Doctor",          faceAngleY = trickSpin*1},
 }
-table.insert(trickAnims, {model = E_MODEL_SQUISHY, name = "Poker", faceAngleY = trickSpin*0.5, sound = audio_sample_load("balatro-mult-hit.ogg"), mult = 0})
+table.insert(trickAnims, {model = E_MODEL_SQUISHY_BALATRO, name = "Joker", faceAngleY = trickSpin*2, sound = audio_sample_load("balatro-mult-hit.ogg"), mult = 0})
 local jokerTaunt = #trickAnims
 
 local trickPrefixes = {
