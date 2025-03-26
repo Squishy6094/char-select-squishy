@@ -33,6 +33,7 @@ for i = 0, MAX_PLAYERS - 1 do
         gfxAnimZ = 0,
     }
 end
+--
 
 gPlayerSyncTable[0].squishyHasShell = false
 gPlayerSyncTable[0].spamBurnout = 0
