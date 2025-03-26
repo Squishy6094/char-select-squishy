@@ -69,6 +69,10 @@ for i in pairs(gActiveMods) do
     end
 end
 
+---------------
+-- Functions --
+---------------
+
 function network_is_romhack()
     return currRomhack ~= ROMHACK_NONE
 end
@@ -81,4 +85,18 @@ function network_mario_is_in_area(index)
     if np.currLevelNum ~= n0.currLevelNum then return false end
     if np.currActNum ~= n0.currActNum then return false end
     return true
+end
+
+table.copy = function(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in pairs(orig) do
+            copy[orig_key] = orig_value
+        end
+    else
+        copy = orig
+    end
+    return copy
 end

@@ -6,12 +6,13 @@
 gGlobalSyncTable.squishySpeedMult = 1
 
 gSquishyExtraStates = {}
-for i = 0, MAX_PLAYERS - 1 do
-    gSquishyExtraStates[i] = {
-        index = network_global_index_from_local(i),
+
+local function squishy_reset_extra_states(index)
+    if index == nil then index = 0 end
+    gSquishyExtraStates[index] = {
+        index = network_global_index_from_local(0),
         forwardVelStore = 0,
         yVelStore = 0,
-        groundPoundJump = true,
         groundPoundFromRollout = true,
         prevForwardVel = 0,
         intendedDYaw = 0,
@@ -27,16 +28,17 @@ for i = 0, MAX_PLAYERS - 1 do
         trickCount = 0,
         actionTick = 0,
         prevFrameAction = 0,
+        hasKoopaShell = true,
         
         gfxAnimX = 0,
         gfxAnimY = 0,
         gfxAnimZ = 0,
     }
 end
---
 
-gPlayerSyncTable[0].squishyHasShell = false
-gPlayerSyncTable[0].spamBurnout = 0
+for i = 0, MAX_PLAYERS - 1 do
+    squishy_reset_extra_states(i)
+end
 
 local spamBurnoutMax = 100
 
@@ -114,30 +116,6 @@ function get_mario_y_vel_from_floor(m)
         return yVel * ((angleDif > 0x4000 or angleDif < -0x4000) and 1 or -1)
     else
         return m.vel.y
-    end
-end
-
-local function squishy_has_koopa_shell(m, setShellState)
-    if setShellState == nil then
-        return gPlayerSyncTable[m.playerIndex].squishyHasShell
-    else
-        gPlayerSyncTable[m.playerIndex].squishyHasShell = setShellState
-    end
-end
-
-local function update_spam_burnout(m, burnTimer)
-    local e = gSquishyExtraStates[m.playerIndex]
-    if m.playerIndex == 0 then
-        if burnTimer == nil then
-            return e.spamBurnout
-        else
-            e.spamBurnout = burnTimer
-            gPlayerSyncTable[0].spamBurnout = burnTimer
-            add_debug_display(m, "Burn: " .. burnTimer)
-        end
-    else
-        local netSpam = gPlayerSyncTable[m.playerIndex].spamBurnout
-        return (netSpam and netSpam or 0)
     end
 end
 
@@ -597,7 +575,7 @@ local function act_squishy_slide(m)
             end
         end
         if m.input & INPUT_B_PRESSED ~= 0 then
-            if squishy_has_koopa_shell(m) then
+            if e.hasKoopaShell then
                 set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
             else
                 set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
@@ -745,7 +723,6 @@ local function act_squishy_ground_pound_land(m)
     m.actionTimer = m.actionTimer + 1
     if m.actionTimer > 10 then
         set_mario_action(m, ACT_IDLE, 0)
-        e.groundPoundJump = true
     else
         if m.input & INPUT_A_PRESSED ~= 0 then
             local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
@@ -763,7 +740,6 @@ local function act_squishy_ground_pound_land(m)
             m.faceAngle.y = m.intendedYaw
             m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.7
             set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
-            e.groundPoundJump = true
         end
     end
 end
@@ -879,8 +855,8 @@ local function act_squishy_fire_burn(m)
                 level_trigger_warp(m, WARP_OP_DEATH);
             end
         end
-        update_spam_burnout(m, 0)
-    elseif update_spam_burnout(m) <= 0 then
+        e.spamBurnout = 0
+    elseif e.spamBurnout <= 0 then
         set_mario_action(m, ACT_FREEFALL, 0)
     end
 
@@ -1602,7 +1578,7 @@ local function act_race_shell_ground(m)
                 m.pos.x, m.pos.y + 100, m.pos.z,
                 castDir.x, castDir.y, castDir.z)
         if info.surface ~= nil then
-            squishy_has_koopa_shell(m, true)
+            e.hasKoopaShell = true
             mario_stop_riding_object(m)
             play_sound(SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject)
             set_squishy_particles(m, PARTICLE_VERTICAL_STAR)
@@ -1706,6 +1682,7 @@ local trickBlacklist = {
     [ACT_SQUISHY_GROUND_POUND] = true,
     [ACT_SQUISHY_FIRE_BURN] = true,
     [ACT_FLYING] = true,
+    [ACT_FALL_AFTER_STAR_GRAB] = true,
 }
 
 local function squishy_update(m)
@@ -1752,28 +1729,25 @@ local function squishy_update(m)
         m.forwardVel = 70
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
-    if m.pos.y == m.floorHeight and m.action ~= ACT_SQUISHY_GROUND_POUND_LAND and m.action ~= ACT_SQUISHY_GROUND_POUND_JUMP then
-        e.groundPoundJump = true
-    end
     if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
         m.pos.y = math.min(math.max(m.pos.y - m.floorHeight, 1000) + m.floorHeight, m.ceilHeight - 150) -- Force spawn height
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
-    if update_spam_burnout(m) > 0 then
+    if e.spamBurnout > 0 then
         if (m.flags & MARIO_METAL_CAP == 0) then
             set_squishy_particles(m, PARTICLE_FIRE)
             m.health = m.health - 10
         end
         play_sound(SOUND_AIR_BLOW_FIRE, m.pos)
         if (m.input & INPUT_A_PRESSED ~= 0 or m.input & INPUT_B_PRESSED ~= 0 or m.input & INPUT_Z_PRESSED ~= 0) then
-            update_spam_burnout(m, e.spamBurnout - 2)
+            e.spamBurnout = e.spamBurnout - 2
             play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
         end
         if (m.waterLevel ~= nil and m.pos.y < m.waterLevel) then
             play_sound(SOUND_GENERAL_FLAME_OUT, m.pos)
-            update_spam_burnout(m, 0)
+            e.spamBurnout = 0
         end
-        update_spam_burnout(m, e.spamBurnout - 1)
+        e.spamBurnout = e.spamBurnout - 1
         e.panicking = true
     end
 
@@ -1784,7 +1758,7 @@ local function squishy_update(m)
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
         if m.forwardVel >= 50 then
             smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_RUN)
-            if not squishy_has_koopa_shell(m) then
+            if not e.hasKoopaShell then
                 m.marioBodyState.handState = MARIO_HAND_OPEN
             end
         elseif smlua_anim_util_get_current_animation_name(m.marioObj) == SQUISHY_ANIM_RUN then
@@ -1793,10 +1767,7 @@ local function squishy_update(m)
     end
 
     if hitActs[m.action] then
-        squishy_has_koopa_shell(m, false)
-    end
-    if m.action == ACT_SHOT_FROM_CANNON and m.vel.y < 0 then
-        set_mario_action(m, ACT_SQUISHY_ROLLOUT, 1)
+        e.hasKoopaShell = false
     end
 end
 
@@ -1827,7 +1798,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action(m, ACT_SQUISHY_LONG_JUMP, 0)
     end
     if (nextAct == ACT_BURNING_FALL or nextAct == ACT_BURNING_GROUND or nextAct == ACT_BURNING_JUMP or nextAct == ACT_LAVA_BOOST) and m.health > 255 then
-        update_spam_burnout(m, spamBurnoutMax)
+        e.spamBurnout = spamBurnoutMax
         m.hurtCounter = 0
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_FIRE_BURN, 0, 90)
     end
@@ -1849,7 +1820,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action(m, ACT_SQUISHY_SLIDE_AIR, 0)
     end
     if nextAct == ACT_RIDING_SHELL_GROUND then
-        squishy_has_koopa_shell(m, true)
+        e.hasKoopaShell = true
         return set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
     end
     if (m.flags & MARIO_METAL_CAP == 0) then
@@ -1951,7 +1922,7 @@ local function hud_render()
         local m = gMarioStates[i]
         local e = gSquishyExtraStates[i]
 
-        local burning = update_spam_burnout(m)/spamBurnoutMax
+        local burning = e.spamBurnout/spamBurnoutMax
         if burning > 0 then
             local pos = {x = 0, y = 0, z = 0}
             djui_hud_world_pos_to_screen_pos(m.pos, pos)
@@ -2060,10 +2031,6 @@ local function hud_render_moveset()
     end
 end
 
-local function level_init()
-    update_spam_burnout(gMarioStates[0])
-end
-
 local function on_interact(m, obj, type)
     local e = gSquishyExtraStates[m.playerIndex]
     local bhvID = get_id_from_behavior(obj.behavior)
@@ -2101,7 +2068,7 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render_moveset)
     hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
-    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, level_init)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, squishy_reset_extra_states)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_INTERACT, on_interact)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_INTERACT, allow_interact)
 end
@@ -2144,30 +2111,6 @@ end
 if network_is_server() then
     hook_chat_command("squishy-speed", "Sets a speed multiplier for Squishy's speed between 0.2 and 3.0", command_squishy_speed)
 end
-
---[[
----@param obj Object
-local function bhv_custom_mips_loop(obj)
-    local m = nearest_interacting_mario_state_to_object(obj)
-    local dist = dist_between_objects(obj, m.marioObj)
-    local radius = 150
-
-    if dist < radius and m.action == ACT_SQUISHY_SLIDE then
-        obj.oMoveAngleYaw = m.faceAngle.y
-        obj.oForwardVel = 90
-        obj.oVelY = 70
-        obj.oAction = MIPS_ACT_FALL_DOWN
-        obj.oMipsStarStatus = MIPS_STAR_STATUS_SHOULD_SPAWN_STAR
-    end
-    obj.oGravity = 5
-    if obj.oPosY == obj.oFloorHeight and obj.oVelY < -5 then
-        obj.oVelY = math.abs(obj.oVelY) - 5
-    end
-end
-
--- hook the behavior
-id_bhvCustomMips = hook_behavior(id_bhvMips, OBJ_LIST_PUSHABLE, false, nil, bhv_custom_mips_loop)
-]]
 
 --local stallPacket = 0
 local function update()
