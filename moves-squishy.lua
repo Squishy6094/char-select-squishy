@@ -1039,9 +1039,10 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_NENE_STYLE, name = "Knife",           faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_HOTLINE,    name = "Hotline",         faceAngleX =  trickSpin*0.5},
     {anim = SQUISHY_ANIM_TRICK_MIKU,       name = "AKAGE",           faceAngleY = -trickSpin*2},
+    {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_PHONE,      name = "Phone",           faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "TEMPRR",          faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric",        faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_TETO,       name = "Drill-Hair",      faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_DOCTOR,     name = "Doctor",          faceAngleY = trickSpin*1},
 }
 table.insert(trickAnims, {model = E_MODEL_SQUISHY_BALATRO, name = "Joker", faceAngleY = trickSpin*2, sound = audio_sample_load("balatro-mult-hit.ogg"), mult = 0})
@@ -1120,7 +1121,7 @@ local function squishy_trick_combo_get()
     local trickName = ""
     squishy_trick_combo_combine({"Spin", "Breakdance", "Backflip", "Twirl"}, "SM64")
     squishy_trick_combo_combine({"Mic", "Speaker", "Uzi", "Knife"}, "Funkin'")
-    squishy_trick_combo_combine({"AKAGE", "Drill-Hair"}, "Baka")
+    squishy_trick_combo_combine({"AKAGE", "Drill-Hair", "Phone"}, "Triple Baka")
     for i = 1, #trickList do
         local trickData = trickList[i]
         local prefix = trickPrefixes[clamp(trickData.count, 1, #trickPrefixes)]
