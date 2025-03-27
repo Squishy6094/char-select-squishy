@@ -495,7 +495,7 @@ local function act_squishy_slide(m)
         end
         if m.input & INPUT_B_PRESSED ~= 0 then
             if e.hasKoopaShell then
-                set_mario_action(m, ACT_SQUISHY_RIDING_SHELL_GROUND, 0)
+                set_mario_action(m, ACT_SHELL_RUSH_RIDING_SHELL_GROUND, 0)
             else
                 set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
             end
@@ -514,7 +514,7 @@ local function act_squishy_slide_air(m)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
     if m.actionArg == 0 then
         if m.forwardVel > 30 and mario_is_on_water(m) and (m.flags & MARIO_METAL_CAP == 0) then
-            set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, -100)
+            set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, 30)
             m.forwardVel = m.forwardVel - 2
             set_mario_particle_flag(m, PARTICLE_SHALLOW_WATER_SPLASH)
             m.actionTimer = 0
@@ -522,9 +522,8 @@ local function act_squishy_slide_air(m)
         end
     else
         --common_air_action_step(m, ACT_SQUISHY_GROUND_POUND_LAND, MARIO_ANIM_SLIDE_KICK, AIR_STEP_NONE)
-        m.vel.y = -math.abs(m.forwardVel)
+        m.vel.y = -100
         m.marioObj.header.gfx.angle.x = 0x2000
-        m.forwardVel = m.forwardVel + 3
     end
     m.peakHeight = m.pos.y
     m.actionTimer = m.actionTimer + 1
@@ -1569,9 +1568,10 @@ end
 
 local rainbowColor = { r = 255, g = 0, b = 0 }
 local rainbowState = 0
+local speedGoal = 100 
 local function djui_hud_set_trick_color(a, speed)
     if speed == nil then speed = 1 end
-    speed = clamp(speed, 0, 70)
+    speed = clamp(speed, 0, speedGoal)
     if rainbowState == 0 then
         rainbowColor.r = rainbowColor.r + speed
         if rainbowColor.r >= 255 then rainbowState = 1 end
@@ -1594,10 +1594,15 @@ local function djui_hud_set_trick_color(a, speed)
     rainbowColor.r = clamp(rainbowColor.r, 0, 255)
     rainbowColor.g = clamp(rainbowColor.g, 0, 255)
     rainbowColor.b = clamp(rainbowColor.b, 0, 255)
-    return djui_hud_set_color(rainbowColor.r*0.5 + 127, rainbowColor.g*0.5 + 127, rainbowColor.b*0.5 + 127, a)
+    local colorFade = speed/(speedGoal*1.1)
+    return djui_hud_set_color(
+    clamp((colorFade) * 255 + (1 - colorFade) * rainbowColor.r, 0, 255),
+    clamp((colorFade) * 255 + (1 - colorFade) * rainbowColor.g, 0, 255),
+    clamp((colorFade) * 255 + (1 - colorFade) * rainbowColor.b, 0, 255),
+    a)
 end
 
-local OPTION_TRICKDISPLAY = _G.charSelect.add_option("Squishy Trick Display", 0, 1, nil, {"Toggles Squishy's Trick Display"}, true)
+local OPTION_TRICKDISPLAY = _G.charSelect.add_option("Squishy Trick Display", 1, 1, nil, {"Toggles Squishy's Trick Display"}, true)
 
 local trickTextY = 0
 local trickTextVel = 0
@@ -1625,7 +1630,7 @@ local function hud_render_moveset()
         end
         if e.trickCount == 0 then
             if prevTrickCount ~= e.trickCount then
-                if m.action == ACT_FORWARD_GROUND_KB then
+                if hitActs[m.action] then
                     trickName = "Failed " .. trickName
                     trickScore = trickScore*0.5
                     rainbowColor = { r = 255, g = 0, b = 0 }
@@ -1649,7 +1654,7 @@ local function hud_render_moveset()
         trickOpacity = clamp(trickOpacity, 0, 255)
 
         local trickMult = (e.trickCount > 0 and squishy_trick_combo_get_mult() or 0)
-        djui_hud_set_trick_color(trickOpacity, trickScore/50 * trickMult)
+        djui_hud_set_trick_color(trickOpacity, trickScore/100 * math.max(trickMult, 1))
         djui_hud_set_font(FONT_RECOLOR_HUD)
         local trickNameLength = djui_hud_measure_text(trickName)
         local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)

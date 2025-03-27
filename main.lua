@@ -2,6 +2,8 @@
 -- description: Omgg the CS dev made a self insert,, why would she do that is she stupid???\n\n\\#ff7777\\Dudee you'd never guess what API this mod needs o.o
 -- category: cs
 
+local VERSION_NUM = "1 Pre-Release"
+
 if not _G.charSelectExists then
     local noCSMessages = {
         {
@@ -75,22 +77,27 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
---[[
-local ANIMS_SQUISHY = {
-    [MARIO_ANIM_IDLE_HEAD_LEFT] = 'idlingman',
-    [MARIO_ANIM_IDLE_HEAD_RIGHT] = 'idlingman',
-    [MARIO_ANIM_IDLE_HEAD_CENTER] = 'idlingman',
-    [MARIO_ANIM_FIRST_PERSON] = 'idlingman',
-}
-]]
-
-CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "005500", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
+CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
---_G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
-_G.charSelect.credit_add(MOD_NAME, "SprSn64", "Models / Textures")
-_G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Textures / Prettyy >//<")
+_G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Taunts / Prettyy >//<")
+_G.charSelect.credit_add(MOD_NAME, "SprSn64", "Squishy Model / Taunts")
+_G.charSelect.credit_add(MOD_NAME, "KF", "Model Rigging")
+_G.charSelect.credit_add(MOD_NAME, "DM-Kun", "Taunts / Icon")
+
+local TEXT_VERSION = "[CS] Squishy v" .. tostring(VERSION_NUM)
+local function hud_render_menu()
+    if _G.charSelect.character_get_current_number() ~= CT_SQUISHY then return end
+    local width = djui_hud_get_screen_width() + 1
+    local menuColor = _G.charSelect.get_menu_color()
+
+    djui_hud_set_color(menuColor.r, menuColor.g, menuColor.b, 255)
+    djui_hud_set_font(FONT_TINY)
+    djui_hud_print_text(TEXT_VERSION, width - 5 - djui_hud_measure_text(TEXT_VERSION)*0.5, 3, 0.5)
+end
+
+_G.charSelect.hook_render_in_menu(hud_render_menu)
