@@ -42,88 +42,6 @@ end
 
 local spamBurnoutMax = 100
 
-local function clamp(num, min, max)
-    return math.min(math.max(num, min), max)
-end
-
-local function clamp_soft(num, min, max, rate)
-    if num < min then
-        num = num + rate
-        num = math.min(num, max)
-    elseif num > max then
-        num = num - rate
-        num = math.max(num, min)
-    end
-    return num
-end
-
-local function lerp(a, b, t)
-    return a * (1 - t) + b * t
-end
-
-local function invlerp(x, a, b)
-    return clamp((x - a) / (b - a), 0.0, 1.0)
-end
-
-local function set_mario_action_and_y_vel(m, action, arg, velY)
-    m.vel.y = velY
-    return set_mario_action(m, action, arg)
-end
-
-local function mario_is_on_water(m)
-    if m.waterLevel == nil then return false end
-    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) then return false end
-    if m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) < m.floorHeight + 60 then return false end
-    return true
-end
-
-local function convert_s16(num)
-    local min = -32768
-    local max = 32767
-    while (num < min) do
-        num = max + (num - min)
-    end
-    while (num > max) do
-        num = min + (num - max)
-    end
-    return num
-end
-
-local function vec3f_angle_between(a, b)
-    return math.acos(vec3f_dot(a, b) / (vec3f_length(a) * vec3f_length(b)))
-end
-
-local function vec3f_non_nan(v)
-    if v.x ~= v.x then v.x = 0 end
-    if v.y ~= v.y then v.y = 0 end
-    if v.z ~= v.z then v.z = 0 end
-end
-
-function get_mario_floor_steepness(m, angle)
-    if angle == nil then angle = m.faceAngle.y end
-    local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
-    local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
-    local floorDif = floor - floorInFront 
-    if floorDif > 20 or floorDif < -20 then floorDif = 0 end
-    return floorDif
-end
-
-function get_mario_y_vel_from_floor(m)
-    if m.pos.y == m.floorHeight then
-        local yVel = math.sqrt(m.vel.x^2 + m.vel.y^2)*get_mario_floor_steepness(m)
-        local velAngle = (math.sqrt(m.vel.z^2 + m.vel.x^2) > 0 and atan2s(m.vel.z, m.vel.x) or m.faceAngle.y)
-        local angleDif = convert_s16(velAngle - m.faceAngle.y)
-        return yVel * ((angleDif > 0x4000 or angleDif < -0x4000) and 1 or -1)
-    else
-        return m.vel.y
-    end
-end
-
-local function set_squishy_particles(m, particle)
-    if not network_mario_is_in_area(m.playerIndex) then return end
-    m.particleFlags = m.particleFlags | particle
-end
-
 ----------------------------------------
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
@@ -419,7 +337,7 @@ local function act_squishy_walking(m)
     elseif switch == GROUND_STEP_NONE then
         anim_and_audio_for_walk(m)
         if (m.intendedMag - m.forwardVel > 16.0) then
-            set_squishy_particles(m, PARTICLE_DUST);
+            set_mario_particle_flag(m, PARTICLE_DUST);
         end
         return
     elseif switch == GROUND_STEP_HIT_WALL then
@@ -539,7 +457,7 @@ local function act_squishy_slide(m)
     
     if m.input & INPUT_Z_DOWN ~= 0 and m.actionTimer > 10 then
         update_speed_cap(m, 3, true)
-        set_squishy_particles(m, PARTICLE_FIRE)
+        set_mario_particle_flag(m, PARTICLE_FIRE)
     else
         update_speed_cap(m, 25)
     end
@@ -597,7 +515,7 @@ local function act_squishy_slide_air(m)
         if m.forwardVel > 30 and mario_is_on_water(m) and (m.flags & MARIO_METAL_CAP == 0) then
             set_mario_action_and_y_vel(m, ACT_SQUISHY_SLIDE_AIR, 0, -100)
             m.forwardVel = m.forwardVel - 2
-            set_squishy_particles(m, PARTICLE_SHALLOW_WATER_SPLASH)
+            set_mario_particle_flag(m, PARTICLE_SHALLOW_WATER_SPLASH)
             m.actionTimer = 0
             m.marioObj.header.gfx.angle.x = -0xB0*clamp(m.vel.y, -40, 40)
         end
@@ -683,7 +601,7 @@ local function act_squishy_ground_pound(m)
         m.vel.x = 0
         m.vel.z = 0
         m.forwardVel = 0
-        set_squishy_particles(m, PARTICLE_SPARKLES)
+        set_mario_particle_flag(m, PARTICLE_SPARKLES)
     end
     e.yVelStore = m.vel.y
     m.actionTimer = m.actionTimer + 1
@@ -709,7 +627,7 @@ local function act_squishy_ground_pound_land(m)
         play_character_sound(m, CHAR_SOUND_HAHA)
         --play_mario_heavy_landing_sound(m)
         e.forwardVelStore = m.forwardVel
-        set_squishy_particles(m, PARTICLE_HORIZONTAL_STAR | PARTICLE_MIST_CIRCLE)
+        set_mario_particle_flag(m, PARTICLE_HORIZONTAL_STAR | PARTICLE_MIST_CIRCLE)
         set_environmental_camera_shake(SHAKE_ENV_EXPLOSION)
     end
     m.forwardVel = 0
@@ -788,7 +706,7 @@ local function act_squishy_wall_slide(m)
     end
 
     m.vel.y = clamp_soft(m.vel.y + 0.3, -70, 150, 2)
-    set_squishy_particles(m, PARTICLE_DUST)
+    set_mario_particle_flag(m, PARTICLE_DUST)
     if m.wall == nil then
         m.faceAngle.y = e.prevWallAngle
         if m.pos.y == m.floorHeight and e.prevFloorDist < 100 then
@@ -1437,7 +1355,7 @@ local function squishy_update(m)
     end
     if e.spamBurnout > 0 then
         if (m.flags & MARIO_METAL_CAP == 0) then
-            set_squishy_particles(m, PARTICLE_FIRE)
+            set_mario_particle_flag(m, PARTICLE_FIRE)
             m.health = m.health - 10
         end
         play_sound(SOUND_AIR_BLOW_FIRE, m.pos)

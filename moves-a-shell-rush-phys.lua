@@ -217,7 +217,7 @@ local function act_race_shell_ground(m)
             e.hasKoopaShell = true
             mario_stop_riding_object(m)
             play_sound(SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject)
-            set_squishy_particles(m, PARTICLE_VERTICAL_STAR)
+            set_mario_particle_flag(m, PARTICLE_VERTICAL_STAR)
             m.forwardVel = 0
             set_mario_action(m, ACT_BACKWARD_GROUND_KB, 0)
         end

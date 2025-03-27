@@ -100,3 +100,91 @@ table.copy = function(orig)
     end
     return copy
 end
+
+
+function clamp(num, min, max)
+    return math.min(math.max(num, min), max)
+end
+
+function clamp_soft(num, min, max, rate)
+    if num < min then
+        num = num + rate
+        num = math.min(num, max)
+    elseif num > max then
+        num = num - rate
+        num = math.max(num, min)
+    end
+    return num
+end
+
+function lerp(a, b, t)
+    return a * (1 - t) + b * t
+end
+
+function invlerp(x, a, b)
+    return clamp((x - a) / (b - a), 0.0, 1.0)
+end
+
+
+function convert_s16(num)
+    local min = -32768
+    local max = 32767
+    while (num < min) do
+        num = max + (num - min)
+    end
+    while (num > max) do
+        num = min + (num - max)
+    end
+    return num
+end
+
+function vec3f_angle_between(a, b)
+    return math.acos(vec3f_dot(a, b) / (vec3f_length(a) * vec3f_length(b)))
+end
+
+function vec3f_non_nan(v)
+    if v.x ~= v.x then v.x = 0 end
+    if v.y ~= v.y then v.y = 0 end
+    if v.z ~= v.z then v.z = 0 end
+end
+
+---------------------
+-- Mario Functions --
+---------------------
+
+function set_mario_particle_flag(m, particle)
+    if not network_mario_is_in_area(m.playerIndex) then return end
+    m.particleFlags = m.particleFlags | particle
+end
+
+function set_mario_action_and_y_vel(m, action, arg, velY)
+    m.vel.y = velY
+    return set_mario_action(m, action, arg)
+end
+
+function mario_is_on_water(m)
+    if m.waterLevel == nil then return false end
+    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) then return false end
+    if m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) < m.floorHeight + 60 then return false end
+    return true
+end
+
+function get_mario_floor_steepness(m, angle)
+    if angle == nil then angle = m.faceAngle.y end
+    local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
+    local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
+    local floorDif = floor - floorInFront 
+    if floorDif > 20 or floorDif < -20 then floorDif = 0 end
+    return floorDif
+end
+
+function get_mario_y_vel_from_floor(m)
+    if m.pos.y == m.floorHeight then
+        local yVel = math.sqrt(m.vel.x^2 + m.vel.y^2)*get_mario_floor_steepness(m)
+        local velAngle = (math.sqrt(m.vel.z^2 + m.vel.x^2) > 0 and atan2s(m.vel.z, m.vel.x) or m.faceAngle.y)
+        local angleDif = convert_s16(velAngle - m.faceAngle.y)
+        return yVel * ((angleDif > 0x4000 or angleDif < -0x4000) and 1 or -1)
+    else
+        return m.vel.y
+    end
+end
