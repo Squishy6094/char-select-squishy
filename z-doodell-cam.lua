@@ -275,7 +275,7 @@ local function camera_update()
                 camSwitchHeld = camSwitchHeld + 1
             end
             local analogToggle = camera_config_is_analog_cam_enabled()
-            local invertXMultiply = camera_config_is_x_inverted() and -1 or 1
+            local invertXMultiply = camera_config_is_x_inverted() and 1 or -1
             local invertYMultiply = camera_config_is_y_inverted() and -1 or 1
 
             local camDigitalLeft  = analogToggle and (_G.OmmEnabled and 0 or L_JPAD) or L_CBUTTONS
