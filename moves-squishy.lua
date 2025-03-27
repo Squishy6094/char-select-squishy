@@ -1309,6 +1309,7 @@ local trickBlacklist = {
     [ACT_SQUISHY_FIRE_BURN] = true,
     [ACT_FLYING] = true,
     [ACT_FALL_AFTER_STAR_GRAB] = true,
+    [ACT_LONG_JUMP] = true,
 }
 
 local function squishy_update(m)
