@@ -1,3 +1,4 @@
+if not _G.charSelectExists then return end
 
 -------------
 -- Moveset --

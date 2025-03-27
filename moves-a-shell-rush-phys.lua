@@ -1,3 +1,5 @@
+if not _G.charSelectExists then return end
+
 ------------------------
 -- Shell Rush Physics --
 ----- By djoslin0 ------

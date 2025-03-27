@@ -1,3 +1,5 @@
+if not _G.charSelectExists then return end
+
 E_MODEL_SLIDE_SPARK = smlua_model_util_get_id("squishy_slide_spark_geo")
 
 gPlayerObjects = {}

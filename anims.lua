@@ -1,3 +1,5 @@
+if not _G.charSelectExists then return end
+
 SQUISHY_ANIM_RUN = "anim_squishy_rainbow_run"
 smlua_anim_util_register_animation(SQUISHY_ANIM_RUN, 0, 189, 0, 0, 72, {
     0x0000, 0x00C0, 0x00BD, 0x00B8, 0x00B4, 0x00B1, 0x00AF, 0x00AD, 0x00AB, 0x00AC, 0x00AE, 0x00B0,

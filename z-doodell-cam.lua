@@ -1,3 +1,5 @@
+if not _G.charSelectExists then return end
+
 local function convert_s16(num)
     local min = -32768
     local max = 32767
