@@ -1217,13 +1217,18 @@ local function act_squishy_trick(m)
 
     local step = perform_air_step(m, AIR_STEP_NONE)
     if step == AIR_STEP_LANDED then
-        _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, E_MODEL_SQUISHY)
         if m.actionTimer < 10 then
             e.trickCount = 0
             audio_squishy_taunt_land(m, true)
             set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
         else
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
+        end
+    elseif step == AIR_STEP_HIT_WALL then
+        if m.actionTimer < 10 then
+            e.trickCount = 0
+            audio_squishy_taunt_land(m, true)
+            set_mario_action(m, ACT_BACKWARD_AIR_KB, 0)
         end
     end
     if type(e.trickAnim) == "string" then
@@ -1320,7 +1325,7 @@ local function squishy_update(m)
     if m.action & ACT_FLAG_AIR == 0 then
         e.groundpoundCancels = 0
         if e.trickCount > 0 then
-            m.forwardVel = m.forwardVel + clamp(e.trickCount*10, 0, 70)
+            m.forwardVel = m.forwardVel + math.min(e.trickCount*2 * squishy_trick_combo_get_mult(), 100)
             audio_squishy_taunt_land(m)
             e.trickCount = 0
         end
@@ -1329,6 +1334,11 @@ local function squishy_update(m)
         e.trickCount = 0
     elseif e.actionTick > 3 and m.input & INPUT_A_PRESSED ~= 0 and not trickBlacklist[m.action] and not hitActs[m.action] then
         set_mario_action(m, ACT_SQUISHY_TRICK, 0)
+    end
+
+    -- Revert Trick Model Changes
+    if m.action ~= ACT_SQUISHY_TRICK and _G.charSelect.character_get_current_table(CT_SQUISHY).model ~= E_MODEL_SQUISHY then
+        _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, E_MODEL_SQUISHY)
     end
     add_debug_display(m, "Tricks: " .. (e.trickCount))
 
