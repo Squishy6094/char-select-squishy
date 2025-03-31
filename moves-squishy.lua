@@ -29,7 +29,7 @@ local function squishy_reset_extra_states(index)
         trickCount = 0,
         actionTick = 0,
         prevFrameAction = 0,
-        hasKoopaShell = true,
+        hasKoopaShell = false,
         
         gfxAnimX = 0,
         gfxAnimY = 0,
@@ -286,6 +286,7 @@ ACT_SQUISHY_LEDGE_GRAB = allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_ST
 ACT_SQUISHY_TRICK = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 
 local function act_squishy_walking(m)
+    local e = gSquishyExtraStates[m.playerIndex]
     local startPos = {x = 0, y = 0, z = 0}
     local startYaw = m.faceAngle.y
 
@@ -1407,12 +1408,10 @@ end
 local function squishy_before_action(m, nextAct)
     local e = gSquishyExtraStates[m.playerIndex]
 
-    if nextAct == ACT_WALKING then
-        if not e.forceDefaultWalk then
-            return set_mario_action(m, ACT_SQUISHY_WALKING, 0)
-        else
-            e.forceDefaultWalk = false
-        end
+    if nextAct == ACT_WALKING and not e.forceDefaultWalk then
+        return set_mario_action(m, ACT_SQUISHY_WALKING, 0)
+    else
+        e.forceDefaultWalk = false
     end
     if nextAct == ACT_GROUND_POUND then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 0, 60)
@@ -1669,14 +1668,19 @@ local function hud_render_moveset()
     end
 end
 
+local forceWalkingInteracts = {
+    [id_bhvDoor] = true,
+    [id_bhvDoorWarp] = true,
+    [id_bhvStarDoor] = true,
+    [id_bhvBowserKeyUnlockDoor] = true,
+    [id_bhvTowerDoor] = true,
+    [id_bhvKoopaShell] = true,
+}
+
 local function on_interact(m, obj, type)
     local e = gSquishyExtraStates[m.playerIndex]
     local bhvID = get_id_from_behavior(obj.behavior)
-    if (bhvID == id_bhvDoor or bhvID == id_bhvDoorWarp or bhvID == id_bhvStarDoor) and m.action == ACT_SQUISHY_WALKING then
-        e.forceDefaultWalk = true
-        set_mario_action(m, ACT_WALKING, 0)
-    end
-    if bhvID == id_bhvKoopaShell and m.action == ACT_SQUISHY_WALKING then
+    if forceWalkingInteracts[bhvID] and m.action == ACT_SQUISHY_WALKING then
         e.forceDefaultWalk = true
         set_mario_action(m, ACT_WALKING, 0)
     end

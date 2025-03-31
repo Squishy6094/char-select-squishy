@@ -65,7 +65,7 @@ local function bhv_spark_loop(obj)
     end
 end
 
-local id_bhvSquishySlideSpark = hook_behavior(nil, OBJ_LIST_DEFAULT, true, bhv_spark_init, bhv_spark_loop)
+local id_bhvSquishySlideSpark = hook_behavior(nil, OBJ_LIST_DEFAULT, true, bhv_spark_init, bhv_spark_loop, "id_bhvSquishySlideSpark")
 
 local function bhv_held_shell_init(obj)
     obj.oFlags = OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE
@@ -112,15 +112,16 @@ local function bhv_held_shell_loop(obj)
         obj.oAnimations = nil
     end
 
-    if e.hasShell and m.action & ACT_FLAG_RIDING_SHELL == 0 then
+    if e.hasKoopaShell and m.action & ACT_FLAG_RIDING_SHELL == 0 then
         cur_obj_unhide()
+        cur_obj_hide()
         --obj.oOpacity = math.min(m.forwardVel/70, 1)*255
     else
         cur_obj_hide()
     end
 end
 
-local id_bhvSquishyHeldShell = hook_behavior(nil, OBJ_LIST_DEFAULT, true, bhv_held_shell_init, bhv_held_shell_loop)
+local id_bhvSquishyHeldShell = hook_behavior(nil, OBJ_LIST_DEFAULT, true, bhv_held_shell_init, bhv_held_shell_loop, "id_bhvSquishyHeldShell")
 
 ------------
 

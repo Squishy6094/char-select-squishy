@@ -293,7 +293,7 @@ local function camera_update()
                     camAngleRaw = camAngleRaw + camAnalogX*10*invertXMultiply
                 end
                 if math.abs(camAnalogY) > 10 then
-                    camScale = clamp(camScale - camAnalogY*0.001*invertYMultiply, 1, 7)
+                    camScale = clamp(camScale - camAnalogY*0.001, 1, 7)
                 end
 
                 if controller.buttonPressed & camDigitalLeft ~= 0 then
@@ -303,11 +303,12 @@ local function camera_update()
                     camAngleRaw = camAngleRaw + 0x2000*invertXMultiply
                 end
                 if controller.buttonPressed & camDigitalDown ~= 0 then
-                    camScale = math.min(camScale + invertYMultiply, 7)
+                    camScale = camScale + 1
                 end
                 if controller.buttonPressed & camDigitalUp ~= 0 then
-                    camScale = math.max(camScale - invertYMultiply, 1)
+                    camScale = camScale - 1
                 end
+                camScale = clamp(camScale, 1, 7)
                 camPitch = 0
                 camPan = 0
             else
