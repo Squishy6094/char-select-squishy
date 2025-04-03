@@ -1217,7 +1217,9 @@ local function act_squishy_trick(m)
     end
     add_debug_display(m, ((trickAnims[m.actionArg] and trickAnims[m.actionArg].name) and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
     if m.vel.y < 0 then
-        m.vel.y = m.vel.y + 2.5/e.trickCount
+        m.vel.y = m.vel.y + 3/e.trickCount
+    else
+        m.vel.y = m.vel.y + 1/e.trickCount
     end
 
     update_air_without_turn(m);
