@@ -440,6 +440,7 @@ local MATH_DIVIDE_SHAKE = 1/1000
 
 local doodellScale = 0
 local function hud_render()
+    if hud_is_hidden() then return end
     local m = gMarioStates[0]
     local l = gLakituState
     djui_hud_set_resolution(RESOLUTION_N64)

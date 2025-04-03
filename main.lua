@@ -90,12 +90,25 @@ _G.charSelect.credit_add(MOD_NAME, "KF", "Model Rigging")
 _G.charSelect.credit_add(MOD_NAME, "DM-Kun", "Taunts / Icon")
 
 local TEXT_VERSION = "[CS] Squishy v" .. tostring(VERSION_NUM)
+local opacity = 0
 local function hud_render_menu()
-    if _G.charSelect.character_get_current_number() ~= CT_SQUISHY then return end
+    if _G.charSelect.character_get_current_number() ~= CT_SQUISHY then
+        opacity = lerp(opacity, 0, 0.1)
+    else
+        opacity = lerp(opacity, 255, 0.1)
+    end
+    if opacity < 1 then
+        return
+    end
     local width = djui_hud_get_screen_width() + 1
     local menuColor = _G.charSelect.get_menu_color()
+    local menuColorHalf = {
+        r = menuColor.r * 0.5 + 127,
+        g = menuColor.g * 0.5 + 127,
+        b = menuColor.b * 0.5 + 127
+    }
 
-    djui_hud_set_color(menuColor.r, menuColor.g, menuColor.b, 255)
+    djui_hud_set_color(menuColorHalf.r, menuColorHalf.g, menuColorHalf.b, opacity)
     djui_hud_set_font(FONT_TINY)
     djui_hud_print_text(TEXT_VERSION, width - 5 - djui_hud_measure_text(TEXT_VERSION)*0.5, 3, 0.5)
 end
