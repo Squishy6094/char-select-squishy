@@ -1045,6 +1045,8 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "TEMPRR",          faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric",        faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_DOCTOR,     name = "Doctor",          faceAngleY = trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_JER,        name = "Jer",        faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_JESS,       name = "Jess",          faceAngleY = trickSpin*1},
 }
 table.insert(trickAnims, {model = E_MODEL_SQUISHY_BALATRO, name = "Joker", faceAngleY = trickSpin*2, sound = audio_sample_load("balatro-mult-hit.ogg"), mult = 0})
 local jokerTaunt = #trickAnims
@@ -1123,6 +1125,7 @@ local function squishy_trick_combo_get()
     squishy_trick_combo_combine({"Spin", "Breakdance", "Backflip", "Twirl"}, "SM64")
     squishy_trick_combo_combine({"Mic", "Speaker", "Uzi", "Knife"}, "Funkin'")
     squishy_trick_combo_combine({"AKAGE", "Drill-Hair", "Phone"}, "Triple Baka")
+    squishy_trick_combo_combine({"Jer", "Jess"}, "Green Siblings")
     for i = 1, #trickList do
         local trickData = trickList[i]
         local prefix = trickPrefixes[clamp(trickData.count, 1, #trickPrefixes)]
@@ -1213,7 +1216,9 @@ local function act_squishy_trick(m)
         audio_squishy_taunt_sound(m, trickData.sound)
     end
     add_debug_display(m, ((trickAnims[m.actionArg] and trickAnims[m.actionArg].name) and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
-    m.vel.y = m.vel.y + 2.5/e.trickCount
+    if m.vel.y < 0 then
+        m.vel.y = m.vel.y + 2.5/e.trickCount
+    end
 
     update_air_without_turn(m);
 

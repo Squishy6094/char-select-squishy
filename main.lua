@@ -77,10 +77,17 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
+local ANIMS_SQUISHY = {
+    [CHAR_ANIM_IDLE_HEAD_LEFT] = "squishy_idle",
+    [CHAR_ANIM_IDLE_HEAD_RIGHT] = "squishy_idle",
+    [CHAR_ANIM_IDLE_HEAD_CENTER] = "squishy_idle",
+}
+
 CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
 _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
+_G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
@@ -88,6 +95,7 @@ _G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Taunts / Prettyy >//<")
 _G.charSelect.credit_add(MOD_NAME, "SprSn64", "Squishy Model / Taunts")
 _G.charSelect.credit_add(MOD_NAME, "KF", "Model Rigging")
 _G.charSelect.credit_add(MOD_NAME, "DM-Kun", "Taunts / Icon")
+_G.charSelect.credit_add(MOD_NAME, "Jer", "Taunts / Anims")
 
 local TEXT_VERSION = "[CS] Squishy v" .. tostring(VERSION_NUM)
 local opacity = 0
