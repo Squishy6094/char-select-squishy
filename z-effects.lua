@@ -142,7 +142,7 @@ end
 
 local function on_object_render(obj)
     local m = gMarioStates[obj.oPlayerIndex]
-    if get_id_from_behavior(obj.behavior) == id_bhvSquishySlideSpark then
+    if obj.behavior ~= nil and get_id_from_behavior(obj.behavior) == id_bhvSquishySlideSpark then
         obj.oFaceAngleYaw = m.faceAngle.y--obj.oFaceAngleYaw + 0x800
         obj.oFaceAnglePitch = 0--obj.oFaceAnglePitch + 0x2800
         obj.oFaceAngleRoll = obj.oFaceAngleRoll + 0x2000
@@ -168,7 +168,7 @@ local function on_object_render(obj)
         obj.header.gfx.pos.z = obj.oPosZ
     end
 
-    if get_id_from_behavior(obj.behavior) == id_bhvSquishyHeldShell then
+    if obj.behavior ~= nil and get_id_from_behavior(obj.behavior) == id_bhvSquishyHeldShell then
         obj.oFaceAngleYaw = m.faceAngle.y
         --obj.oFaceAnglePitch = 0--obj.oFaceAnglePitch + 0x2800
         --obj.oFaceAngleRoll = obj.oFaceAngleRoll + 0x2000
