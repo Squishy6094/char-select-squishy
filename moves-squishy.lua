@@ -284,6 +284,7 @@ ACT_SQUISHY_WALL_KICK_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_
 ACT_SQUISHY_SIDE_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_LEDGE_GRAB = allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
 ACT_SQUISHY_TRICK = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_CEILING_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 
 local function act_squishy_walking(m)
     local e = gSquishyExtraStates[m.playerIndex]
@@ -442,7 +443,7 @@ local function act_squishy_long_jump(m)
         m.vel.y = 30
     end
     m.vel.y = m.vel.y + 2
-    common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_CHECK_LEDGE_GRAB)
+    common_air_action_step(m, ACT_SQUISHY_CROUCH_SLIDE, CHAR_ANIM_SLOW_LONGJUMP, AIR_STEP_CHECK_LEDGE_GRAB | AIR_STEP_CHECK_HANG)
     update_omm_air_rotation(m)
     e.gfxAnimX = e.gfxAnimX * 0.8
     m.marioObj.header.gfx.angle.x = e.gfxAnimX
@@ -522,7 +523,6 @@ local function act_squishy_slide_air(m)
             m.marioObj.header.gfx.angle.x = -0xB0*clamp(m.vel.y, -40, 40)
         end
     else
-        --common_air_action_step(m, ACT_SQUISHY_GROUND_POUND_LAND, MARIO_ANIM_SLIDE_KICK, AIR_STEP_NONE)
         m.vel.y = -100
         m.marioObj.header.gfx.angle.x = 0x2000
     end
@@ -558,7 +558,7 @@ local function act_squishy_rollout(m)
         m.pos.y = m.pos.y + 1
     end
     ]]
-    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_FORWARD_SPINNING_FLIP, AIR_STEP_CHECK_LEDGE_GRAB)
+    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_FORWARD_SPINNING_FLIP, AIR_STEP_CHECK_LEDGE_GRAB | AIR_STEP_CHECK_HANG)
     update_omm_air_rotation(m)
     squishy_allow_spin_jump(m, m.actionArg == 0)
     m.peakHeight = m.pos.y
@@ -666,7 +666,7 @@ end
 --- @param m MarioState
 local function act_squishy_ground_pound_jump(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_CHECK_LEDGE_GRAB)
+    common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_SINGLE_JUMP, AIR_STEP_CHECK_LEDGE_GRAB | AIR_STEP_CHECK_HANG)
     update_omm_air_rotation(m)
     squishy_allow_spin_jump(m)
     if m.actionTimer == 1 then
@@ -751,7 +751,7 @@ end
 --- @param m MarioState
 local function act_squishy_fire_burn(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    common_air_action_step(m, ACT_SQUISHY_FIRE_BURN, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_NONE)
+    common_air_action_step(m, ACT_SQUISHY_FIRE_BURN, MARIO_ANIM_FIRE_LAVA_BURN, AIR_STEP_CHECK_HANG)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300)
     m.peakHeight = m.pos.y
 
@@ -923,7 +923,7 @@ local function act_squishy_wall_kick_air(m)
     end
 
     play_mario_jump_sound(m);
-    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_SLIDEJUMP, AIR_STEP_CHECK_LEDGE_GRAB);
+    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_SLIDEJUMP, AIR_STEP_CHECK_LEDGE_GRAB | AIR_STEP_CHECK_HANG);
     m.actionTimer = m.actionTimer + 1
 end
 
@@ -944,7 +944,7 @@ local function act_squishy_side_flip(m)
 
     play_mario_jump_sound(m);
 
-    if (common_air_action_step(m, ACT_SIDE_FLIP_LAND, MARIO_ANIM_SLIDEFLIP, AIR_STEP_CHECK_LEDGE_GRAB) ~= AIR_STEP_GRABBED_LEDGE) then
+    if (common_air_action_step(m, ACT_SIDE_FLIP_LAND, MARIO_ANIM_SLIDEFLIP, AIR_STEP_CHECK_LEDGE_GRAB | AIR_STEP_CHECK_HANG) ~= AIR_STEP_GRABBED_LEDGE) then
         m.marioObj.header.gfx.angle.y = m.marioObj.header.gfx.angle.y + 0x8000;
     end
 
@@ -1224,7 +1224,7 @@ local function act_squishy_trick(m)
 
     update_air_without_turn(m);
 
-    local step = perform_air_step(m, AIR_STEP_NONE)
+    local step = perform_air_step(m, AIR_STEP_CHECK_HANG)
     if step == AIR_STEP_LANDED then
         if m.actionTimer < 10 then
             e.trickCount = 0
@@ -1239,6 +1239,8 @@ local function act_squishy_trick(m)
             audio_squishy_taunt_land(m, true)
             set_mario_action(m, ACT_BACKWARD_AIR_KB, 0)
         end
+    elseif step == AIR_STEP_GRABBED_CEILING then
+        set_mario_action(m, ACT_SQUISHY_CEILING_SLIDE, 0)
     end
     if type(e.trickAnim) == "string" then
         smlua_anim_util_set_animation(m.marioObj, e.trickAnim)
@@ -1271,6 +1273,35 @@ local function act_squishy_trick(m)
     end
 end
 
+local function act_squishy_ceiling_slide(m)
+    if (m.input & INPUT_A_DOWN) == 0 or m.ceil == nil or m.ceil.type ~= SURFACE_HANGABLE or m.forwardVel < 1 then
+        return set_mario_action(m, ACT_FREEFALL, 0)
+    end
+
+    m.vel.y = 0
+    m.pos.y = m.ceilHeight - m.marioObj.hitboxHeight
+
+    local nextPos = {x = 0, y = 0, z = 0}
+    nextPos.x = m.pos.x - m.ceil.normal.y * m.vel.x;
+    nextPos.z = m.pos.z - m.ceil.normal.y * m.vel.z;
+    nextPos.y = m.pos.y;
+
+    stepResult = perform_hanging_step(m, nextPos);
+    if stepResult == 2 then -- HANG_LEFT_CEIL
+        set_mario_action(m, ACT_FREEFALL, 0)
+    end
+    set_mario_animation(m, MARIO_ANIM_MOVE_ON_WIRE_NET_RIGHT)
+    vec3f_copy(m.marioObj.header.gfx.pos, m.pos)
+    vec3s_set(m.marioObj.header.gfx.angle, 0, m.faceAngle.y, 0)
+
+    m.vel.x = clamp_soft(m.vel.x, 0, 0, 0.1)
+    m.vel.z = clamp_soft(m.vel.z, 0, 0, 0.1)
+    m.forwardVel = clamp_soft(m.forwardVel, 0, 0, 0.5)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0xF0, 0xF0)
+
+    return false
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1291,6 +1322,7 @@ hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, {every_frame = act_squishy_wall_kic
 hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
 hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
+hook_mario_action(ACT_SQUISHY_CEILING_SLIDE, {every_frame = act_squishy_ceiling_slide})
 if _G.doorBust then
     _G.doorBust.add_door_bust_action(ACT_SQUISHY_SLIDE)
 end
@@ -1477,6 +1509,9 @@ local function squishy_before_action(m, nextAct)
     end
     if nextAct == ACT_LEDGE_GRAB then
         return set_mario_action(m, ACT_SQUISHY_LEDGE_GRAB, 0)
+    end
+    if nextAct == ACT_START_HANGING then
+        return set_mario_action(m, ACT_SQUISHY_CEILING_SLIDE, 0)
     end
 end
 
