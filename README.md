@@ -3,9 +3,9 @@ A Character Select Pack meant to set a defining quality standard for modern Char
 
 Put simple, uhmmm silly lady go zoom with codee!!! >.<
 
-This release is made purely in celebration of my birthday!! Which of course means that this is not yet a finished product! I ask that you report ANY issues you encounter with the mod in the [Github Issues](https://github.com/Squishy6094/char-select-squishy/issues) for the mod as well as give feedback for what you think I can improve on! And also stay up to date by following progress in the [Squishy Discord Server](https://discord.gg/9hCFXbKP5h)!!!
+Please report ANY issues you encounter with the mod in the [Github Issues](https://github.com/Squishy6094/char-select-squishy/issues) for the mod as well as give feedback for what you think I can improve on! And also stay up to date by following progress in the [Squishy Discord Server](https://discord.gg/9hCFXbKP5h)!!!
 
-This release features:
+This mod currently features:
 - Squishy (x1)
   - :transgender_flag: 
 - A full Moveset making use of Character Select's Moveset Hooks
