@@ -1067,6 +1067,7 @@ local trickPrefixes = {
 
 local trickList = {}
 local function squishy_trick_combo_add(m, name, mult)
+    if m.playerIndex ~= 0 then return end
     if mult == nil then mult = 0 end
     local e = gSquishyExtraStates[m.playerIndex]
     local trickListFound = false
@@ -1183,7 +1184,6 @@ end
 
 local function act_squishy_trick(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    local index = network_global_index_from_local(m.playerIndex)
     if m.actionTimer == 0 then
         -- Reset Anim Stuffs
         e.gfxAnimX = 0
@@ -1367,7 +1367,9 @@ local function squishy_update(m)
     if m.action & ACT_FLAG_AIR == 0 then
         e.groundpoundCancels = 0
         if e.trickCount > 0 then
-            m.forwardVel = m.forwardVel + math.min(e.trickCount*2 * squishy_trick_combo_get_mult(), 100)
+            if m.input & INPUT_NONZERO_ANALOG ~= 0 then
+                m.forwardVel = m.forwardVel + math.min(e.trickCount*2 * squishy_trick_combo_get_mult(), 100)
+            end
             audio_squishy_taunt_land(m)
             e.trickCount = 0
         end
@@ -1379,7 +1381,7 @@ local function squishy_update(m)
     end
 
     -- Revert Trick Model Changes
-    if m.action ~= ACT_SQUISHY_TRICK and _G.charSelect.character_get_current_table(CT_SQUISHY).model ~= E_MODEL_SQUISHY then
+    if m.playerIndex == 0 and m.action ~= ACT_SQUISHY_TRICK and _G.charSelect.character_get_current_table(CT_SQUISHY).model ~= E_MODEL_SQUISHY then
         _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, E_MODEL_SQUISHY)
     end
     add_debug_display(m, "Tricks: " .. (e.trickCount))
@@ -1703,7 +1705,7 @@ local function hud_render_moveset()
         local trickTextScale = clamp((width - 80)/trickNameLength, 0.3, 1)
         local x = width*0.5 - trickNameLength*trickTextScale*0.5
         local y = height - 64 - trickTextY
-        djui_hud_print_text(trickName, x, y + (1 - trickTextScale)*32, trickTextScale)
+        djui_hud_print_text(trickName, x, y + (1 - trickTextScale)*16, trickTextScale)
 
         local trickScoreText = "SCORE: " .. trickScore .. (trickMult > 1 and " x " .. trickMult or "")
         djui_hud_print_text(trickScoreText, width*0.5 - djui_hud_measure_text(trickScoreText)*0.5, y + 20, 1)
