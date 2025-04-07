@@ -105,9 +105,9 @@ u8 squishy_queer_metal_light_rgba16[] = {
 	#include "actors/squishy/queer-metal-light.rgba16.inc.c"
 };
 
-Gfx squishy_shirtemblem_ia8_aligner[] = {gsSPEndDisplayList()};
-u8 squishy_shirtemblem_ia8[] = {
-	#include "actors/squishy/shirtemblem.ia8.inc.c"
+Gfx squishy_squishy_shirt_emblem_ia8_aligner[] = {gsSPEndDisplayList()};
+u8 squishy_squishy_shirt_emblem_ia8[] = {
+	#include "actors/squishy/squishy-shirt-emblem.ia8.inc.c"
 };
 
 Gfx squishy_lashes_ia8_aligner[] = {gsSPEndDisplayList()};
@@ -120,9 +120,9 @@ u8 squishy_mouth_ia8[] = {
 	#include "actors/squishy/mouth.ia8.inc.c"
 };
 
-Gfx squishy_hatemblem_ia8_aligner[] = {gsSPEndDisplayList()};
-u8 squishy_hatemblem_ia8[] = {
-	#include "actors/squishy/hatemblem.ia8.inc.c"
+Gfx squishy_squishy_hat_emblem_ia8_aligner[] = {gsSPEndDisplayList()};
+u8 squishy_squishy_hat_emblem_ia8[] = {
+	#include "actors/squishy/squishy-hat-emblem.ia8.inc.c"
 };
 
 Gfx squishy_squishy_mouth_hurt_ia8_aligner[] = {gsSPEndDisplayList()};
@@ -2910,7 +2910,7 @@ Gfx mat_squishy_SquishyShirtEmblem[] = {
 	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
 	gsDPSetAlphaDither(G_AD_NOISE),
 	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, squishy_shirtemblem_ia8),
+	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, squishy_squishy_shirt_emblem_ia8),
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 255, 512),
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 4, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0),
@@ -3022,7 +3022,7 @@ Gfx mat_squishy_SquishyCapEmblem_layer5[] = {
 	gsDPSetRenderMode(G_RM_FOG_SHADE_A, G_RM_AA_ZB_XLU_SURF2),
 	gsSPTexture(65535, 65535, 0, 0, 1),
 	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
-	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, squishy_hatemblem_ia8),
+	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, squishy_squishy_hat_emblem_ia8),
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 511, 512),
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0),
