@@ -657,7 +657,7 @@ local function act_squishy_ground_pound_land(m)
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
             m.faceAngle.y = m.intendedYaw
-            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.7
+            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.75
             set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
         end
     end
@@ -1396,11 +1396,11 @@ local function squishy_update(m)
         set_mario_action(m, ACT_SQUISHY_SLIDE, 1)
     end
     if m.action == ACT_SLIDE_KICK then
-        m.forwardVel = m.forwardVel + 30
+        m.forwardVel = m.forwardVel + 40
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
     if (m.action == ACT_PUNCHING or m.action == ACT_MOVE_PUNCHING) and m.actionArg == 9 then
-        m.forwardVel = 70
+        m.forwardVel = 80
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
     if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
