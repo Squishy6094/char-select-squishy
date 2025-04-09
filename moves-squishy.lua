@@ -157,8 +157,10 @@ local function update_squishy_sliding(m, stopSpeed)
     --! This is attempting to use trig derivatives to rotate Mario's speed.
     -- It is slightly off/asymmetric since it uses the new X speed, but the old
     -- Z speed.
+    -- fix for the above ^
+    local oldVelX = m.slideVelX
     m.slideVelX = m.slideVelX + m.slideVelZ * (m.intendedMag / 32.0) * sideward * 0.05;
-    m.slideVelZ = m.slideVelZ - m.slideVelX * (m.intendedMag / 32.0) * sideward * 0.05;
+    m.slideVelZ = m.slideVelZ - oldVelX * (m.intendedMag / 32.0) * sideward * 0.05;
 
     newSpeed = math.sqrt(m.slideVelX * m.slideVelX + m.slideVelZ * m.slideVelZ);
 
@@ -730,7 +732,7 @@ local function act_squishy_wall_slide(m)
             add_debug_display(m, "Wall Angle Diff: " .. debug_num_to_hex(wallAngleDiff))
         end
         e.prevWallAngle = wallAngle
-        m.marioObj.header.gfx.angle.y = atan2s(m.wall.normal.z, m.wall.normal.x)
+        m.marioObj.header.gfx.angle.y = wallAngle
         e.prevFloorDist = m.pos.y - m.floorHeight
         play_sound(SOUND_MOVING_TERRAIN_SLIDE + m.terrainSoundAddend, m.marioObj.header.gfx.cameraToObject);
         add_debug_display(m, "Wall Angle: " .. debug_num_to_hex(wallAngle))
@@ -1392,21 +1394,7 @@ local function squishy_update(m)
     if (m.action == ACT_SQUISHY_LONG_JUMP or m.action == ACT_SQUISHY_DIVE) and m.input & INPUT_Z_PRESSED ~= 0 then
         set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, (m.action == ACT_SQUISHY_DIVE and 1 or 0), 60)
     end
-    if m.action == ACT_BUTT_SLIDE then
-        set_mario_action(m, ACT_SQUISHY_SLIDE, 1)
-    end
-    if m.action == ACT_SLIDE_KICK then
-        m.forwardVel = m.forwardVel + 40
-        set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
-    end
-    if (m.action == ACT_PUNCHING or m.action == ACT_MOVE_PUNCHING) and m.actionArg == 9 then
-        m.forwardVel = 80
-        set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
-    end
-    if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
-        m.pos.y = math.min(math.max(m.pos.y - m.floorHeight, 1000) + m.floorHeight, m.ceilHeight - 150) -- Force spawn height
-        set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
-    end
+
     if e.spamBurnout > 0 then
         if (m.flags & MARIO_METAL_CAP == 0) then
             set_mario_particle_flag(m, PARTICLE_FIRE)
@@ -1442,6 +1430,25 @@ local function squishy_update(m)
 
     if hitActs[m.action] then
         e.hasKoopaShell = false
+    end
+end
+
+---@param m MarioState
+local function squishy_on_action(m)
+    if m.action == ACT_BUTT_SLIDE then
+        set_mario_action(m, ACT_SQUISHY_SLIDE, 1)
+    end
+    if m.action == ACT_SLIDE_KICK then
+        m.forwardVel = m.forwardVel + 40
+        set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
+    end
+    if (m.action == ACT_PUNCHING or m.action == ACT_MOVE_PUNCHING) and m.actionArg == 9 then
+        m.forwardVel = 80
+        set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
+    end
+    if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
+        m.pos.y = math.min(math.max(m.pos.y - m.floorHeight, 1000) + m.floorHeight, m.ceilHeight - 150) -- Force spawn height
+        set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
 end
 
@@ -1750,6 +1757,7 @@ end
 
 local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_SET_MARIO_ACTION, squishy_on_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render_moveset)
