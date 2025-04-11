@@ -166,8 +166,9 @@ end
 
 function mario_is_on_water(m)
     if m.waterLevel == nil then return false end
-    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) then return false end
-    if m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) < m.floorHeight + 60 then return false end
+    local steepness = get_mario_floor_steepness(m)
+    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*steepness then return false end
+    if m.waterLevel + math.abs(m.forwardVel)*steepness < m.floorHeight + 60 then return false end
     return true
 end
 
@@ -182,10 +183,10 @@ end
 
 function get_mario_y_vel_from_floor(m)
     if m.pos.y == m.floorHeight then
-        local yVel = math.sqrt(m.vel.x^2 + m.vel.y^2)*get_mario_floor_steepness(m)
-        local velAngle = (math.sqrt(m.vel.z^2 + m.vel.x^2) > 0 and atan2s(m.vel.z, m.vel.x) or m.faceAngle.y)
-        local angleDif = convert_s16(velAngle - m.faceAngle.y)
-        return yVel * ((angleDif > 0x4000 or angleDif < -0x4000) and 1 or -1)
+        local velMag = math.sqrt(m.vel.x^2 + m.vel.y^2)
+        local yVel = velMag*get_mario_floor_steepness(m)
+        local velAngle = (velMag > 0 and atan2s(m.vel.z, m.vel.x) or m.faceAngle.y)
+        return yVel * ((abs_angle_diff(velAngle, m.faceAngle.y) > 0x4000) and 1 or -1)
     else
         return m.vel.y
     end
