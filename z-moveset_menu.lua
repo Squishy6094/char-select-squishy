@@ -23,7 +23,6 @@ local movesetMenus = {
         { input = 'Aa',   name = "Trick",         desc = "Perform a random trick. Chain them together for huge cool points! Better not fumble though.." },
         { input = 'Za',   name = "Ground Pound",  desc = "A spinning ground pound! Press [A] just after landing to bounce high." },
         { input = 'ZAa',  name = "Rollout Cancel" },
-        { input = 'BZma', name = "Drill Dive",    desc = "Alternative ground pound, performed out of a dive." },
         { input = 'ZB',   name = "Slide Kick",    desc = "Firey slide kick that builds up tons of speed!" },
     }
 }
