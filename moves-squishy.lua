@@ -36,6 +36,7 @@ local function squishy_reset_extra_states(index)
         gfxAnimZ = 0,
 
         stretchVelY = 0,
+        lastAirVelY = 0
     }
 end
 
@@ -1435,9 +1436,19 @@ local function squishy_update(m)
     end
 
     -- Squish and Stretch
+    local velDiv = 300
     local absVelY = math.abs(m.vel.y)
-    e.stretchVelY = clamp_soft(e.stretchVelY*200, absVelY, absVelY, 5)*0.005
-    obj_scale_xyz(m.marioObj, 1 - e.stretchVelY*0.5, 1 + e.stretchVelY, 1 - e.stretchVelY*0.5)
+    if m.action & ACT_FLAG_AIR == 0 and e.lastAirVelY ~= 0 then
+        e.stretchVelY = e.lastAirVelY/velDiv
+        e.lastAirVelY = clamp_soft(e.lastAirVelY, 0, 0, 5)
+    else
+        e.stretchVelY = e.stretchVelY - (e.stretchVelY - absVelY/velDiv)*0.95
+        e.lastAirVelY = m.vel.y
+    end
+    djui_chat_message_create(tostring(e.stretchVelY))
+    djui_chat_message_create(tostring(absVelY/velDiv))
+    e.stretchVelY = clamp(e.stretchVelY, -0.9, 1.9)
+    obj_scale_xyz(m.marioObj, 1 - e.stretchVelY, 1 + e.stretchVelY, 1 - e.stretchVelY)    
 end
 
 ---@param m MarioState
