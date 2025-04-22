@@ -34,6 +34,8 @@ local function squishy_reset_extra_states(index)
         gfxAnimX = 0,
         gfxAnimY = 0,
         gfxAnimZ = 0,
+
+        stretchVelY = 0,
     }
 end
 
@@ -1431,6 +1433,11 @@ local function squishy_update(m)
     if hitActs[m.action] then
         e.hasKoopaShell = false
     end
+
+    -- Squish and Stretch
+    local absVelY = math.abs(m.vel.y)
+    e.stretchVelY = clamp_soft(e.stretchVelY*200, absVelY, absVelY, 5)*0.005
+    obj_scale_xyz(m.marioObj, 1 - e.stretchVelY*0.5, 1 + e.stretchVelY, 1 - e.stretchVelY*0.5)
 end
 
 ---@param m MarioState
