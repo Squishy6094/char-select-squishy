@@ -290,6 +290,7 @@ ACT_SQUISHY_SIDE_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVI
 ACT_SQUISHY_LEDGE_GRAB = allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
 ACT_SQUISHY_TRICK = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_CEILING_SLIDE = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_POLE_SWING = allocate_mario_action(ACT_FLAG_STATIONARY | ACT_FLAG_ON_POLE | ACT_FLAG_ATTACKING)
 
 local function act_squishy_walking(m)
     local e = gSquishyExtraStates[m.playerIndex]
@@ -1307,6 +1308,40 @@ local function act_squishy_ceiling_slide(m)
     return false
 end
 
+local function squishy_act_pole_swing(m)
+    local sp24
+    local marioObj = m.marioObj;
+    local cameraAngle = m.area.camera.yaw;
+
+    if (m.input & INPUT_A_PRESSED) ~= 0 then
+        add_tree_leaf_particles(m);
+        m.faceAngle.y = m.faceAngle.y + 0x8000;
+        return set_mario_action(m, ACT_SQUISHY_ROLLOUT, 0);
+    end
+
+    if (m.controller.stickY < 8.0) then
+        return set_mario_action(m, ACT_HOLDING_POLE, 0)
+    end
+
+    marioObj.oMarioPolePos = marioObj.oMarioPolePos + 20;
+    marioObj.oMarioPoleYawVel = 0;
+    m.faceAngle.y = convert_s16(m.faceAngle.y + 0x100)
+
+    if (set_pole_position(m, 0.0) == 0) then
+        sp24 = m.controller.stickY / 4.0 * 0x10000;
+        set_mario_anim_with_accel(m, MARIO_ANIM_CLIMB_UP_POLE, sp24);
+        add_tree_leaf_particles(m);
+        play_climbing_sounds(m, 1);
+    end
+
+    local poleTop = m.usedObj.hitboxHeight - 100.0;
+    if (marioObj.oMarioPolePos >= poleTop - 0.4) then
+        return set_mario_action(m, ACT_TRIPLE_JUMP, 0);
+    end
+
+    return false;
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1328,6 +1363,7 @@ hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
 hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
 hook_mario_action(ACT_SQUISHY_CEILING_SLIDE, {every_frame = act_squishy_ceiling_slide})
+hook_mario_action(ACT_SQUISHY_POLE_SWING, {every_frame = squishy_act_pole_swing})
 if _G.doorBust then
     _G.doorBust.add_door_bust_action(ACT_SQUISHY_SLIDE)
 end
@@ -1438,15 +1474,17 @@ local function squishy_update(m)
     -- Squish and Stretch
     local velDiv = 300
     local absVelY = math.abs(m.vel.y)
-    if m.action & ACT_FLAG_AIR == 0 and e.lastAirVelY ~= 0 then
-        e.stretchVelY = e.lastAirVelY/velDiv
-        e.lastAirVelY = clamp_soft(e.lastAirVelY, 0, 0, 5)
-    else
+    if m.action & ACT_FLAG_AIR ~= 0 then
         e.stretchVelY = e.stretchVelY - (e.stretchVelY - absVelY/velDiv)*0.95
         e.lastAirVelY = m.vel.y
+    elseif m.action & ACT_FLAG_SWIMMING ~= 0 then
+        absVelY = 0
+        e.lastAirVelY = 0
+        e.stretchVelY = e.stretchVelY - (e.stretchVelY - absVelY/velDiv)*0.95
+    elseif e.lastAirVelY ~= 0 then
+        e.stretchVelY = e.lastAirVelY/velDiv
+        e.lastAirVelY = clamp_soft(e.lastAirVelY, 0, 0, 5)
     end
-    djui_chat_message_create(tostring(e.stretchVelY))
-    djui_chat_message_create(tostring(absVelY/velDiv))
     e.stretchVelY = clamp(e.stretchVelY, -0.9, 1.9)
     obj_scale_xyz(m.marioObj, 1 - e.stretchVelY, 1 + e.stretchVelY, 1 - e.stretchVelY)    
 end
@@ -1539,6 +1577,9 @@ local function squishy_before_action(m, nextAct)
     end
     if nextAct == ACT_START_HANGING then
         return set_mario_action(m, ACT_SQUISHY_CEILING_SLIDE, 0)
+    end
+    if nextAct == ACT_GRAB_POLE_FAST or nextAct == ACT_GRAB_POLE_SLOW then
+        return set_mario_action(m, ACT_SQUISHY_POLE_SWING, 0)
     end
 end
 
