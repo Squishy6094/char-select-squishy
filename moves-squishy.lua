@@ -1031,6 +1031,7 @@ local function act_squishy_ledge_grab(m)
 end
 
 local E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
+local E_MODEL_SQUISHY_PLUSH = smlua_model_util_get_id("squishy_plush_geo")
 local trickSpin = 0x10000
 local trickAnims = {
     {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2}, -- Failsafe Anim
@@ -1052,8 +1053,9 @@ local trickAnims = {
     {anim = SQUISHY_ANIM_TRICK_TEMPRR,     name = "TEMPRR",          faceAngleY =  trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_SURGE,      name = "Electric",        faceAngleY = -trickSpin*1},
     {anim = SQUISHY_ANIM_TRICK_DOCTOR,     name = "Doctor",          faceAngleY = trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_JER,        name = "Jer",        faceAngleY = -trickSpin*1},
-    {anim = SQUISHY_ANIM_TRICK_JESS,       name = "Jess",          faceAngleY = trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_JER,        name = "Jer",             faceAngleY = -trickSpin*1},
+    {anim = SQUISHY_ANIM_TRICK_JESS,       name = "Jess",            faceAngleY = trickSpin*1},
+    {model = E_MODEL_SQUISHY_PLUSH,        name = "Marketable",      faceAngleY = trickSpin*1, sound = audio_sample_load("squishy-plushie.ogg")}
 }
 table.insert(trickAnims, {model = E_MODEL_SQUISHY_BALATRO, name = "Joker", faceAngleY = trickSpin*2, sound = audio_sample_load("balatro-mult-hit.ogg"), mult = 0})
 local jokerTaunt = #trickAnims
@@ -1205,9 +1207,10 @@ local function act_squishy_trick(m)
             m.vel.y = math.max(m.vel.y, 0)
         end
         if m.playerIndex == 0 then
+            m.actionArg = math.random(2, #trickAnims)
+            
             -- +1 Mult for every Taunt in hand
             trickAnims[jokerTaunt].mult = e.trickCount
-            m.actionArg = math.random(2, #trickAnims)
         else
             m.actionArg = 1
         end
@@ -1499,7 +1502,7 @@ local function squishy_update(m)
     -- Squish and Stretch
     local velDiv = 300
     local absVelY = math.abs(m.vel.y)
-    if m.action & ACT_FLAG_AIR ~= 0 then
+    if m.action & ACT_FLAG_AIR ~= 0 or m.action & ACT_FLAG_ON_POLE ~= 0 then
         e.stretchVelY = e.stretchVelY - (e.stretchVelY - absVelY/velDiv)*0.95
         e.lastAirVelY = m.vel.y
     elseif m.action & ACT_FLAG_SWIMMING ~= 0 then
@@ -1528,7 +1531,15 @@ local function squishy_on_action(m)
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
     if m.action == ACT_SPAWN_SPIN_AIRBORNE or m.action == ACT_SPAWN_NO_SPIN_AIRBORNE then
-        m.pos.y = math.min(math.max(m.pos.y - m.floorHeight, 1000) + m.floorHeight, m.ceilHeight - 150) -- Force spawn height
+        local ceiling = collision_find_surface_on_ray(m.pos.x, m.floorHeight, m.pos.z, 0, 3000, 0).hitPos.y
+        m.pos.y = math.max(m.pos.y, m.floorHeight + 1000) -- Force spawn height
+        djui_chat_message_create(tostring(ceiling))
+        djui_chat_message_create(tostring(ceiling > m.floorHeight))
+        djui_chat_message_create(tostring(ceiling < m.pos.y))
+        if ceiling > m.floorHeight and ceiling < m.pos.y then
+            m.pos.y = ceiling
+        end
+        djui_chat_message_create(tostring(m.pos.y - m.floorHeight))
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
 end
