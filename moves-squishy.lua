@@ -13,6 +13,7 @@ local function squishy_reset_extra_states(index)
     gSquishyExtraStates[index] = {
         index = network_global_index_from_local(0),
         forwardVelStore = 0,
+        poleVel = 0,
         yVelStore = 0,
         groundPoundFromRollout = true,
         prevForwardVel = 0,
@@ -1311,41 +1312,55 @@ end
 
 local function squishy_act_pole_swing(m)
     local e = gSquishyExtraStates[m.playerIndex]
-    local sp24
-    local marioObj = m.marioObj
-
-    if m.actionTimer == 0 then
-        m.vel.y = e.forwardVelStore --math.sqrt(m.vel.y^2 + m.forwardVel^2)
-    end
-    m.vel.y = m.vel.y - 1
-
-    if (m.input & INPUT_A_PRESSED) ~= 0 then
-        add_tree_leaf_particles(m)
-        m.faceAngle.y = m.faceAngle.y + 0x8000
-        return set_mario_action(m, ACT_SQUISHY_ROLLOUT, 0)
-    end
-
-    djui_chat_message_create(tostring(m.vel.y))
-    
-    m.faceAngle.y = convert_s16(m.faceAngle.y + m.marioObj.oMarioPoleYawVel * 2)
+    local oldAngle = m.faceAngle.y
+    m.faceAngle.y = m.faceAngle.y + m.marioObj.oMarioPoleYawVel * 2
     m.marioObj.oMarioPoleYawVel = m.marioObj.oMarioPoleYawVel - 0x20
 
-    if (set_pole_position(m, 0.0) == 0) then
+    if m.faceAngle.y < oldAngle then
+        play_sound(SOUND_ACTION_SPIN, m.marioObj.header.gfx.cameraToObject)
+    end
+
+    if set_pole_position(m, 0) == 0 then
         m.marioObj.oMarioPolePos = m.marioObj.oMarioPolePos + m.marioObj.oMarioPoleYawVel / 0x80
-        m.forwardVel = m.marioObj.oMarioPoleYawVel / 0x40
-        --sp24 = m.controller.stickY / 4.0 * 0x10000
-        set_mario_animation(m, MARIO_ANIM_CLIMB_UP_POLE)
+
         add_tree_leaf_particles(m)
-        play_climbing_sounds(m, 1)
-    end
+        play_climbing_sounds(m, 2)
 
-    local poleTop = m.usedObj.hitboxHeight - 100.0
-    if (marioObj.oMarioPolePos >= poleTop - 0.4) then
-        return set_mario_action(m, ACT_TRIPLE_JUMP, 0)
-    end
+        if (m.input & INPUT_A_PRESSED) ~= 0
+        or m.marioObj.oMarioPolePos >= m.usedObj.hitboxHeight - 100 then
 
-    m.actionTimer = m.actionTimer + 1
-    return false;
+            if (m.input & INPUT_NONZERO_ANALOG) ~= 0 then
+                m.faceAngle.y = m.intendedYaw
+            else
+                m.faceAngle.y = m.area.camera.yaw - 0x8000
+            end
+
+            m.forwardVel = m.marioObj.oMarioPoleYawVel / 0x40
+
+            if m.marioObj.oMarioPolePos >= m.usedObj.hitboxHeight - 100 then
+                m.forwardVel = e.poleVel*0.6
+                m.vel.y = e.poleVel*0.6
+                set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
+                --set_mario_y_vel_based_on_fspeed(m, 62, 0)
+                --m.forwardVel = max(m.forwardVel * 3/4, 24)
+            else
+                set_mario_action(m, ACT_SQUISHY_WALL_KICK_AIR, 0)
+            end
+        end
+
+        local bhv = get_id_from_behavior(m.usedObj.behavior)
+
+        if m.marioObj.oMarioPoleYawVel > 0x800
+        and bhv ~= id_bhvDDDPole and bhv ~= id_bhvDddMovingPole then
+            set_mario_animation(m, MARIO_ANIM_GRAB_POLE_SWING_PART1)
+        else
+            set_mario_animation(m, MARIO_ANIM_GRAB_POLE_SWING_PART2)
+            if is_anim_at_end(m) ~= 0 then
+                m.marioObj.oMarioPoleYawVel = 0
+                set_mario_action(m, ACT_HOLDING_POLE, 0)
+            end
+        end
+    end
 end
 
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
@@ -1477,6 +1492,10 @@ local function squishy_update(m)
         e.hasKoopaShell = false
     end
 
+    if m.action & ACT_FLAG_ON_POLE == 0 then
+        e.poleVel = math.sqrt(m.forwardVel^2 + m.vel.y^2) * (m.vel.y < -30 and -1 or 1)
+    end
+
     -- Squish and Stretch
     local velDiv = 300
     local absVelY = math.abs(m.vel.y)
@@ -1492,7 +1511,7 @@ local function squishy_update(m)
         e.lastAirVelY = clamp_soft(e.lastAirVelY, 0, 0, 5)
     end
     e.stretchVelY = clamp(e.stretchVelY, -0.9, 1.9)
-    obj_scale_xyz(m.marioObj, 1 - e.stretchVelY, 1 + e.stretchVelY, 1 - e.stretchVelY)    
+    obj_scale_xyz(m.marioObj, 1 - e.stretchVelY, 1 + e.stretchVelY, 1 - e.stretchVelY)
 end
 
 ---@param m MarioState
@@ -1585,7 +1604,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action(m, ACT_SQUISHY_CEILING_SLIDE, 0)
     end
     if nextAct == ACT_GRAB_POLE_FAST or nextAct == ACT_GRAB_POLE_SLOW then
-        m.marioObj.oMarioPoleYawVel = m.forwardVel * 40
+        m.marioObj.oMarioPoleYawVel = e.poleVel * 40
         return set_mario_action(m, ACT_SQUISHY_POLE_SWING, 0)
     end
 end
