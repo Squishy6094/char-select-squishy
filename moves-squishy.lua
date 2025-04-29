@@ -1341,11 +1341,9 @@ local function squishy_act_pole_swing(m)
             m.forwardVel = m.marioObj.oMarioPoleYawVel / 0x40
 
             if m.marioObj.oMarioPolePos >= m.usedObj.hitboxHeight - 100 then
-                m.forwardVel = e.poleVel*0.6
-                m.vel.y = e.poleVel*0.6
+                m.forwardVel = m.marioObj.oMarioPoleYawVel/0x40
+                m.vel.y = m.marioObj.oMarioPoleYawVel/0x40
                 set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
-                --set_mario_y_vel_based_on_fspeed(m, 62, 0)
-                --m.forwardVel = max(m.forwardVel * 3/4, 24)
             else
                 set_mario_action(m, ACT_SQUISHY_WALL_KICK_AIR, 0)
             end

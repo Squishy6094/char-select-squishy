@@ -463,7 +463,7 @@ local function hud_render()
         _G.charSelect.hud_hide_element(HUD_DISPLAY_FLAG_CAMERA)
         djui_hud_set_rotation(l.roll, 0.5, 0.8)
         djui_hud_render_texture_tile(TEX_DOODELL_CAM, width - 38 - 64*doodellScale + shakeX, height - 38 - 64*doodellScale + eepyCamOffset*0.1*doodellScale + shakeY, doodellScale, doodellScale, animFrame*128, doodellState*128, 128, 128)
-        djui_hud_set_rotation(l.roll, 0, 0)
+        djui_hud_set_rotation(0, 0, 0)
     else
         _G.charSelect.hud_show_element(HUD_DISPLAY_FLAG_CAMERA)
     end
