@@ -62,7 +62,53 @@ local CAPS_SQUISHY = {
     metalWing = smlua_model_util_get_id("squishy_cap_metal_geo")
 }
 
-local PALETTE_SQUISHY = {
+local squishyPalettes = {
+    {
+        name = "Default",
+        [SHOES] = "1C1C1C",
+        [GLOVES] = "BFC72F",
+        [EMBLEM] = "FFFFFF",
+        [HAIR] = "130D0A",
+        [SKIN] = "FBE7B7",
+        [SHIRT] = "12250B",
+        [PANTS] = "0B0E20",
+    },
+    {
+        name = "Soft Sided",
+        [PANTS] = {r = 34, g = 28, b = 26},
+        [SHIRT] = {r = 18, g = 32, b = 32},
+        [GLOVES] = {r = 255, g = 255, b = 255},
+        [SHOES] = {r = 74, g = 84, b = 98},
+        [HAIR] = {r = 59, g = 23, b = 37},
+        [SKIN] = {r = 233, g = 181, b = 163},
+        [CAP] = {r = 34, g = 28, b = 26},
+        [EMBLEM] = {r = 255, g = 255, b = 255},
+    },
+    {
+        name = "Shell",
+        [PANTS]  = "0c0a15",
+        [SHIRT]  = "1a152c",
+        [GLOVES] = "ffffff",
+        [SHOES]  = "ffffff",
+        [HAIR]   = "867edd",
+        [SKIN]   = "feffff",
+        [CAP]    = "1a152c",
+        [EMBLEM] = "8176ff",
+    },
+    {
+        name = "Yo-Yo Girl",
+        [PANTS] = {r = 77, g = 70, b = 59},
+        [SHIRT] = {r = 100, g = 140, b = 170},
+        [GLOVES] = {r = 234, g = 211, b = 130},
+        [SHOES] = {r = 100, g = 140, b = 170},
+        [HAIR] = {r = 240, g = 206, b = 147},
+        [SKIN] = {r = 233, g = 191, b = 162},
+        [CAP] = {r = 100, g = 140, b = 170},
+        [EMBLEM] = {r = 234, g = 211, b = 130},
+    },
+}
+
+local PALETTE_SQUISHY_DEFAULT = {
     [SHOES] = "1C1C1C",
     [GLOVES] = "BFC72F",
     [EMBLEM] = "FFFFFF",
@@ -84,11 +130,14 @@ local ANIMS_SQUISHY = {
 }
 
 CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
-_G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 _G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
 _G.charSelect.character_set_category(CT_SQUISHY, "char-select-squishy")
+
+for i = 1, #squishyPalettes do
+    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, squishyPalettes[i], squishyPalettes[i].name)
+end
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
