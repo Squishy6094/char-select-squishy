@@ -194,6 +194,7 @@ local ANIMS_SQUISHY = {
     [CHAR_ANIM_IDLE_HEAD_LEFT] = "squishy_idle",
     [CHAR_ANIM_IDLE_HEAD_RIGHT] = "squishy_idle",
     [CHAR_ANIM_IDLE_HEAD_CENTER] = "squishy_idle",
+    [charSelect.CS_ANIM_MENU] = SQUISHY_ANIM_TRICK_TEMPRR
 }
 
 CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
