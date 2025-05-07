@@ -63,17 +63,26 @@ local function update_speed_cap(m, peakVel, force)
     end
     if peakVel == nil then peakVel = 30 end
     peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
+    if m.action & ACT_FLAG_SWIMMING ~= 0 then
+        peakVel = peakVel * 0.1
+    end
     if e.panicking then
         peakVel = peakVel * 1.5
         add_debug_display(m, "Panicking!!!")
     end
-    m.forwardVel = clamp_soft(m.forwardVel, -peakVel, peakVel, 0.1*math.floor(math.abs(m.forwardVel)/peakVel))
+    m.vel.x = clamp_soft(m.vel.x, -peakVel, peakVel, 0.1*math.floor(math.abs(m.vel.x)/peakVel))
+    m.vel.z = clamp_soft(m.vel.z, -peakVel, peakVel, 0.1*math.floor(math.abs(m.vel.z)/peakVel))
     m.slideVelX = clamp_soft(m.slideVelX, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelX)/peakVel))
     m.slideVelZ = clamp_soft(m.slideVelZ, -peakVel, peakVel, 0.1*math.floor(math.abs(m.slideVelZ)/peakVel))
-    if m.vel.y > 0 then
-        m.vel.y = clamp_soft(m.vel.y, -peakVel*2, peakVel*2, 0.1*math.floor(math.abs(m.vel.y)/peakVel*2))
+    if m.action & ACT_FLAG_SWIMMING ~= 0 then
+        m.vel.y = clamp_soft(m.vel.y, -peakVel, peakVel, 0.1*math.floor(math.abs(m.vel.y)/peakVel))
+    else
+        if m.vel.y > 0 then
+            m.vel.y = clamp_soft(m.vel.y, -peakVel*2, peakVel*2, 0.1*math.floor(math.abs(m.vel.y)/peakVel*2))
+        end
     end
-    add_debug_display(m, "Speed H: " .. math.floor(m.forwardVel) .. "/" .. peakVel .. " (" .. -0.1*math.floor(math.abs(m.forwardVel)/peakVel) .. ")")
+    local forwardVel = math.sqrt(m.vel.x^2 + m.vel.z^2)
+    add_debug_display(m, "Speed H: " .. math.floor(forwardVel) .. "/" .. peakVel .. " (" .. -0.1*math.floor(math.abs(forwardVel)/peakVel) .. ")")
     add_debug_display(m, "Speed V: " .. math.floor(m.vel.y) .. "/" .. peakVel*2 .. " (" .. -0.1*math.floor(math.abs(m.vel.y)/peakVel*2) .. ")")
 end
 
