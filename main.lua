@@ -52,6 +52,7 @@ if not _G.charSelectExists then
 end
 
 E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
+E_MODEL_SQUISHY_PLUSHIE = smlua_model_util_get_id('squishy_plush_geo')
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
 
@@ -205,6 +206,7 @@ _G.charSelect.character_set_category(CT_SQUISHY, "char-select-squishy")
 
 for i = 1, #squishyPalettes do
     _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, squishyPalettes[i], squishyPalettes[i].name)
+    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY_PLUSHIE, squishyPalettes[i], squishyPalettes[i].name)
 end
 
 local MOD_NAME = "Squishy Pack"
