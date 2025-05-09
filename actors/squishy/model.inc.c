@@ -524,7 +524,7 @@ Gfx squishy_000_offset_001_mesh_layer_1_tri_1[] = {
 	gsSPEndDisplayList(),
 };
 
-Vtx squishy_000_offset_001_mesh_layer_4_vtx_0[9] = {
+Vtx squishy_000_offset_001_mesh_layer_5_vtx_0[9] = {
 	{{ {54, 83, 66}, 0, {1013, 296}, {4, 127, 247, 255} }},
 	{{ {28, 67, -1}, 0, {497, 514}, {209, 118, 0, 255} }},
 	{{ {16, 68, 64}, 0, {1071, 555}, {211, 118, 246, 255} }},
@@ -536,8 +536,8 @@ Vtx squishy_000_offset_001_mesh_layer_4_vtx_0[9] = {
 	{{ {16, 68, -65}, 0, {-78, 555}, {211, 118, 10, 255} }},
 };
 
-Gfx squishy_000_offset_001_mesh_layer_4_tri_0[] = {
-	gsSPVertex(squishy_000_offset_001_mesh_layer_4_vtx_0 + 0, 9, 0),
+Gfx squishy_000_offset_001_mesh_layer_5_tri_0[] = {
+	gsSPVertex(squishy_000_offset_001_mesh_layer_5_vtx_0 + 0, 9, 0),
 	gsSP2Triangles(0, 1, 2, 0, 0, 3, 1, 0),
 	gsSP2Triangles(4, 3, 0, 0, 4, 5, 3, 0),
 	gsSP2Triangles(3, 5, 6, 0, 3, 6, 7, 0),
@@ -2907,9 +2907,10 @@ Gfx mat_squishy_SquishyShirtEmblem[] = {
 	gsSPGeometryMode(G_CULL_BACK, 0),
 	gsSPCopyLightsPlayerPart(GLOVES),
 	gsDPPipeSync(),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
+	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
 	gsDPSetAlphaDither(G_AD_NOISE),
 	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
 	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, squishy_squishy_shirt_emblem_ia8),
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 255, 512),
@@ -3336,16 +3337,16 @@ Gfx squishy_000_offset_001_mesh_layer_1_mat_override_metal_v3_001_0[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx squishy_000_offset_001_mesh_layer_4[] = {
+Gfx squishy_000_offset_001_mesh_layer_5[] = {
 	gsSPDisplayList(mat_squishy_SquishyShirtEmblem),
-	gsSPDisplayList(squishy_000_offset_001_mesh_layer_4_tri_0),
+	gsSPDisplayList(squishy_000_offset_001_mesh_layer_5_tri_0),
 	gsSPDisplayList(mat_revert_squishy_SquishyShirtEmblem),
 	gsSPEndDisplayList(),
 };
 
-Gfx squishy_000_offset_001_mesh_layer_4_mat_override_metal_v3_001_0[] = {
+Gfx squishy_000_offset_001_mesh_layer_5_mat_override_metal_v3_001_0[] = {
 	gsSPDisplayList(mat_squishy_metal_v3_001),
-	gsSPDisplayList(squishy_000_offset_001_mesh_layer_4_tri_0),
+	gsSPDisplayList(squishy_000_offset_001_mesh_layer_5_tri_0),
 	gsSPDisplayList(mat_revert_squishy_metal_v3_001),
 	gsSPEndDisplayList(),
 };
