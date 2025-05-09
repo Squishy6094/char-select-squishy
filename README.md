@@ -18,3 +18,8 @@ This mod currently features:
   - Fully customizable via SM64CoopDX's Camera Settings
 
 <img src="https://raw.githubusercontent.com/Squishy6094/char-select-squishy/refs/heads/main/images/birthday-yuri.png">
+
+## How to use Source Files
+- Blend Files
+  - [Blender 3.6 LTS](https://www.blender.org/download/releases/3-6/)
+  - [Fast64-Gart](https://github.com/ManIsCat2/Fast64-Gart)
