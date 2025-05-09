@@ -51,6 +51,7 @@ local spamBurnoutMax = 100
 -- Ported n' Modified Mario Functions --
 ----------------------------------------
 
+local maxSpeed = 500
 local function update_speed_cap(m, peakVel, force)
     local e = gSquishyExtraStates[m.playerIndex]
     if force == nil then force = false end
@@ -84,6 +85,10 @@ local function update_speed_cap(m, peakVel, force)
     local forwardVel = math.sqrt(m.vel.x^2 + m.vel.z^2)
     add_debug_display(m, "Speed H: " .. math.floor(forwardVel) .. "/" .. peakVel .. " (" .. -0.1*math.floor(math.abs(forwardVel)/peakVel) .. ")")
     add_debug_display(m, "Speed V: " .. math.floor(m.vel.y) .. "/" .. peakVel*2 .. " (" .. -0.1*math.floor(math.abs(m.vel.y)/peakVel*2) .. ")")
+
+    m.vel.x = clamp(m.vel.x, -maxSpeed, maxSpeed)
+    m.vel.y = clamp(m.vel.y, -maxSpeed, maxSpeed)
+    m.vel.z = clamp(m.vel.z, -maxSpeed, maxSpeed)
 end
 
 local function update_squishy_sliding_angle(m, accel, lossFactor)
@@ -1543,7 +1548,6 @@ local function squishy_on_action(m)
         if ceiling > m.floorHeight and ceiling < m.pos.y then
             m.pos.y = ceiling
         end
-        djui_chat_message_create(tostring(m.pos.y - m.floorHeight))
         set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 1)
     end
 end
