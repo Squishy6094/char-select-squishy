@@ -303,3 +303,4 @@ extern Gfx squishy_000_offset_013_mesh_layer_1[];
 extern Gfx squishy_000_offset_013_mesh_layer_1_mat_override_metal_v3_001_0[];
 extern Gfx squishy_000_displaylist_005_mesh_layer_1[];
 extern Gfx squishy_000_displaylist_005_mesh_layer_1_mat_override_metal_v3_001_0[];
+extern Gfx squishy_material_revert_render_settings[];

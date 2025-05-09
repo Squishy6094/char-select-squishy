@@ -3731,13 +3731,6 @@ Gfx squishy_005_switch_option_left_hand_cap_mesh_layer_5[] = {
 	gsSPDisplayList(mat_squishy_SquishyCapEmblem_layer5),
 	gsSPDisplayList(squishy_005_switch_option_left_hand_cap_mesh_layer_5_tri_0),
 	gsSPDisplayList(mat_revert_squishy_SquishyCapEmblem_layer5),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3745,13 +3738,6 @@ Gfx squishy_005_switch_option_left_hand_cap_mesh_layer_5_mat_override_metal_v3_0
 	gsSPDisplayList(mat_squishy_metal_v3_001),
 	gsSPDisplayList(squishy_005_switch_option_left_hand_cap_mesh_layer_5_tri_0),
 	gsSPDisplayList(mat_revert_squishy_metal_v3_001),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3777,13 +3763,6 @@ Gfx squishy_006_switch_option_left_hand_wing_cap_mesh_layer_5[] = {
 	gsSPDisplayList(mat_squishy_SquishyCapEmblem_layer5),
 	gsSPDisplayList(squishy_006_switch_option_left_hand_wing_cap_mesh_layer_5_tri_0),
 	gsSPDisplayList(mat_revert_squishy_SquishyCapEmblem_layer5),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3791,13 +3770,6 @@ Gfx squishy_006_switch_option_left_hand_wing_cap_mesh_layer_5_mat_override_metal
 	gsSPDisplayList(mat_squishy_metal_v3_001),
 	gsSPDisplayList(squishy_006_switch_option_left_hand_wing_cap_mesh_layer_5_tri_0),
 	gsSPDisplayList(mat_revert_squishy_metal_v3_001),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3808,13 +3780,6 @@ Gfx squishy_006_switch_option_left_hand_wing_cap_wings_mesh_layer_4[] = {
 	gsSPDisplayList(mat_squishy_wing_1_v3_001),
 	gsSPDisplayList(squishy_006_switch_option_left_hand_wing_cap_wings_mesh_layer_4_tri_1),
 	gsSPDisplayList(mat_revert_squishy_wing_1_v3_001),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3825,13 +3790,6 @@ Gfx squishy_006_switch_option_left_hand_wing_cap_wings_mesh_layer_4_mat_override
 	gsSPDisplayList(mat_squishy_wing_1_v3_001),
 	gsSPDisplayList(squishy_006_switch_option_left_hand_wing_cap_wings_mesh_layer_4_tri_1),
 	gsSPDisplayList(mat_revert_squishy_wing_1_v3_001),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3916,13 +3874,6 @@ Gfx squishy_000_displaylist_005_mesh_layer_1[] = {
 	gsSPDisplayList(mat_squishy_SquishyShoes),
 	gsSPDisplayList(squishy_000_displaylist_005_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_squishy_SquishyShoes),
-	gsDPPipeSync(),
-	gsSPSetGeometryMode(G_LIGHTING),
-	gsSPClearGeometryMode(G_TEXTURE_GEN),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsSPTexture(65535, 65535, 0, 0, 0),
-	gsDPSetEnvColor(255, 255, 255, 255),
-	gsDPSetAlphaCompare(G_AC_NONE),
 	gsSPEndDisplayList(),
 };
 
@@ -3931,6 +3882,10 @@ Gfx squishy_000_displaylist_005_mesh_layer_1_mat_override_metal_v3_001_0[] = {
 	gsSPDisplayList(squishy_000_displaylist_005_mesh_layer_1_tri_0),
 	gsSPDisplayList(squishy_000_displaylist_005_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_squishy_metal_v3_001),
+	gsSPEndDisplayList(),
+};
+
+Gfx squishy_material_revert_render_settings[] = {
 	gsDPPipeSync(),
 	gsSPSetGeometryMode(G_LIGHTING),
 	gsSPClearGeometryMode(G_TEXTURE_GEN),
@@ -3938,6 +3893,16 @@ Gfx squishy_000_displaylist_005_mesh_layer_1_mat_override_metal_v3_001_0[] = {
 	gsSPTexture(65535, 65535, 0, 0, 0),
 	gsDPSetEnvColor(255, 255, 255, 255),
 	gsDPSetAlphaCompare(G_AC_NONE),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 1, 0),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP  | G_TX_NOMIRROR, 0, 0),
+	gsDPLoadBlock(7, 0, 0, 1023, 256),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0),
+	gsDPSetTileSize(0, 0, 0, 124, 124),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 1, 0),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 0, 256, 6, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
+	gsDPLoadBlock(6, 0, 0, 1023, 256),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 8, 256, 1, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0, G_TX_CLAMP | G_TX_NOMIRROR, 5, 0),
+	gsDPSetTileSize(1, 0, 0, 124, 124),
 	gsSPEndDisplayList(),
 };
 

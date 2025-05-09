@@ -1065,6 +1065,9 @@ GEO_ASM((LAYER_TRANSPARENT_DECAL << 2) | 1, geo_mirror_mario_backface_culling),
 
 			GEO_CLOSE_NODE(),
 		GEO_CLOSE_NODE(),
+		GEO_DISPLAY_LIST(LAYER_OPAQUE, squishy_material_revert_render_settings),
+		GEO_DISPLAY_LIST(LAYER_ALPHA, squishy_material_revert_render_settings),
+		GEO_DISPLAY_LIST(LAYER_TRANSPARENT, squishy_material_revert_render_settings),
 	GEO_CLOSE_NODE(),
 	GEO_END(),
 };
