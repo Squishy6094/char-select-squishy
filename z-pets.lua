@@ -3,7 +3,7 @@ if not _G.wpets then return end
 local ID_SQUISHY_PLUSHIE = _G.wpets.add_pet({
 	name = "Squishy Plushie", credit = "SprSp64",
 	description = "wonderful",
-	modelID = E_MODEL_SQUISHY_PLUSHIE,
+	modelID = E_MODEL_SQUISHY_PLUSH,
 	scale = 0.7, yOffset = 0, flying = false
 })
 

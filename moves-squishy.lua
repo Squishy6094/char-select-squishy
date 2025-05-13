@@ -1044,8 +1044,6 @@ local function act_squishy_ledge_grab(m)
     return 0;
 end
 
-local E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
-local E_MODEL_SQUISHY_PLUSH = smlua_model_util_get_id("squishy_plush_geo")
 local trickSpin = 0x10000
 local trickAnims = {
     {anim = MARIO_ANIM_DOUBLE_JUMP_RISE,   name = "Spin",            faceAngleY =  trickSpin*2}, -- Failsafe Anim
