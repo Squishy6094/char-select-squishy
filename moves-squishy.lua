@@ -62,7 +62,7 @@ local function update_speed_cap(m, peakVel, force)
             return
         end
     end
-    if peakVel == nil then peakVel = 30 end
+    if peakVel == nil then peakVel = 20 end
     peakVel = peakVel * gGlobalSyncTable.squishySpeedMult
     if m.action & ACT_FLAG_SWIMMING ~= 0 then
         peakVel = peakVel * 0.1
@@ -615,7 +615,7 @@ local function act_squishy_ground_pound(m)
     else
         if omm_moveset_enabled(m) and m.input & INPUT_B_PRESSED ~= 0 then
             m.faceAngle.y = m.intendedYaw
-            m.forwardVel = m.forwardVel + 15
+            --m.forwardVel = m.forwardVel + 15
             set_mario_action_and_y_vel(m, ACT_SQUISHY_DIVE, 0, 30)
         end
     end
@@ -1216,7 +1216,7 @@ local function act_squishy_trick(m)
 
         e.trickCount = e.trickCount + 1
         if omm_moveset_enabled(m) then
-            m.vel.y = math.max(m.vel.y, 0)
+            m.vel.y = math.max(m.vel.y, -5)
         end
         if m.playerIndex == 0 then
             m.actionArg = math.random(2, #trickAnims)
@@ -1692,11 +1692,8 @@ local function squishy_before_phys_step(m)
         end
     end
 
-    if not omm_moveset_enabled(m) then
-        -- Peaking Velocity
-        if m.action & ACT_FLAG_BUTT_OR_STOMACH_SLIDE == 0 then
-            update_speed_cap(m)
-        end
+    if m.action & ACT_FLAG_BUTT_OR_STOMACH_SLIDE == 0 then
+        update_speed_cap(m)
     end
 end
 
