@@ -655,14 +655,14 @@ local function act_squishy_ground_pound_land(m)
     m.forwardVel = 0
     m.vel.x = 0
     m.vel.y = 0
-    common_landing_action(m, MARIO_ANIM_GROUND_POUND_LANDING, ACT_FREEFALL)
+    common_landing_action(m, MARIO_ANIM_CROUCHING, ACT_FREEFALL)
     squishy_allow_spin_jump(m)
     
     m.forwardVel = 0
 
     m.actionTimer = m.actionTimer + 1
     if m.actionTimer > 10 then
-        set_mario_action(m, ACT_IDLE, 0)
+        set_mario_action(m, ACT_CROUCHING, 0)
     else
         if m.input & INPUT_A_PRESSED ~= 0 then
             local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)

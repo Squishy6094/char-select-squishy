@@ -202,6 +202,7 @@ local ANIMS_SQUISHY = {
     [CHAR_ANIM_CRAWLING] = SQUISHY_ANIM_CRAWLING,
     [CHAR_ANIM_START_CRAWLING] = SQUISHY_ANIM_START_CRAWLING,
     [CHAR_ANIM_STOP_CRAWLING] = SQUISHY_ANIM_STOP_CRAWLING,
+    [CHAR_ANIM_GROUND_POUND] = SQUISHY_ANIM_GROUND_POUND,
     [charSelect.CS_ANIM_MENU] = SQUISHY_ANIM_TRICK_TETO
 }
 
@@ -210,6 +211,7 @@ _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 _G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
 _G.charSelect.character_set_category(CT_SQUISHY, "char-select-squishy")
+_G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
 
 for i = 1, #squishyPalettes do
     _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, squishyPalettes[i], squishyPalettes[i].name)
