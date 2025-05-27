@@ -341,10 +341,10 @@ local function camera_update()
                 if controller.buttonPressed & camDigitalRight ~= 0 or mouseCamXDigital > 0 then
                     camAngleRaw = camAngleRaw + 0x2000*invertXMultiply
                 end
-                if controller.buttonPressed & camDigitalDown ~= 0 or mouseCamYDigital then
+                if controller.buttonPressed & camDigitalDown ~= 0 or mouseCamYDigital > 0 then
                     camScale = camScale + 1
                 end
-                if controller.buttonPressed & camDigitalUp ~= 0 or mouseCamYDigital then
+                if controller.buttonPressed & camDigitalUp ~= 0 or mouseCamYDigital < 0 then
                     camScale = camScale - 1
                 end
                 camScale = clamp(camScale, 1, 7)
@@ -500,10 +500,12 @@ local function hud_render()
         local shakeX = math.random(-1, 1)*math.max(math.abs(l.roll)-1000, 0)*MATH_DIVIDE_SHAKE
         local shakeY = math.random(-1, 1)*math.max(math.abs(l.roll)-1000, 0)*MATH_DIVIDE_SHAKE
 
+        local x = width - 38 - 64*doodellScale + shakeX + (mousePullX/mousePullMax * 4)
+        local y = height - 38 - 64*doodellScale + eepyCamOffset*0.1*doodellScale + shakeY + (mousePullY/mousePullMax * 4)
         djui_hud_set_color(255, 255, 255, 255)
         _G.charSelect.hud_hide_element(HUD_DISPLAY_FLAG_CAMERA)
         djui_hud_set_rotation(l.roll, 0.5, 0.8)
-        djui_hud_render_texture_tile(TEX_DOODELL_CAM, width - 38 - 64*doodellScale + shakeX, height - 38 - 64*doodellScale + eepyCamOffset*0.1*doodellScale + shakeY, doodellScale, doodellScale, animFrame*128, doodellState*128, 128, 128)
+        djui_hud_render_texture_tile(TEX_DOODELL_CAM, x, y, doodellScale, doodellScale, animFrame*128, doodellState*128, 128, 128)
         djui_hud_set_rotation(0, 0, 0)
     else
         _G.charSelect.hud_show_element(HUD_DISPLAY_FLAG_CAMERA)
