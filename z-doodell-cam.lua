@@ -88,11 +88,13 @@ local function doodell_cam_enabled()
 end
 
 function doodell_cam_active()
+    local m = gMarioStates[0]
     return doodell_cam_enabled() and
     not camera_config_is_free_cam_enabled() and
     not omm_camera_enabled() and
-    gMarioStates[0].area.camera ~= nil and
-    gMarioStates[0].statusForCamera.cameraEvent ~= CAM_EVENT_DOOR
+    m.area.camera ~= nil and
+    m.statusForCamera.cameraEvent ~= CAM_EVENT_DOOR and
+    m.action ~= ACT_STAR_DANCE_EXIT
 end
 
 local nonMomentumActs = {
@@ -277,7 +279,7 @@ local function camera_update()
                 camSwitchHeld = camSwitchHeld + 1
             end
             local analogToggle = camera_config_is_analog_cam_enabled()
-            local invertXMultiply = camera_config_is_x_inverted() and 1 or -1
+            local invertXMultiply = camera_config_is_x_inverted() and -1 or 1
             local invertYMultiply = camera_config_is_y_inverted() and -1 or 1
 
             local camDigitalLeft  = analogToggle and (_G.OmmEnabled and 0 or L_JPAD) or L_CBUTTONS
@@ -418,8 +420,10 @@ local function camera_update()
             eepyCamOffset = eepyCamOffset * 0.9
             eepyTimer = 0
         end
-
-        l.roll = lerp(l.roll, roll, 0.1)
+        
+        l.roll = math.floor(lerp(l.roll, roll, 0.1))
+        l.keyDanceRoll = l.roll -- Required for applying rotation because sm64 is fuckin stupid
+        --set_camera_roll_shake(1000, 0.1, 1)
         camFov = lerp(camFov, 50 + math.abs(m.forwardVel)*0.1, 0.1)
         set_override_fov(camFov)
 
