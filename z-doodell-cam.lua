@@ -474,6 +474,7 @@ local function camera_update()
     end
     
     camAngle = atan2s(l.pos.z - l.focus.z, l.pos.x - l.focus.x)
+    camAngleInput = atan2s(rawCamPos.z - rawFocusPos.z, rawCamPos.x - rawFocusPos.x)
 end
 
 local TEX_DOODELL_CAM = get_texture_info("squishy-doodell-cam")
@@ -523,8 +524,7 @@ end
 local function input_update(m)
     if m.playerIndex ~= 0 then return end
     if doodell_cam_active() and m.action ~= ACT_FLYING and gLakituState.mode == CAMERA_MODE_NONE then
-        local camAngle = camAngle
-        local intAngle = m.intendedYaw - camAngle
+        local intAngle = m.intendedYaw - camAngleInput
         if (intAngle > 0x3000 and intAngle < 0x5000) or (intAngle > -0x3000 and intAngle < -0x5000) then
             camAngle = camAngleRaw
         end
@@ -533,7 +533,7 @@ local function input_update(m)
             camAngle = (camAngle/0x1000)*0x1000
         end
         m.area.camera.yaw = camAngle
-        m.intendedYaw = atan2s(-m.controller.stickY, m.controller.stickX) + camAngle
+        m.intendedYaw = atan2s(-m.controller.stickY, m.controller.stickX) + camAngleInput
     end
 end
 
