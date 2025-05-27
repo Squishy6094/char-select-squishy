@@ -90,7 +90,6 @@ end
 function doodell_cam_active()
     local m = gMarioStates[0]
     return doodell_cam_enabled() and
-    not camera_config_is_free_cam_enabled() and
     not omm_camera_enabled() and
     m.area.camera ~= nil and
     m.statusForCamera.cameraEvent ~= CAM_EVENT_DOOR and
@@ -248,6 +247,9 @@ local function speedrun_timer_check_checkpoint(m)
     end
 end
 
+local mousePullX = 0
+local mousePullY = 0
+local mousePullMax = 500
 local function camera_update()
     local m = gMarioStates[0]
     local l = gLakituState
@@ -279,7 +281,8 @@ local function camera_update()
                 camSwitchHeld = camSwitchHeld + 1
             end
             local analogToggle = camera_config_is_analog_cam_enabled()
-            local invertXMultiply = camera_config_is_x_inverted() and -1 or 1
+
+            local invertXMultiply = (camera_config_is_x_inverted() or camera_config_is_mouse_look_enabled()) and -1 or 1
             local invertYMultiply = camera_config_is_y_inverted() and -1 or 1
 
             local camDigitalLeft  = analogToggle and (_G.OmmEnabled and 0 or L_JPAD) or L_CBUTTONS
@@ -290,6 +293,40 @@ local function camera_update()
             local camAnalogX = analogToggle and controller.extStickX or (_G.OmmEnabled and 0 or button_to_analog(m, L_JPAD, R_JPAD))
             local camAnalogY = analogToggle and controller.extStickY or (_G.OmmEnabled and 0 or button_to_analog(m, U_JPAD, D_JPAD))
             
+
+            local mouseCamXDigital = 0
+            local mouseCamYDigital = 0
+            local rawMouseX = djui_hud_get_raw_mouse_x()
+            local rawMouseY = djui_hud_get_raw_mouse_y()
+            if camera_config_is_mouse_look_enabled() then
+                djui_hud_set_mouse_locked(true)
+                mousePullX = clamp_soft(mousePullX + rawMouseX, 0, 0, 10)
+                mousePullY = clamp_soft(mousePullY + rawMouseY, 0, 0, 10)
+                if not analogToggle then
+                    if mousePullX > mousePullMax then
+                        mouseCamXDigital = 1
+                        mousePullX = 0
+                    end
+                    if mousePullX < -mousePullMax then
+                        mouseCamXDigital = -1
+                        mousePullX = 0
+                    end
+                    if mousePullY > mousePullMax then
+                        mouseCamYDigital = 1
+                        mousePullY = 0
+                    end
+                    if mousePullY < -mousePullMax then
+                        mouseCamYDigital = -1
+                        mousePullY = 0
+                    end
+                else
+                    camAnalogX = rawMouseX*camera_config_get_x_sensitivity()*0.03
+                    camAnalogY = -rawMouseY*camera_config_get_y_sensitivity()*0.04
+                end
+            else
+                djui_hud_set_mouse_locked(false)
+            end
+
             if not camSwitch then
                 if math.abs(camAnalogX) > 10 then
                     camAngleRaw = camAngleRaw + camAnalogX*10*invertXMultiply
@@ -298,16 +335,16 @@ local function camera_update()
                     camScale = clamp(camScale - camAnalogY*0.001, 1, 7)
                 end
 
-                if controller.buttonPressed & camDigitalLeft ~= 0 then
+                if controller.buttonPressed & camDigitalLeft ~= 0 or mouseCamXDigital < 0 then
                     camAngleRaw = camAngleRaw - 0x2000*invertXMultiply
                 end
-                if controller.buttonPressed & camDigitalRight ~= 0 then
+                if controller.buttonPressed & camDigitalRight ~= 0 or mouseCamXDigital > 0 then
                     camAngleRaw = camAngleRaw + 0x2000*invertXMultiply
                 end
-                if controller.buttonPressed & camDigitalDown ~= 0 then
+                if controller.buttonPressed & camDigitalDown ~= 0 or mouseCamYDigital then
                     camScale = camScale + 1
                 end
-                if controller.buttonPressed & camDigitalUp ~= 0 then
+                if controller.buttonPressed & camDigitalUp ~= 0 or mouseCamYDigital then
                     camScale = camScale - 1
                 end
                 camScale = clamp(camScale, 1, 7)
