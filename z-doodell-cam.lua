@@ -300,8 +300,8 @@ local function camera_update()
             local rawMouseY = djui_hud_get_raw_mouse_y()
             if camera_config_is_mouse_look_enabled() then
                 djui_hud_set_mouse_locked(true)
-                mousePullX = clamp_soft(mousePullX + rawMouseX, 0, 0, 10)
-                mousePullY = clamp_soft(mousePullY + rawMouseY, 0, 0, 10)
+                mousePullX = clamp(clamp_soft(mousePullX + rawMouseX, 0, 0, 10), -mousePullMax*1.1, mousePullMax*1.1)
+                mousePullY = clamp(clamp_soft(mousePullY + rawMouseY, 0, 0, 10), -mousePullMax*1.1, mousePullMax*1.1)
                 if not analogToggle then
                     if mousePullX > mousePullMax then
                         mouseCamXDigital = 1
