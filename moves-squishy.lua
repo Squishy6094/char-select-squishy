@@ -1492,11 +1492,11 @@ local function squishy_update(m)
 
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
         if m.forwardVel >= 50 then
-            smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_RUN)
+            smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_MACH_RUNNING)
             if not e.hasKoopaShell then
                 m.marioBodyState.handState = MARIO_HAND_OPEN
             end
-        elseif smlua_anim_util_get_current_animation_name(m.marioObj) == SQUISHY_ANIM_RUN then
+        elseif smlua_anim_util_get_current_animation_name(m.marioObj) == SQUISHY_ANIM_MACH_RUNNING then
             m.marioObj.header.gfx.animInfo.animID = -1
         end
     end
