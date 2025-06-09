@@ -2,7 +2,7 @@ if not _G.charSelectExists then return end
 
 GAMEMODE_ACTIVE = false
 for i = 1, #gActiveMods do
-    if gActiveMods[i].incompatible:find("gamemode") or gActiveMods[i].category:find("gamemode") then
+    if (gActiveMods[i].incompatible ~= nil and gActiveMods[i].incompatible:find("gamemode")) or (gActiveMods[i].category and gActiveMods[i].category:find("gamemode")) then
         GAMEMODE_ACTIVE = true
         break
     end
