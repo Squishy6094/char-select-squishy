@@ -510,11 +510,14 @@ local function act_squishy_slide(m)
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x80, 0x80)
     if m.actionTimer > 0 then
         if m.input & INPUT_A_PRESSED ~= 0 then
+            set_mario_action(m, ACT_DOUBLE_JUMP, 0)
+            --[[
             if m.actionArg == 1 then
                 set_mario_action(m, ACT_DOUBLE_JUMP, 0)
             else
                 set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
             end
+            ]]
         end
         if m.input & INPUT_B_PRESSED ~= 0 then
             if e.hasKoopaShell then
@@ -666,6 +669,9 @@ local function act_squishy_ground_pound_land(m)
     else
         if m.input & INPUT_A_PRESSED ~= 0 then
             local speedBalanced = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)
+            m.vel.y = math.max(speedBalanced*0.65, 70)
+            m.forwardVel = speedBalanced*0.1
+            --[[
             if m.input & INPUT_NONZERO_ANALOG ~= 0 then
                 m.vel.y = 60
                 m.forwardVel = speedBalanced*0.6
@@ -673,12 +679,13 @@ local function act_squishy_ground_pound_land(m)
                 m.vel.y = math.max(speedBalanced*0.65, 70)
                 m.forwardVel = speedBalanced*0.1
             end
+            ]]
             set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
             m.faceAngle.y = m.intendedYaw
         end
         if (m.input & INPUT_B_PRESSED ~= 0) then
             m.faceAngle.y = m.intendedYaw
-            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.75
+            m.forwardVel = math.sqrt(e.yVelStore * e.yVelStore + e.forwardVelStore * e.forwardVelStore)*0.85
             set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
         end
     end

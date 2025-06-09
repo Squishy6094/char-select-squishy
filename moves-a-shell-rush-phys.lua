@@ -33,7 +33,7 @@ local function race_get_slope_physics(m)
     }
 end
 
-local function race_apply_slope_accel(m)
+function race_apply_slope_accel(m)
     local physics = race_get_slope_physics(m)
 
     local floor = m.floor
@@ -56,7 +56,8 @@ local function race_apply_slope_accel(m)
     -- apply direction
     local angle = vec3f_angle_between(m.vel, mDir)
 
-    local parallel = vec3f_project(m.vel, mDir)
+    local parallel = {x = 0, y = 0, z = 0}
+    vec3f_project(m.vel, mDir, parallel)
     local perpendicular = { x = m.vel.x - parallel.x, y = m.vel.y - parallel.y, z = m.vel.z - parallel.z }
     local parallelMag = vec3f_length(parallel)
     local perpendicularMag = vec3f_length(perpendicular)
@@ -264,7 +265,8 @@ function act_race_shell_air(m)
     }
 
     -- apply direction
-    local parallel = vec3f_project(mDir, m.vel)
+    local parallel = {x = 0, y = 0, z = 0}
+    vec3f_project(m.vel, mDir, parallel)
     local perpendicular = { x = mDir.x - parallel.x, y = mDir.y - parallel.y, z = mDir.z - parallel.z }
     local parallelMag = vec3f_length(parallel)
     if parallelMag < mSpeed then parallelMag = mSpeed / parallelMag end
