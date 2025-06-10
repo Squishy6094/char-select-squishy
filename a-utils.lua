@@ -199,3 +199,7 @@ function get_mario_y_vel_from_floor(m)
         return m.vel.y
     end
 end
+
+function midpoint(a, b)
+    return (a + b) / 2
+end
