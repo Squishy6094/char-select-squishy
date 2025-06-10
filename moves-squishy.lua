@@ -906,9 +906,10 @@ local function act_squishy_swim_attack(m)
 end
 
 local function act_squishy_wall_kick_air(m)
+    local e = gSquishyExtraStates[m.playerIndex]
     if m.actionTimer == 1 then
+        m.vel.y = math.max(m.vel.y, 30) - e.groundpoundCancels
         m.forwardVel = math.max(35, math.abs(m.vel.y*0.7)) --math.abs(e.forwardVelStore*0.8)
-        m.vel.y = math.max(m.vel.y*0.7, 40)
     end
 
     if (m.input & INPUT_B_PRESSED ~= 0) then
@@ -1214,17 +1215,19 @@ local function act_squishy_trick(m)
         audio_squishy_taunt_sound(m, trickData.sound)
     end
     add_debug_display(m, ((trickAnims[m.actionArg] and trickAnims[m.actionArg].name) and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
+    --[[
     if m.vel.y < 0 then
         m.vel.y = m.vel.y + 3/e.trickCount
     else
         m.vel.y = m.vel.y + 1/e.trickCount
     end
+    ]]
 
     update_air_without_turn(m);
 
     local step = perform_air_step(m, AIR_STEP_CHECK_HANG)
     if step == AIR_STEP_LANDED then
-        if m.actionTimer < 10 then
+        if m.actionTimer < 8 then
             e.trickCount = 0
             audio_squishy_taunt_land(m, true)
             set_mario_action(m, ACT_FORWARD_GROUND_KB, 0)
@@ -1232,7 +1235,7 @@ local function act_squishy_trick(m)
             set_mario_action(m, ACT_FREEFALL_LAND, 0)
         end
     elseif step == AIR_STEP_HIT_WALL then
-        if m.actionTimer < 10 then
+        if m.actionTimer < 8 then
             e.trickCount = 0
             audio_squishy_taunt_land(m, true)
             set_mario_action(m, ACT_BACKWARD_AIR_KB, 0)
@@ -1258,7 +1261,7 @@ local function act_squishy_trick(m)
     if m.actionArg ~= 0 then
         m.actionTimer = m.actionTimer + 1
     end
-    if m.actionTimer <= 8 then
+    if m.actionTimer <= 6 then
         set_mario_particle_flags(m, PARTICLE_SPARKLES, 0)
     else
         if m.input & INPUT_A_PRESSED ~= 0 then
@@ -1437,8 +1440,7 @@ local function squishy_update(m)
     end
     add_debug_display(m, "Tricks: " .. (e.trickCount))
 
-
-    m.vel.y = m.vel.y - math.max(e.groundpoundCancels - 1, 0)*0.6
+    m.vel.y = m.vel.y - e.groundpoundCancels
 
     if (m.action == ACT_SQUISHY_LONG_JUMP or m.action == ACT_SQUISHY_DIVE) and m.input & INPUT_Z_PRESSED ~= 0 then
         set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, (m.action == ACT_SQUISHY_DIVE and 1 or 0), 60)
@@ -1557,7 +1559,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
     end
     if m.wall ~= nil and nextAct == ACT_AIR_HIT_WALL or nextAct == ACT_OMM_WALL_SLIDE then
-        return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel*0.9 + m.vel.y*0.7)
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel + math.min(m.vel.y, 0) - e.groundpoundCancels)
     end
     if nextAct == ACT_LONG_JUMP and m.forwardVel > 0 then
         return set_mario_action(m, ACT_SQUISHY_LONG_JUMP, 0)
