@@ -64,20 +64,22 @@ local CAPS_SQUISHY = {
     metalWing = smlua_model_util_get_id("squishy_cap_metal_geo")
 }
 
-local SQUISHY_SKIN_TONE = "FBE7B7"
+local SQUISHY_SKIN_TONE = "eec39a"
 local squishyPalettes = {
     {
         name = "Default",
-        [SHOES] = "1C1C1C",
-        [GLOVES] = "BFC72F",
+        [SHOES] = "414146",
+        [GLOVES] = "d5c600",
         [EMBLEM] = "FFFFFF",
-        [HAIR] = "130D0A",
+        [HAIR] = "3d2121",
         [SKIN] = SQUISHY_SKIN_TONE,
-        [SHIRT] = "12250B",
-        [PANTS] = "0B0E20",
+        [SHIRT] = "0e2502",
+        [CAP] = "2a2a30",
+        [PANTS] = "121331",
     },
+    --[[
     {
-        name = "Soft Sided",
+        name = "Soft Spoken",
         [PANTS] = "221C1A",
         [SHIRT] = "122020",
         [GLOVES] = "FFFFFF",
@@ -98,6 +100,7 @@ local squishyPalettes = {
         [CAP]    = "1A152C",
         [EMBLEM] = "8176FF",
     },
+    ]]
     {
         name = "Yo-Yo Girl",
         [PANTS] = "4D463B",
@@ -120,6 +123,7 @@ local squishyPalettes = {
         [CAP] = "FFB620",
         [EMBLEM] = "FFF03A",
     },
+    --[[
     {
         name = "Modeled",
         [PANTS] = "000000",
@@ -141,17 +145,7 @@ local squishyPalettes = {
         [SHIRT] = "9BE4FF",
         [PANTS] = "70EA81",
     },
-    {
-        name = "Climber",
-        [PANTS] = "92301C",
-        [SHIRT] = "265ACD",
-        [GLOVES] = "009FCB",
-        [SHOES] = "FFF7C2",
-        [HAIR] = "FF280F",
-        [SKIN] = SQUISHY_SKIN_TONE,
-        [CAP] = "4A263D",
-        [EMBLEM] = "92301C",
-    },
+    ]]
     {
         name = "Pluto",
         [PANTS] = "E90037",
@@ -184,7 +178,18 @@ local squishyPalettes = {
         [SKIN] = "F0FFEC",
         [CAP] = "121210",
         [EMBLEM] = "FFFFF9",
-    }
+    },
+    {
+        name = "Mayo",
+        [PANTS] = "FFFFFF",
+        [SHIRT] = "FFFFFF",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "FFFFFF",
+        [HAIR] = "FFFFFF",
+        [SKIN] = "FFFFFF",
+        [CAP] = "FFFFFF",
+        [EMBLEM] = "FFFFFF",
+    },
 }
 
 local COURSE_SQUISHY = {
