@@ -200,6 +200,7 @@ function get_mario_y_vel_from_floor(m)
     end
 end
 
-function midpoint(a, b)
-    return (a + b) / 2
+function midpoint(a, b, sway)
+    if sway == nil then sway = 0.5 end
+    return a + (b - a) * sway
 end
