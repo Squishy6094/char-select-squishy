@@ -63,6 +63,48 @@ local CAPS_SQUISHY = {
     metal = smlua_model_util_get_id("squishy_cap_metal_geo"),
     metalWing = smlua_model_util_get_id("squishy_cap_metal_geo")
 }
+local VOICETABLE_SQUISHY = {
+    [CHAR_SOUND_OKEY_DOKEY] =        'squishy-okeydoki.ogg', -- Starting game
+    [CHAR_SOUND_LETS_A_GO] =         {'squishy-letsgo1.ogg', 'squishy-letsgo2.ogg'}, -- Starting level
+    [CHAR_SOUND_PUNCH_YAH] =         {'squishy-punchyah1.ogg', 'squishy-punchyah2.ogg'}, -- Punch 1
+    [CHAR_SOUND_PUNCH_WAH] =         {'squishy-punchwah1.ogg', 'squishy-punchwah2.ogg'}, -- Punch 2
+    [CHAR_SOUND_PUNCH_HOO] =         {'squishy-punchhoo1.ogg', 'squishy-punchhoo2.ogg'}, -- Punch 3
+    [CHAR_SOUND_YAH_WAH_HOO] =       {'squishy-yah.ogg', 'squishy-wah1.ogg', 'squishy-hoo1.ogg'}, -- First Jump Sounds
+    [CHAR_SOUND_HOOHOO] =            'squishy-hoho1.ogg', -- Second jump sound
+    [CHAR_SOUND_YAHOO_WAHA_YIPPEE] = {'squishy-yahoo1.ogg', 'squishy-yahoo2.ogg', 'squishy-yippi.ogg', 'squishy-wahaa.ogg'}, -- Triple jump sounds
+    [CHAR_SOUND_UH] =                {'squishy-oof1.ogg', 'squishy-oof2.ogg'}, -- Wall bonk
+    [CHAR_SOUND_UH2] =               'squishy-hurt1.ogg', -- Landing after long jump
+    [CHAR_SOUND_UH2_2] =             'squishy-hurt2.ogg',
+    [CHAR_SOUND_HAHA] =              'squishy-hoho2.ogg', -- Landing triple jump
+    [CHAR_SOUND_YAHOO] =             {'squishy-yahoo1.ogg', 'squishy-yahoo2.ogg'}, -- Long jump
+    [CHAR_SOUND_DOH] =               'squishy-bonk.ogg', -- Long jump wall bonk
+    [CHAR_SOUND_WHOA] =              {'squishy-woah1.ogg', 'squishy-woah2.ogg', 'squishy-woah3.ogg'}, -- Grabbing ledge
+    [CHAR_SOUND_EEUH] =              'squishy-euugh.ogg', -- Climbing over ledge
+    [CHAR_SOUND_WAAAOOOW] =          'squishy-fallscreaming.ogg', -- Falling a long distance
+    [CHAR_SOUND_TWIRL_BOUNCE] =      'squishy-boing.ogg', -- Bouncing off of a flower spring
+    [CHAR_SOUND_GROUND_POUND_WAH] =  {'squishy-groundpoundwah.ogg', 'squishy-groundpoundwah2.ogg'}, 
+    [CHAR_SOUND_HRMM] =              'squishy-hi.ogg', -- Lifting something
+    [CHAR_SOUND_HERE_WE_GO] =        'squishy-herewego1.ogg', -- Star get
+    [CHAR_SOUND_SO_LONGA_BOWSER] =   {'squishy-solong1.ogg', 'squishy-solong2.ogg', 'squishy-solong3.ogg'}, -- Throwing Bowser
+    -- DAMAGE
+    [CHAR_SOUND_ATTACKED] =          {'squishy-hurt1.ogg', 'squishy-hurt2.ogg', 'squishy-hurt3.ogg'}, -- Damaged
+    [CHAR_SOUND_PANTING] =           'squishy-tired.ogg', -- Low health
+    [CHAR_SOUND_ON_FIRE] =           'squishy-fireburn.ogg', -- Burned
+    -- SLEEP SOUNDS
+    [CHAR_SOUND_IMA_TIRED] =         'squishy-tired.ogg', -- Mario feeling tired
+    [CHAR_SOUND_YAWNING] =           'squishy-yawn.ogg', -- Mario yawning before he sits down to sleep
+    [CHAR_SOUND_SNORING1] =          'squishy-sleephinale.ogg', -- Snore Inhale
+    [CHAR_SOUND_SNORING2] =          'squishy-sleepexnale.ogg', -- Exhale
+    [CHAR_SOUND_SNORING3] =          'squishy-dreaming.ogg', -- Sleep talking / mumbling
+    -- COUGHING (USED IN THE GAS MAZE)
+    [CHAR_SOUND_COUGHING1] =         'squishy-coughting1.ogg', -- Cough take 1
+    [CHAR_SOUND_COUGHING2] =         'squishy-coughting2.ogg', -- Cough take 2
+    [CHAR_SOUND_COUGHING3] =         'squishy-coughting3.ogg', -- Cough take 3
+    -- DEATH
+    [CHAR_SOUND_DYING] =             {'squishy-dieing.ogg', 'squishy-dieing2.ogg'}, -- Dying from damage
+    [CHAR_SOUND_DROWNING] =          {'squishy-drowing1.ogg', 'squishy-drowing2.ogg'}, -- Running out of air underwater
+    [CHAR_SOUND_MAMA_MIA] =          {'squishy-mammamia1.ogg', 'squishy-mammamia2.ogg'}, -- Booted out of level
+}
 
 local SQUISHY_SKIN_TONE = "eec39a"
 local squishyPalettes = {
@@ -217,6 +259,8 @@ CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Selec
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 _G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
+_G.charSelect.character_add_voice(E_MODEL_SQUISHY, VOICETABLE_SQUISHY)
+_G.charSelect.config_character_sounds()
 _G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
 
 for i = 1, #squishyPalettes do
