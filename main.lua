@@ -110,7 +110,7 @@ local SQUISHY_SKIN_TONE = "eec39a"
 local squishyPalettes = {
     {
         name = "Default",
-        [SHOES] = "414146",
+        [SHOES] = "363636",
         [GLOVES] = "d5c600",
         [EMBLEM] = "FFFFFF",
         [HAIR] = "3d2121",
