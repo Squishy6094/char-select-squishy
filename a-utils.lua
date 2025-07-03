@@ -148,16 +148,6 @@ function convert_s16(num)
     return num
 end
 
-function vec3f_angle_between(a, b)
-    return math.acos(vec3f_dot(a, b) / (vec3f_length(a) * vec3f_length(b)))
-end
-
-function vec3f_non_nan(v)
-    if v.x ~= v.x then v.x = 0 end
-    if v.y ~= v.y then v.y = 0 end
-    if v.z ~= v.z then v.z = 0 end
-end
-
 ---------------------
 -- Mario Functions --
 ---------------------

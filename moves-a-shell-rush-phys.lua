@@ -110,9 +110,19 @@ local function vec3f_dist(v1, v2)
     return math.sqrt(dx * dx + dy * dy + dz * dz)
 end
 
--------------------------------
+-- Other Functions
 
-local shellSpeed = 1.0
+local function vec3f_non_nan(v)
+    if v.x ~= v.x then v.x = 0 end
+    if v.y ~= v.y then v.y = 0 end
+    if v.z ~= v.z then v.z = 0 end
+end
+
+local function vec3f_angle_between(a, b)
+    return math.acos(vec3f_dot(a, b) / (vec3f_length(a) * vec3f_length(b)))
+end
+
+local shellSpeed = 0.8
 
 gExtraMarioState = { }
 
@@ -293,7 +303,8 @@ function act_race_shell_ground(m)
     if (m.input & INPUT_A_PRESSED) ~= 0 then
         m.vel.x = m.vel.x * 0.9
         m.vel.z = m.vel.z * 0.9
-        return set_mario_action(m, ACT_RIDING_SHELL_JUMP, 0)
+        m.vel.y = 35 + math.sqrt(m.vel.x^2 + m.vel.z^2)*0.5
+        return set_mario_action(m, ACT_SHELL_RUSH_RIDING_SHELL_JUMP, 0)
     end
 
     -- update physics
@@ -309,7 +320,7 @@ function act_race_shell_ground(m)
     local gs = perform_ground_step(m)
     if gs == GROUND_STEP_LEFT_GROUND then
         m.vel.y = (m.pos.y - gExtraMarioState[m.playerIndex].lastY)
-        return set_mario_action(m, ACT_RIDING_SHELL_FALL, 0)
+        return set_mario_action(m, ACT_SHELL_RUSH_RIDING_SHELL_FALL, 0)
 
     elseif gs == GROUND_STEP_HIT_WALL then
         -- check if the wall is in the facing direction
@@ -381,7 +392,7 @@ function act_race_shell_air(m)
 
     local step = perform_air_step(m, 0)
     if step == AIR_STEP_LANDED then
-        set_mario_action(m, ACT_RIDING_SHELL_GROUND, 1)
+        set_mario_action(m, ACT_SHELL_RUSH_RIDING_SHELL_GROUND, 1)
     elseif step == AIR_STEP_HIT_WALL then
         mario_set_forward_vel(m, 0.0)
     elseif step == AIR_STEP_HIT_LAVA_WALL then
