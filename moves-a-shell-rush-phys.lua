@@ -5,9 +5,123 @@ if not _G.charSelectExists then return end
 ----- By djoslin0 ------
 ------------------------
 
+--- Reimplement old vec3f --
+--- @param dest Vec3f
+--- @param src Vec3f
+--- @return Vec3f
+local function vec3f_copy(dest, src)
+    dest.x = src.x
+    dest.y = src.y
+    dest.z = src.z
+    return dest
+end
+
+--- @param dest Vec3f
+--- @param x number
+--- @param y number
+--- @param z number
+--- @return Vec3f
+local function vec3f_set(dest, x, y, z)
+    dest.x = x
+    dest.y = y
+    dest.z = z
+    return dest
+end
+
+--- @param dest Vec3f
+--- @param a Vec3f
+--- @return Vec3f
+local function vec3f_add(dest, a)
+    dest.x = dest.x + a.x
+    dest.y = dest.y + a.y
+    dest.z = dest.z + a.z
+    return dest
+end
+
+--- @param dest Vec3f
+--- @param a Vec3f
+--- @param b Vec3f
+--- @return Vec3f
+local function vec3f_sum(dest, a, b)
+    dest.x = a.x + b.x
+    dest.y = a.y + b.y
+    dest.z = a.z + b.z
+    return dest
+end
+
+--- @param dest Vec3f
+--- @param a number
+--- @return Vec3f
+local function vec3f_mul(dest, a)
+    dest.x = dest.x * a
+    dest.y = dest.y * a
+    dest.z = dest.z * a
+    return dest
+end
+
+--- @param dest Vec3f
+--- @return Vec3f
+local function vec3f_normalize(dest)
+    local divisor = math.sqrt(dest.x * dest.x + dest.y * dest.y + dest.z * dest.z)
+    if divisor == 0 then
+        return dest
+    end
+
+    local invsqrt = 1.0 / divisor
+    dest.x = dest.x * invsqrt
+    dest.y = dest.y * invsqrt
+    dest.z = dest.z * invsqrt
+
+    return dest
+end
+
+--- @param a Vec3f
+--- @return number
+local function vec3f_length(a)
+    return math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z)
+end
+
+--- @param a Vec3f
+--- @param b Vec3f
+--- @return number
+local function vec3f_dot(a, b)
+    return a.x * b.x + a.y * b.y + a.z * b.z
+end
+
+--- @param vec Vec3f
+--- @param onto Vec3f
+--- @return Vec3f
+local function vec3f_project(vec, onto)
+  local numerator = vec3f_dot(vec, onto)
+  local denominator = vec3f_dot(onto, onto)
+  local out = {}
+  vec3f_copy(out, onto)
+  vec3f_mul(out, numerator / denominator)
+  return out
+end
+
+--- @param v1 Vec3f
+--- @param v2 Vec3f
+--- @return number
+local function vec3f_dist(v1, v2)
+    dx = v1.x - v2.x
+    dy = v1.y - v2.y
+    dz = v1.z - v2.z
+    return math.sqrt(dx * dx + dy * dy + dz * dz)
+end
+
+-------------------------------
+
 local shellSpeed = 1.0
 
-local function race_get_slope_physics(m)
+gExtraMarioState = { }
+
+for i = 0, (MAX_PLAYERS - 1) do
+    gExtraMarioState[i] = { }
+    gExtraMarioState[i].lastY = 0
+end
+
+function race_get_slope_physics(m)
     local friction = 0.96
     local force = 3
 
@@ -56,8 +170,7 @@ function race_apply_slope_accel(m)
     -- apply direction
     local angle = vec3f_angle_between(m.vel, mDir)
 
-    local parallel = {x = 0, y = 0, z = 0}
-    vec3f_project(m.vel, mDir, parallel)
+    local parallel = vec3f_project(m.vel, mDir)
     local perpendicular = { x = m.vel.x - parallel.x, y = m.vel.y - parallel.y, z = m.vel.z - parallel.z }
     local parallelMag = vec3f_length(parallel)
     local perpendicularMag = vec3f_length(perpendicular)
@@ -103,7 +216,7 @@ function race_apply_slope_accel(m)
     m.vel.z = m.vel.z * 0.2 + velBeforeVanilla.z * 0.8
 end
 
-local function update_race_shell_speed(m)
+function update_race_shell_speed(m)
     local maxTargetSpeed = 0
     local targetSpeed = 0
     local startForwardVel = m.forwardVel
@@ -167,8 +280,7 @@ ACT_SHELL_RUSH_RIDING_SHELL_GROUND = allocate_mario_action(ACT_GROUP_MOVING | AC
 ACT_SHELL_RUSH_RIDING_SHELL_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_RIDING_SHELL | ACT_FLAG_CONTROL_JUMP_HEIGHT)
 ACT_SHELL_RUSH_RIDING_SHELL_FALL = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_RIDING_SHELL)
 
-local function act_race_shell_ground(m)
-    local e = gSquishyExtraStates[m.playerIndex]
+function act_race_shell_ground(m)
     if m.actionTimer < 5 then m.actionTimer = m.actionTimer + 1 end
 
     local startYaw = m.faceAngle.y
@@ -181,14 +293,7 @@ local function act_race_shell_ground(m)
     if (m.input & INPUT_A_PRESSED) ~= 0 then
         m.vel.x = m.vel.x * 0.9
         m.vel.z = m.vel.z * 0.9
-        m.vel.y = math.max(50 + get_mario_y_vel_from_floor(m)*1, 20)
-        return set_mario_action(m, ACT_SHELL_RUSH_RIDING_SHELL_JUMP, 0)
-    end
-    
-    -- Dismount
-    if (m.input & INPUT_Z_PRESSED) ~= 0 then
-        mario_stop_riding_object(m)
-        return set_mario_action_and_y_vel(m, ACT_FORWARD_ROLLOUT, 1, 30)
+        return set_mario_action(m, ACT_RIDING_SHELL_JUMP, 0)
     end
 
     -- update physics
@@ -203,8 +308,8 @@ local function act_race_shell_ground(m)
 
     local gs = perform_ground_step(m)
     if gs == GROUND_STEP_LEFT_GROUND then
-        m.vel.y = (m.pos.y - e.lastShellY)
-        return set_mario_action(m, ACT_SHELL_RUSH_RIDING_SHELL_FALL, 0)
+        m.vel.y = (m.pos.y - gExtraMarioState[m.playerIndex].lastY)
+        return set_mario_action(m, ACT_RIDING_SHELL_FALL, 0)
 
     elseif gs == GROUND_STEP_HIT_WALL then
         -- check if the wall is in the facing direction
@@ -217,10 +322,9 @@ local function act_race_shell_ground(m)
                 m.pos.x, m.pos.y + 100, m.pos.z,
                 castDir.x, castDir.y, castDir.z)
         if info.surface ~= nil then
-            e.hasKoopaShell = true
             mario_stop_riding_object(m)
             play_sound(SOUND_ACTION_BONK, m.marioObj.header.gfx.cameraToObject)
-            set_mario_particle_flag(m, PARTICLE_VERTICAL_STAR)
+            m.particleFlags = m.particleFlags | PARTICLE_VERTICAL_STAR
             m.forwardVel = 0
             set_mario_action(m, ACT_BACKWARD_GROUND_KB, 0)
         end
@@ -237,24 +341,17 @@ local function act_race_shell_ground(m)
     adjust_sound_for_speed(m)
 
     reset_rumble_timers(m)
-    e.lastShellY = m.pos.y
+    gExtraMarioState[m.playerIndex].lastY = m.pos.y
     return 0
 end
 
 function act_race_shell_air(m)
-    local e = gSquishyExtraStates[m.playerIndex]
     if m.actionTimer < 5 then m.actionTimer = m.actionTimer + 1 end
 
     play_mario_sound(m, SOUND_ACTION_TERRAIN_JUMP, 0)
     set_mario_animation(m, MARIO_ANIM_JUMP_RIDING_SHELL)
 
-    --if m.vel.y > 65 then m.vel.y = 65 end
-
-    -- Dismount
-    if (m.input & INPUT_Z_PRESSED) ~= 0 then
-        mario_stop_riding_object(m)
-        return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 0, 60)
-    end
+    if m.vel.y > 65 then m.vel.y = 65 end
 
     local mSpeed = m.forwardVel / 128.0 * shellSpeed
     if mSpeed > 100 * shellSpeed then mSpeed = 100 * shellSpeed end
@@ -265,8 +362,7 @@ function act_race_shell_air(m)
     }
 
     -- apply direction
-    local parallel = {x = 0, y = 0, z = 0}
-    vec3f_project(m.vel, mDir, parallel)
+    local parallel = vec3f_project(mDir, m.vel)
     local perpendicular = { x = mDir.x - parallel.x, y = mDir.y - parallel.y, z = mDir.z - parallel.z }
     local parallelMag = vec3f_length(parallel)
     if parallelMag < mSpeed then parallelMag = mSpeed / parallelMag end
@@ -293,7 +389,7 @@ function act_race_shell_air(m)
     end
 
     m.marioObj.header.gfx.pos.y = m.marioObj.header.gfx.pos.y + 42.0
-    e.lastShellY = m.pos.y
+    gExtraMarioState[m.playerIndex].lastY = m.pos.y
     return 0
 end
 
