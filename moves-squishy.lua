@@ -1428,6 +1428,7 @@ local function squishy_update(m)
         e.panicking = true
     end
 
+    m.marioBodyState.handState = MARIO_HAND_HOLDING_CAP
     if m.marioObj.header.gfx.animInfo.animID == CHAR_ANIM_RUNNING then
         if m.forwardVel >= 50 then
             smlua_anim_util_set_animation(m.marioObj, SQUISHY_ANIM_MACH_RUNNING)
