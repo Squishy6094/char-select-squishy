@@ -105,7 +105,7 @@ extern Vtx squishy_000_displaylist_mesh_layer_1_vtx_0[75];
 extern Gfx squishy_000_displaylist_mesh_layer_1_tri_0[];
 extern Vtx squishy_000_displaylist_mesh_layer_1_vtx_1[6];
 extern Gfx squishy_000_displaylist_mesh_layer_1_tri_1[];
-extern Vtx squishy_000_displaylist_mesh_layer_1_vtx_2[107];
+extern Vtx squishy_000_displaylist_mesh_layer_1_vtx_2[291];
 extern Gfx squishy_000_displaylist_mesh_layer_1_tri_2[];
 extern Vtx squishy_000_displaylist_mesh_layer_1_vtx_3[21];
 extern Gfx squishy_000_displaylist_mesh_layer_1_tri_3[];
