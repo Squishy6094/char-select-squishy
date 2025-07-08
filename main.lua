@@ -219,6 +219,7 @@ _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 _G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
 _G.charSelect.character_add_voice(E_MODEL_SQUISHY, VOICETABLE_SQUISHY)
+_G.charSelect.config_character_sounds()
 _G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
 
 for i = 1, #squishyPalettes do
