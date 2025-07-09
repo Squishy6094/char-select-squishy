@@ -148,7 +148,7 @@ local squishyPalettes = {
     },
     ]]
     {
-        name = "Pluto",
+        name = "Saturn",
         [PANTS] = "E90037",
         [SHIRT] = "D25400",
         [GLOVES] = "FFFFFF",
@@ -157,6 +157,17 @@ local squishyPalettes = {
         [SKIN] = SQUISHY_SKIN_TONE,
         [CAP] = "E90037",
         [EMBLEM] = "FFFFFF",
+    },
+    {
+        name = "Pluto",
+        [PANTS] = "292929",
+        [SHIRT] = "292929",
+        [GLOVES] = "ffff00",
+        [SHOES] = "36e7a2",
+        [HAIR] = "1c1c1c",
+        [SKIN] = SQUISHY_SKIN_TONE,
+        [CAP] = "FFFFFF",
+        [EMBLEM] = "34ae72",
     },
     {
         name = "So True :3",
