@@ -43,7 +43,7 @@ Lights1 squishy_SquishyLashes_002_lights = gdSPDefLights1(
 	0xEE, 0xC3, 0x9A, 0x28, 0x28, 0x28);
 
 Lights1 squishy_SquishyEye_lights = gdSPDefLights1(
-	0x7F, 0x7F, 0x7F,
+	0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0x28, 0x28, 0x28);
 
 Lights1 squishy_face_1___eye_half_v3_001_lights = gdSPDefLights1(
@@ -6008,12 +6008,13 @@ Gfx mat_revert_squishy_SquishyLashes_002[] = {
 
 Gfx mat_squishy_SquishyEye[] = {
 	gsSPClearGeometryMode(G_CULL_BACK),
-	gsSPCopyLightsPlayerPart(EMBLEM),
+	gsSPLight(&squishy_SquishyEye_lights.l, 1),
+    gsSPLight(&squishy_SquishyEye_lights.a, 2),
+    gsSPCopyLightEXT(2, 17),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, PRIMITIVE, 0),
 	gsDPSetAlphaDither(G_AD_NOISE),
 	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetPrimColor(0, 0, 255, 255, 255, 255),
 	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, squishy_neweye_ia8),
 	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
 	gsDPLoadBlock(7, 0, 0, 511, 512),
