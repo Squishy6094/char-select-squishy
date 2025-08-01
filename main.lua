@@ -1,4 +1,4 @@
--- name: [CS] Squishy
+-- name: [CS] \\#008800\\Squishy
 -- description: Omgg the CS dev made a self insert,, why would she do that is she stupid???\n\n\\#ff7777\\Dudee you'd never guess what API this mod needs o.o
 -- category: cs
 

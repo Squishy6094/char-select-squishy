@@ -291,7 +291,7 @@ local function camera_update()
             local camDigitalDown  = analogToggle and (_G.OmmEnabled and 0 or D_JPAD) or D_CBUTTONS
 
             local camAnalogX = analogToggle and controller.extStickX or (_G.OmmEnabled and 0 or button_to_analog(m, L_JPAD, R_JPAD))
-            local camAnalogY = analogToggle and controller.extStickY or (_G.OmmEnabled and 0 or button_to_analog(m, U_JPAD, D_JPAD))
+            local camAnalogY = analogToggle and controller.extStickY or (_G.OmmEnabled and 0 or button_to_analog(m, D_JPAD, U_JPAD))
             
 
             local mouseCamXDigital = 0
@@ -430,7 +430,7 @@ local function camera_update()
         }
         rawCamPos = {
             x = m.pos.x + (velPan and posVel.x*camForwardDist*2 or 0) + sins(angle) * 500 * camScale,
-            y = m.pos.y - (velPan and get_mario_y_vel_from_floor(m)*camForwardDist*1.5 or 0) - 150 + 350 * camScale - eepyCamOffset,
+            y = m.pos.y - (velPan and get_mario_y_vel_from_floor(m)*camForwardDist*1.5 or 0) - 150 + 350*((m.action & ACT_FLAG_HANGING == 0) and 1 or -0.5) * camScale - eepyCamOffset,
             z = m.pos.z + (velPan and posVel.z*camForwardDist*2 or 0) + coss(angle) * 500 * camScale,
         }
         
