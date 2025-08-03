@@ -242,8 +242,9 @@ function crown_loop(o)
         o.oAnimState = 1
     end
     oGFX.node.flags = mGFX.node.flags
-
-    if m.playerIndex ~= 0 and (m.marioBodyState.updateHeadPosTime < get_global_timer() - 2) then -- disable rendering if not on screen
+    if _G.charSelect.character_get_current_number(m.playerIndex) ~= CT_SQUISHY then
+        cur_obj_disable_rendering()
+    elseif m.playerIndex ~= 0 and (m.marioBodyState.updateHeadPosTime < get_global_timer() - 2) then -- disable rendering if not on screen
         cur_obj_disable_rendering()
     end
     o.hookRender = 1
