@@ -538,6 +538,7 @@ local function input_update(m)
 end
 
 local function on_level_init()
+    if not doodell_cam_active() then return end
     speedrun_timer_checkpoint()
     timerPerLevel = 0
     doodell_cam_snap(true)
