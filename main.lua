@@ -2,7 +2,7 @@
 -- description: Omgg the CS dev made a self insert,, why would she do that is she stupid???\n\n\\#ff7777\\Dudee you'd never guess what API this mod needs o.o
 -- category: cs
 
-local VERSION_NUM = "1 Pre-Release"
+local VERSION_NUM = "2 Pre-Release"
 
 if not _G.charSelectExists then
     local noCSMessages = {
@@ -226,10 +226,14 @@ local ANIMS_SQUISHY = {
     [charSelect.CS_ANIM_MENU] = SQUISHY_ANIM_TRICK_TETO
 }
 
-CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
+local EYES_SQUISHY = {
+    [charSelect.CS_ANIM_MENU] = MARIO_EYES_LOOK_RIGHT
+}
+
+CT_SQUISHY = _G.charSelect.character_add("Squishy", "Creator of Character Select!! Transgender ladyy full of coderinggg - Version " .. VERSION_NUM, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
-_G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY)
+_G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY, EYES_SQUISHY)
 _G.charSelect.character_add_voice(E_MODEL_SQUISHY, VOICETABLE_SQUISHY)
 _G.charSelect.config_character_sounds()
 _G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
@@ -250,6 +254,7 @@ _G.charSelect.credit_add(MOD_NAME, "Jer", "Taunts / Anims")
 local TEXT_VERSION = "[CS] Squishy v" .. tostring(VERSION_NUM)
 local opacity = 0
 local function hud_render_menu()
+    --[[
     if _G.charSelect.character_get_current_number() ~= CT_SQUISHY then
         opacity = lerp(opacity, 0, 0.1)
     else
@@ -269,6 +274,7 @@ local function hud_render_menu()
     djui_hud_set_color(menuColorHalf.r, menuColorHalf.g, menuColorHalf.b, opacity)
     djui_hud_set_font(FONT_TINY)
     djui_hud_print_text(TEXT_VERSION, width - 5 - djui_hud_measure_text(TEXT_VERSION)*0.5, 3, 0.5)
+    ]]
 end
 
 _G.charSelect.hook_render_in_menu(hud_render_menu)
