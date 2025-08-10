@@ -53,6 +53,7 @@ end
 
 E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
 E_MODEL_SQUISHY_PLUSH = smlua_model_util_get_id("squishy_plush_geo")
+E_MODEL_SQUISHY_PLUSH_PET = smlua_model_util_get_id("squishy_plush_pet_geo")
 E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
