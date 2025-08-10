@@ -817,7 +817,8 @@ local function act_squishy_swim_moving(m)
         m.faceAngle.x = atan2s(m.forwardVel, m.vel.y)
     end
 
-    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x400, 0x400)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x900, 0x900);
+    m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x9000)
 
     if m.input & INPUT_NONZERO_ANALOG ~= 0 or m.input & INPUT_A_DOWN ~= 0 or m.input & INPUT_Z_DOWN ~= 0 then
         if m.forwardVel < 25 then
@@ -848,7 +849,6 @@ local function act_squishy_swim_moving(m)
     m.vel.x = m.forwardVel * sins(m.faceAngle.y) * coss(m.faceAngle.x)
     m.vel.y = m.forwardVel * sins(m.faceAngle.x)
     m.vel.z = m.forwardVel * coss(m.faceAngle.y) * coss(m.faceAngle.x)
-    
 
     m.actionTimer = m.actionTimer + 1
     apply_water_current(m, m.vel)
@@ -866,7 +866,8 @@ local function act_squishy_swim_attack(m)
         e.gfxAnimZ = 0x10000
     end
 
-    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x100, 0x100)
+    m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300);
+    m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x9000)
 
     if m.input & INPUT_A_DOWN ~= 0 then
         m.faceAngle.x = math.min(m.faceAngle.x + 0x100, 0x3000)
@@ -1361,7 +1362,7 @@ hook_mario_action(ACT_SQUISHY_WALL_SLIDE, {every_frame = act_squishy_wall_slide}
 hook_mario_action(ACT_SQUISHY_FIRE_BURN, {every_frame = act_squishy_fire_burn})
 hook_mario_action(ACT_SQUISHY_SWIM_IDLE, {every_frame = act_squishy_swim_idle})
 hook_mario_action(ACT_SQUISHY_SWIM_MOVING, {every_frame = act_squishy_swim_moving})
-hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_SWIM_ATTACK, {every_frame = act_squishy_swim_attack}, INT_PUNCH)
 hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, {every_frame = act_squishy_wall_kick_air})
 hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
