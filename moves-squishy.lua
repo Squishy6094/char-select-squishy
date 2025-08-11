@@ -818,7 +818,7 @@ local function act_squishy_swim_moving(m)
     end
 
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x900, 0x900);
-    m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x9000)
+    m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x10000)
 
     if m.input & INPUT_NONZERO_ANALOG ~= 0 or m.input & INPUT_A_DOWN ~= 0 or m.input & INPUT_Z_DOWN ~= 0 then
         if m.forwardVel < 25 then
@@ -867,7 +867,7 @@ local function act_squishy_swim_attack(m)
     end
 
     m.faceAngle.y = m.intendedYaw - approach_s32(convert_s16(m.intendedYaw - m.faceAngle.y), 0, 0x300, 0x300);
-    m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x9000)
+    m.forwardVel = m.forwardVel* (1 - math.abs(convert_s16(m.faceAngle.y - m.intendedYaw))/0x10000)
 
     if m.input & INPUT_A_DOWN ~= 0 then
         m.faceAngle.x = math.min(m.faceAngle.x + 0x100, 0x3000)
