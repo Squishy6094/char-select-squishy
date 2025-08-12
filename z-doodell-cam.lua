@@ -90,6 +90,7 @@ end
 function doodell_cam_active()
     local m = gMarioStates[0]
     return doodell_cam_enabled() and
+    not camera_is_frozen() and
     not omm_camera_enabled() and
     m.area.camera ~= nil and
     m.statusForCamera.cameraEvent ~= CAM_EVENT_DOOR and

@@ -262,28 +262,31 @@ local function check_squishy_ramp(m, action)
     end
 end
 
-ACT_SQUISHY_WALKING =           allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
-ACT_SQUISHY_CROUCH_SLIDE =      allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
-ACT_SQUISHY_DIVE =              allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION)
-ACT_SQUISHY_DIVE_SLIDE =        allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE)
-ACT_SQUISHY_LONG_JUMP =         allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
-ACT_SQUISHY_SLIDE =             allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
-ACT_SQUISHY_SLIDE_AIR =         allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
-ACT_SQUISHY_ROLLOUT =           allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
-ACT_SQUISHY_GROUND_POUND =      allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR)
-ACT_SQUISHY_GROUND_POUND_LAND = allocate_mario_action(ACT_GROUP_STATIONARY | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
-ACT_SQUISHY_GROUND_POUND_JUMP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
-ACT_SQUISHY_WALL_SLIDE =        allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
-ACT_SQUISHY_FIRE_BURN =         allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
-ACT_SQUISHY_SWIM_IDLE =         allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
-ACT_SQUISHY_SWIM_MOVING =       allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
-ACT_SQUISHY_SWIM_ATTACK =       allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
-ACT_SQUISHY_WALL_KICK_AIR =     allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
-ACT_SQUISHY_SIDE_FLIP =         allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
-ACT_SQUISHY_LEDGE_GRAB =        allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
-ACT_SQUISHY_TRICK =             allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
-ACT_SQUISHY_CEILING_SLIDE =     allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
-ACT_SQUISHY_POLE_SWING =        allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY | ACT_FLAG_ON_POLE | ACT_FLAG_ATTACKING)
+ACT_SQUISHY_WALKING =              allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING )
+ACT_SQUISHY_CROUCH_SLIDE =         allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_MOVING | ACT_FLAG_SHORT_HITBOX )
+ACT_SQUISHY_DIVE =                 allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION)
+ACT_SQUISHY_DIVE_SLIDE =           allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_DIVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE)
+ACT_SQUISHY_LONG_JUMP =            allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
+ACT_SQUISHY_SLIDE =                allocate_mario_action(ACT_GROUP_MOVING | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_BUTT_OR_STOMACH_SLIDE | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX)
+ACT_SQUISHY_SLIDE_AIR =            allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_DIVING | ACT_FLAG_SHORT_HITBOX | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
+ACT_SQUISHY_ROLLOUT =              allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
+ACT_SQUISHY_GROUND_POUND =         allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_GROUND_POUND_LAND =    allocate_mario_action(ACT_GROUP_STATIONARY | ACT_FLAG_ATTACKING | ACT_FLAG_MOVING)
+ACT_SQUISHY_GROUND_POUND_JUMP =    allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
+ACT_SQUISHY_WALL_SLIDE =           allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_FIRE_BURN =            allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_SWIM_IDLE =            allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_STATIONARY)
+ACT_SQUISHY_SWIM_MOVING =          allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING)
+ACT_SQUISHY_SWIM_ATTACK =          allocate_mario_action(ACT_GROUP_SUBMERGED | ACT_FLAG_SWIMMING | ACT_FLAG_WATER_OR_TEXT | ACT_FLAG_MOVING | ACT_FLAG_ATTACKING)
+ACT_SQUISHY_WALL_KICK_AIR =        allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
+ACT_SQUISHY_SIDE_FLIP =            allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR | ACT_FLAG_ALLOW_VERTICAL_WIND_ACTION )
+ACT_SQUISHY_LEDGE_GRAB =           allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
+ACT_SQUISHY_TRICK =                allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_CEILING_SLIDE =        allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_POLE_SWING =           allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY | ACT_FLAG_ON_POLE | ACT_FLAG_ATTACKING)
+ACT_SQUISHY_BASEBALL_BAT_STARTUP = allocate_mario_action(ACT_FLAG_STATIONARY | ACT_FLAG_ATTACKING)
+ACT_SQUISHY_BASEBALL_BAT_SWING =   allocate_mario_action(ACT_FLAG_STATIONARY | ACT_FLAG_ATTACKING)
+ACT_UNCAPPED_KNOCKBACK =           allocate_mario_action(ACT_GROUP_CUTSCENE)
 
 local function act_squishy_walking(m)
     local e = gSquishyExtraStates[m.playerIndex]
@@ -1347,6 +1350,67 @@ local function squishy_act_pole_swing(m)
     end
 end
 
+local function act_squishy_basebase_bat_startup(m)
+    m.vel.x = 0
+    m.vel.z = 0
+    if m.actionArg == 0 then
+        if m.actionTimer < 60 then
+            set_mario_animation(m, MARIO_ANIM_CREDITS_LOWER_HAND)
+        else
+            return set_mario_action(m, ACT_SQUISHY_BASEBALL_BAT_SWING, 0)
+        end
+    else
+        if m.actionTimer < 30 then
+            set_mario_animation(m, MARIO_ANIM_BACKFLIP)
+        else
+            return set_mario_action(m, ACT_IDLE, 0)
+        end
+    end
+
+    perform_ground_step(m);
+    m.actionTimer = m.actionTimer + 1
+    return false;
+end
+
+local function act_squishy_basebase_bat_swing(m)
+    if m.actionTimer < 5 then
+        set_mario_animation(m, MARIO_ANIM_FIRST_PUNCH)
+        m.marioObj.hitboxRadius = 100 -- Damage hitbox
+    else
+        m.marioObj.hitboxRadius = 37 -- Reset the hitbox after initial hit
+        return set_mario_action(m, ACT_SQUISHY_BASEBALL_BAT_STARTUP, 1)
+    end
+
+    perform_ground_step(m);
+    m.actionTimer = m.actionTimer + 1
+end
+
+local homerunCam = {x = 0, y = 0, z = 0}
+local function act_uncapped_knockback(m)
+    local l = gLakituState
+    if m.playerIndex == 0 then
+        camera_freeze()
+        l.pos.x = homerunCam.x
+        l.pos.y = homerunCam.y
+        l.pos.z = homerunCam.z
+        l.focus.x = m.pos.x
+        l.focus.y = m.pos.y
+        l.focus.z = m.pos.z
+    end
+
+    m.forwardVel = -100
+    local step = common_air_action_step(m, ACT_HARD_BACKWARD_GROUND_KB, MARIO_ANIM_BACKWARD_SPINNING, AIR_STEP_NONE);
+    if step == AIR_STEP_LANDED then
+        camera_unfreeze()
+    end
+
+    m.actionTimer = m.actionTimer + 1
+end
+
+local function act_uncapped_knockback_gravity(m)
+    m.vel.y = m.vel.y - 3
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1369,6 +1433,9 @@ hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab}
 hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
 hook_mario_action(ACT_SQUISHY_CEILING_SLIDE, {every_frame = act_squishy_ceiling_slide})
 hook_mario_action(ACT_SQUISHY_POLE_SWING, {every_frame = squishy_act_pole_swing})
+hook_mario_action(ACT_SQUISHY_BASEBALL_BAT_STARTUP, {every_frame = act_squishy_basebase_bat_startup})
+hook_mario_action(ACT_SQUISHY_BASEBALL_BAT_SWING, {every_frame = act_squishy_basebase_bat_swing}, INT_KICK)
+hook_mario_action(ACT_UNCAPPED_KNOCKBACK, {every_frame = act_uncapped_knockback, gravity = act_uncapped_knockback_gravity})
 if _G.doorBust then
     _G.doorBust.add_door_bust_action(ACT_SQUISHY_SLIDE)
 end
@@ -1604,6 +1671,9 @@ local function squishy_before_action(m, nextAct)
         m.marioObj.oMarioPoleYawVel = e.poleVel * 40
         return set_mario_action(m, ACT_SQUISHY_POLE_SWING, 0)
     end
+    if nextAct == ACT_PUNCHING or (nextAct == ACT_MOVE_PUNCHING and m.forwardVel < 5) then
+        return set_mario_action(m, ACT_SQUISHY_BASEBALL_BAT_STARTUP, 0)
+    end
 end
 
 local strainingActs = {
@@ -1673,6 +1743,8 @@ local function squishy_before_phys_step(m)
     end
 end
 
+
+--[[
 local function hud_render()
     djui_hud_set_resolution(RESOLUTION_N64)
     for i = 0, MAX_PLAYERS - 1 do
@@ -1793,6 +1865,7 @@ local function hud_render_moveset()
         djui_hud_print_text(trickScoreText, width*0.5 - djui_hud_measure_text(trickScoreText)*0.5, y + 20, 1)
     end
 end
+]]
 
 local forceWalkingInteracts = {
     [id_bhvDoor] = true,
@@ -1834,6 +1907,20 @@ local function on_pvp_attack(a, v, int)
     if (a.action == ACT_SQUISHY_SLIDE or a.action == ACT_SQUISHY_SLIDE_AIR) then
         a.forwardVel = -math.max(math.abs(a.forwardVel * 0.25), 40)
         set_mario_action(a, ACT_BACKWARD_ROLLOUT, 0)
+    end
+
+    if (a.action == ACT_SQUISHY_BASEBALL_BAT_STARTUP or a.action == ACT_SQUISHY_BASEBALL_BAT_SWING) then
+        if v.playerIndex == 0 then
+            homerunCam.y = a.pos.y + 50
+            homerunCam.x = a.pos.x + 250 * sins(a.faceAngle.y + 0x6000)
+            homerunCam.z = a.pos.z + 250 * coss(a.faceAngle.y + 0x6000)
+        end
+        v.faceAngle.y = a.faceAngle.y + 0x8000
+        v.forwardVel = -100
+        v.vel.y = 100
+        v.pos.y = v.pos.y + 10
+        set_mario_action(v, ACT_UNCAPPED_KNOCKBACK, 0)
+        v.hurtCounter = 4*8
     end
 end
 
