@@ -411,13 +411,17 @@ local function act_squishy_dive(m)
         if m.interactObj.behavior == get_behavior_from_id(id_bhvBowser) then
             set_mario_action(m, ACT_PICKING_UP_BOWSER, 0)
             m.marioBodyState.grabPos = GRAB_POS_BOWSER
-            return true
+            return 1
         elseif m.interactObj.oInteractionSubtype & INT_SUBTYPE_GRABS_MARIO ~= 0 then
-            return false
+            return 0
         else
             m.marioBodyState.grabPos = GRAB_POS_LIGHT_OBJ
-            return true
+            return 1
         end
+    end
+
+    if (m.input & INPUT_Z_PRESSED ~= 0) then
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 1, 40);
     end
 
     m.actionTimer = m.actionTimer + 1
@@ -458,6 +462,11 @@ local function act_squishy_long_jump(m)
     update_omm_air_rotation(m)
     e.gfxAnimX = e.gfxAnimX * 0.8
     m.marioObj.header.gfx.angle.x = e.gfxAnimX
+
+    if (m.input & INPUT_Z_PRESSED ~= 0) then
+        return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 0, 60);
+    end
+
     m.actionTimer = m.actionTimer + 1
 end
 
@@ -617,7 +626,7 @@ local function act_squishy_ground_pound(m)
     e.yVelStore = math.abs(m.vel.y)
     m.actionTimer = m.actionTimer + 1
     m.peakHeight = m.pos.y
-    if m.input & INPUT_A_PRESSED ~= 0 then
+    if m.input & INPUT_A_PRESSED ~= 0 and m.actionArg ~= 1 then
         m.faceAngle.y = m.intendedYaw
         m.forwardVel = math.abs(m.forwardVel)
         e.groundpoundCancels = e.groundpoundCancels + 1
@@ -705,14 +714,15 @@ local function act_squishy_wall_slide(m)
         return set_mario_action(m, ACT_HARD_BACKWARD_AIR_KB, 0)
     end
 
-    if m.actionTimer == 0 then
-        e.forwardVelStore = m.forwardVel
+    if m.actionTimer < 2 then
+        e.forwardVelStore = math.sqrt(m.vel.z^2 + m.vel.x^2) + math.min(m.vel.y, 0)
+        m.vel.y = e.forwardVelStore
         if m.wall ~= nil then
             e.prevWallAngle = atan2s(m.wall.normal.z, m.wall.normal.x)
         end
     end
 
-    m.vel.y = clamp_soft(m.vel.y + 0.3, -70, 150, 2)
+    m.vel.y = m.vel.y + 0.3
     set_mario_particle_flag(m, PARTICLE_DUST)
     if m.wall == nil then
         m.faceAngle.y = e.prevWallAngle
@@ -727,12 +737,10 @@ local function act_squishy_wall_slide(m)
     else
         local wallAngle = atan2s(m.wall.normal.z, m.wall.normal.x)
         local wallAngleDiff = (wallAngle - e.prevWallAngle)
-        if wallAngleDiff ~= 0 and (wallAngleDiff < 0x3000 and wallAngleDiff > -0x3000) then
-            local vel = math.sqrt(m.vel.z^2 + m.vel.x^2)
-            local velAngle = atan2s(m.vel.z, m.vel.x)
-            velAngle = velAngle + wallAngleDiff
-            m.vel.x = clamp(vel * sins(velAngle), -30, 30)
-            m.vel.z = clamp(vel * coss(velAngle), -30, 30)
+        if wallAngleDiff ~= 0 and (wallAngleDiff < 0x3F00 and wallAngleDiff > -0x3F00) then
+            local velAngle = atan2s(m.vel.z, m.vel.x) + wallAngleDiff
+            m.vel.x = e.forwardVelStore * sins(velAngle)
+            m.vel.z = e.forwardVelStore * coss(velAngle)
             add_debug_display(m, "Wall Angle Diff: " .. debug_num_to_hex(wallAngleDiff))
         end
         e.prevWallAngle = wallAngle
@@ -749,6 +757,16 @@ local function act_squishy_wall_slide(m)
                 m.marioObj.header.gfx.cameraToObject);
 
         set_mario_action(m, ACT_SQUISHY_WALL_KICK_AIR, 0)
+    end
+
+    if m.input & INPUT_Z_PRESSED ~= 0 then
+        m.faceAngle.y = e.prevWallAngle
+
+        play_sound((m.flags & MARIO_METAL_CAP ~= 0) and SOUND_ACTION_METAL_BONK or SOUND_ACTION_BONK,
+                m.marioObj.header.gfx.cameraToObject);
+
+        m.forwardVel = 20
+        set_mario_action(m, ACT_FREEFALL, 0)
     end
 
     m.actionTimer = m.actionTimer + 1
@@ -1499,10 +1517,6 @@ local function squishy_update(m)
     end
     add_debug_display(m, "Tricks: " .. (e.trickCount))
 
-    if (m.action == ACT_SQUISHY_LONG_JUMP or m.action == ACT_SQUISHY_DIVE) and m.input & INPUT_Z_PRESSED ~= 0 then
-        set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, (m.action == ACT_SQUISHY_DIVE and 1 or 0), 60)
-    end
-
     if e.spamBurnout > 0 then
         if (m.flags & MARIO_METAL_CAP == 0) then
             set_mario_particle_flag(m, PARTICLE_FIRE)
@@ -1616,7 +1630,7 @@ local function squishy_before_action(m, nextAct)
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_ROLLOUT, 0, 30)
     end
     if m.wall ~= nil and nextAct == ACT_AIR_HIT_WALL or nextAct == ACT_OMM_WALL_SLIDE then
-        return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 0, m.forwardVel + math.min(m.vel.y, 0))
+        return set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
     end
     if nextAct == ACT_LONG_JUMP and m.forwardVel > 0 then
         return set_mario_action(m, ACT_SQUISHY_LONG_JUMP, 0)
@@ -1725,19 +1739,17 @@ local function squishy_before_phys_step(m)
     if m.wall ~= nil then
         if (m.wall.type == SURFACE_BURNING) then return end
 
-        local wallDYaw = (atan2s(m.wall.normal.z, m.wall.normal.x) - (m.faceAngle.y))
+        local wallDYaw = convert_s16(atan2s(m.wall.normal.z, m.wall.normal.x) - (m.faceAngle.y))
         --I don't really understand this however I do know the lower `limit` becomes, the more possible wallkick degrees.
         local limitNegative = (-((180 - wallAngleLimit) * (8192/45))) + 1
         local limitPositive = ((180 - wallAngleLimit) * (8192/45)) - 1
-        --wallDYaw is s16, so I converted it
-        wallDYaw = convert_s16(wallDYaw)
 
         --Standard air hit wall requirements
         if (m.forwardVel >= 16) and (canWallkick[m.action] ~= nil) then
             if (wallDYaw >= limitPositive) or (wallDYaw <= limitNegative) then
                 --mario_bonk_reflection(m, 0);
                 m.faceAngle.y = convert_s16(m.faceAngle.y + 0x8000)
-                set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 1)
+                set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_SLIDE, 1, math.sqrt(m.vel.x^2, m.vel.z^2))
             end
         end
     end
@@ -1929,12 +1941,12 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_SET_MARIO_ACTION, squishy_on_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
-    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render_moveset)
+    --_G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render_moveset)
     --hook_event(HOOK_ON_HUD_RENDER_BEHIND, hud_render)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, squishy_reset_extra_states)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_INTERACT, on_interact)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_INTERACT, allow_interact)
-    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_FORCE_WATER_ACTION, squishy_water_skipping)
+    --_G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_FORCE_WATER_ACTION, squishy_water_skipping)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_PVP_ATTACK, on_pvp_attack)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
