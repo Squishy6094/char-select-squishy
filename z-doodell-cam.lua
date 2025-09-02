@@ -127,6 +127,7 @@ local eepyTimer = 0
 local eepyStart = 390
 local eepyCamOffset = 0
 local prevPos = {x = 0, y = 0, z = 0}
+local prevPosVel = {x = 0, y = 0, z = 0}
 
 local camSpawnAngles = {
     [LEVEL_BITDW] = 0x4000,
@@ -378,8 +379,24 @@ local function camera_update()
             end
         end
 
+        local posVelDist = vec3f_dist(prevPos, m.pos)
+        local velPan = not nonMomentumActs[m.action]
+        if posVelDist > 500 then
+            doodell_cam_snap(false)
+        end
+        local posVel = {
+            x = lerp(prevPosVel.x, velPan and m.pos.x - prevPos.x or 0, 0.3),
+            y = lerp(prevPosVel.y, velPan and m.pos.y - prevPos.y or 0, 0.3),
+            z = lerp(prevPosVel.z, velPan and m.pos.z - prevPos.z or 0, 0.3),
+        }
+        prevPosVel = {
+            x = posVel.x,
+            y = posVel.y,
+            z = posVel.z,
+        }
+
         local angle = camAngleRaw
-        local roll = ((sins(atan2s(m.vel.z, m.vel.x) - camAngleRaw)*m.forwardVel/150)*0x800)
+        local roll = ((sins(atan2s(posVel.z, posVel.x) - camAngleRaw)*m.forwardVel/150)*0x800)
         if not camSwitch then
             if m.action == ACT_FLYING then
                 angle = m.faceAngle.y - 0x8000
@@ -397,16 +414,6 @@ local function camera_update()
             end
         end
 
-        local posVelDist = vec3f_dist(prevPos, m.pos)
-        if posVelDist > 500 then
-            doodell_cam_snap(false)
-        end
-        local posVel = {
-            x = m.pos.x - prevPos.x,
-            y = m.pos.y - prevPos.y,
-            z = m.pos.z - prevPos.z,
-        }
-
         local camPanX = sins(convert_s16(camAngleRaw + 0x4000))*camPan
         local camPanZ = coss(convert_s16(camAngleRaw + 0x4000))*camPan
 
@@ -422,17 +429,16 @@ local function camera_update()
 
         if m.action == ACT_SQUISHY_GROUND_POUND_LAND then return end
 
-        local velPan = not nonMomentumActs[m.action]
         
         rawFocusPos = {
-            x = m.pos.x + camPanX + (velPan  and posVel.x*camForwardDist or 0),
-            y = m.pos.y + camPitch + 100 + 100*camScale*0.5 + (velPan and clamp(get_mario_y_vel_from_floor(m), -100, 100)*camForwardDist or 0) - eepyCamOffset,
-            z = m.pos.z + camPanZ + (velPan and posVel.z*camForwardDist or 0),
+            x = m.pos.x + camPanX + posVel.x*camForwardDist*1.5,
+            y = m.pos.y + camPitch + 100 + 100*camScale*0.5 + clamp(get_mario_y_vel_from_floor(m), -100, 100)*camForwardDist or 0 - eepyCamOffset,
+            z = m.pos.z + camPanZ + posVel.z*camForwardDist*1.5,
         }
         rawCamPos = {
-            x = m.pos.x + (velPan and posVel.x*camForwardDist*2 or 0) + sins(angle) * 500 * camScale,
-            y = m.pos.y - (velPan and get_mario_y_vel_from_floor(m)*camForwardDist*1.5 or 0) - 150 + 350*((m.action & ACT_FLAG_HANGING == 0) and 1 or -0.5) * camScale - eepyCamOffset,
-            z = m.pos.z + (velPan and posVel.z*camForwardDist*2 or 0) + coss(angle) * 500 * camScale,
+            x = m.pos.x + posVel.x*camForwardDist + sins(angle) * 500 * camScale,
+            y = m.pos.y - get_mario_y_vel_from_floor(m)*camForwardDist*1.5 - 150 + 350*((m.action & ACT_FLAG_HANGING == 0) and 1 or -0.5) * camScale - eepyCamOffset,
+            z = m.pos.z + posVel.z*camForwardDist + coss(angle) * 500 * camScale,
         }
         
         if camPitch >= 600*((camScale + 1)/3.5) and
@@ -475,7 +481,11 @@ local function camera_update()
     end
     
     camAngle = atan2s(l.pos.z - l.focus.z, l.pos.x - l.focus.x)
-    camAngleInput = atan2s(rawCamPos.z - rawFocusPos.z, rawCamPos.x - rawFocusPos.x)
+    if camera_config_is_analog_cam_enabled() then
+        camAngleInput = atan2s(rawCamPos.z - rawFocusPos.z, rawCamPos.x - rawFocusPos.x)
+    else
+        camAngleInput = atan2s(camPos.z - focusPos.z, camPos.x - focusPos.x)
+    end
 end
 
 local TEX_DOODELL_CAM = get_texture_info("squishy-doodell-cam")
@@ -532,6 +542,9 @@ local function input_update(m)
         local analogToggle = camera_config_is_analog_cam_enabled()
         if not analogToggle then
             camAngle = (camAngle/0x1000)*0x1000
+        else
+            local turnRate = camera_config_get_aggression()*m.forwardVel*0.3
+            camAngleRaw = (m.faceAngle.y + 0x8000) - approach_s32(convert_s16((m.faceAngle.y + 0x8000) - camAngleRaw), 0, turnRate, turnRate)
         end
         m.area.camera.yaw = camAngle
         m.intendedYaw = atan2s(-m.controller.stickY, m.controller.stickX) + camAngleInput
