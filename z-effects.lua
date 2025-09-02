@@ -289,17 +289,22 @@ function on_obj_render(o)
 
     -- Hair phys
 
-    local dx = oGFX.pos.x - o.oVelX
-    local dz = oGFX.pos.z - o.oVelZ
-
+    local dx = oGFX.pos.x - o.oHomeX
+    local dy = oGFX.pos.y - o.oHomeY
+    local dz = oGFX.pos.z - o.oHomeZ
     if dx ~= 0 or dz ~= 0 then
         -- Calculate yaw difference between previous and current position
-        local angle = atan2s(dz, dx)
-        oGFX.angle.z = oGFX.angle.z - angle*0.1
+        djui_chat_message_create(tostring(atan2s(dz, dx)*0.01))
+        o.oVelZ = o.oVelZ + atan2s(dz, dx)*0.01 + clamp(m.forwardVel*10, -1000, 1000) + math.clamp(-m.vel.y, 0, 70)*50
+        oGFX.angle.z = clamp(oGFX.angle.z + o.oVelZ, 0, 0x7000)
+        o.oVelX = o.oVelX - atan2s(dz, dx)*0.01
+        oGFX.angle.x = clamp(oGFX.angle.x + o.oVelX, -0x3000, 0x3000)
     end
+    o.oVelZ = lerp(o.oVelZ, 0, 0.1)
+    o.oVelX = lerp(o.oVelX, 0, 0.1)
 
     -- Store current position for next frame
-    o.oVelX, o.oVelY, o.oVelZ = oGFX.pos.x, oGFX.pos.y, oGFX.pos.z
+    o.oHomeX, o.oHomeY, o.oHomeZ = oGFX.pos.x, oGFX.pos.y, oGFX.pos.z
 
     o.oPosX = oGFX.pos.x
     o.oPosY = oGFX.pos.y
