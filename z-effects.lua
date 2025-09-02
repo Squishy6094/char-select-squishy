@@ -294,7 +294,6 @@ function on_obj_render(o)
     local dz = oGFX.pos.z - o.oHomeZ
     if dx ~= 0 or dz ~= 0 then
         -- Calculate yaw difference between previous and current position
-        djui_chat_message_create(tostring(atan2s(dz, dx)*0.01))
         o.oVelZ = o.oVelZ + atan2s(dz, dx)*0.01 + clamp(m.forwardVel*10, -1000, 1000) + math.clamp(-m.vel.y, 0, 70)*50
         oGFX.angle.z = clamp(oGFX.angle.z + o.oVelZ, 0, 0x7000)
         o.oVelX = o.oVelX - atan2s(dz, dx)*0.01
