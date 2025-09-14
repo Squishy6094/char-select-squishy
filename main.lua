@@ -52,9 +52,9 @@ if not _G.charSelectExists then
 end
 
 E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
+E_MODEL_SHELL = smlua_model_util_get_id("player_shell_geo")
 E_MODEL_SQUISHY_PLUSH = smlua_model_util_get_id("squishy_plush_geo")
 E_MODEL_SQUISHY_PLUSH_PET = smlua_model_util_get_id("squishy_plush_pet_geo")
-E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
 
@@ -67,7 +67,7 @@ local CAPS_SQUISHY = {
 local VOICETABLE_SQUISHY = {nil}
 
 local SQUISHY_SKIN_TONE = "eec39a"
-local squishyPalettes = {
+local PALETTES_SQUISHY = {
     {
         name = "Default",
         [SHOES] = "363636",
@@ -160,17 +160,6 @@ local squishyPalettes = {
         [EMBLEM] = "FFFFFF",
     },
     {
-        name = "Pluto",
-        [PANTS] = "292929",
-        [SHIRT] = "292929",
-        [GLOVES] = "ffff00",
-        [SHOES] = "36e7a2",
-        [HAIR] = "1c1c1c",
-        [SKIN] = SQUISHY_SKIN_TONE,
-        [CAP] = "FFFFFF",
-        [EMBLEM] = "34ae72",
-    },
-    {
         name = "So True :3",
         [PANTS] = "398FBE",
         [SHIRT] = "B96C86",
@@ -205,6 +194,20 @@ local squishyPalettes = {
     },
 }
 
+local PALETTES_SHELL = {
+    {
+        name = "Default",
+        [PANTS] = "373090",
+        [SHIRT] = "34305F",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "1B162D",
+        [HAIR] = "D7D3FF",
+        [SKIN] = "FFFFFF",
+        [CAP] = "1B162D",
+        [EMBLEM] = "6B5EFF",
+    }
+}
+
 local COURSE_SQUISHY = {
     top = get_texture_info("squishy-course-top"),
     bottom = get_texture_info("squishy-course-bottom"),
@@ -230,26 +233,27 @@ local EYES_SQUISHY = {
     [charSelect.CS_ANIM_MENU] = MARIO_EYES_LOOK_RIGHT
 }
 
+-- Squishy Character
 CT_SQUISHY = _G.charSelect.character_add("Squishy", "Creator of Character Select!! Transgender ladyy full of coderinggg - Version " .. VERSION_NUM, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 _G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY, EYES_SQUISHY)
 _G.charSelect.character_add_voice(E_MODEL_SQUISHY, VOICETABLE_SQUISHY)
-_G.charSelect.config_character_sounds()
 _G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
+for i = 1, #PALETTES_SQUISHY do
+    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTES_SQUISHY[i], PALETTES_SQUISHY[i].name)
+end
 
-for i = 1, #squishyPalettes do
-    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, squishyPalettes[i], squishyPalettes[i].name)
-    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY_PLUSH, squishyPalettes[i], squishyPalettes[i].name)
+-- Shell Character
+CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "D7D3FF", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
+for i = 1, #PALETTES_SHELL do
+    _G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTES_SHELL[i], PALETTES_SHELL[i].name)
 end
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
 _G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Taunts / Prettyy >//<")
-_G.charSelect.credit_add(MOD_NAME, "SprSn64", "Squishy Model / Taunts")
-_G.charSelect.credit_add(MOD_NAME, "KF", "Model Rigging")
-_G.charSelect.credit_add(MOD_NAME, "DM-Kun", "Taunts / Icon")
-_G.charSelect.credit_add(MOD_NAME, "Jer", "Taunts / Anims")
+_G.charSelect.credit_add(MOD_NAME, "JerThePear", "Shell Model")
 
 local TEXT_VERSION = "[CS] Squishy v" .. tostring(VERSION_NUM)
 local opacity = 0
@@ -278,3 +282,4 @@ local function hud_render_menu()
 end
 
 _G.charSelect.hook_render_in_menu(hud_render_menu)
+_G.charSelect.config_character_sounds()
