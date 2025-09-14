@@ -80,7 +80,11 @@ local function act_squishy_ground_pound(m)
     local e = gSquishyStates[m.playerIndex]
 
     if m.actionTimer < 2 then
-        m.vel.y = poundVel*10
+        m.vel.y = poundVel*(m.actionArg == 0 and 10 or 15)
+    end
+
+    if m.forwardVel < 0 and m.actionArg == 0 then
+        m.actionArg = 1
     end
 
     e.poundMaxVel = clamp(math.max(e.poundMaxVel, math.abs(m.vel.y)*0.8, m.forwardVel), 0, 60)
@@ -91,6 +95,14 @@ local function act_squishy_ground_pound(m)
     play_sound_if_no_flag(m, SOUND_ACTION_THROW, MARIO_ACTION_SOUND_PLAYED);
 
     set_character_animation(m, CHAR_ANIM_GROUND_POUND);
+
+    if (m.input & INPUT_B_PRESSED) ~= 0 then
+        m.vel.y = 5
+        mario_set_forward_vel(m, math.max(30, m.forwardVel))
+        m.faceAngle.y = m.intendedYaw
+        e.poundMaxVel = 0
+        return set_mario_action(m, ACT_SQUISHY_SLIDE_AIR, 0)
+    end
 
     local stepResult = perform_air_step(m, 0);
     if (stepResult == AIR_STEP_LANDED) then
@@ -103,7 +115,7 @@ local function act_squishy_ground_pound(m)
         else
             play_mario_heavy_landing_sound(m, SOUND_ACTION_TERRAIN_HEAVY_LANDING);
             set_mario_particle_flags(m, (PARTICLE_MIST_CIRCLE | PARTICLE_HORIZONTAL_STAR), 0);
-            return set_mario_action(m, ACT_SQUISHY_GROUND_POUND_LAND, 0);
+            return set_mario_action(m, ACT_SQUISHY_GROUND_POUND_LAND, m.actionArg);
         end
     end
 
@@ -138,13 +150,27 @@ local function act_squishy_ground_pound_land(m)
         return set_mario_action(m, ACT_SQUISHY_SLIDE, 0);
     end
 
+
+    if (m.input & INPUT_A_PRESSED) ~= 0 then
+        if m.actionArg == 0 then
+            m.vel.y = 70
+            return set_mario_action(m, ACT_DOUBLE_JUMP, 0)
+        elseif m.actionArg == 1 then
+            mario_set_forward_vel(m, -30)
+            return set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 2)
+        else
+            m.vel.y = 200
+            mario_set_forward_vel(m, -50)
+            return set_mario_action(m, ACT_BACKFLIP, 1)
+        end
+    end
+
     if (m.input & INPUT_B_PRESSED) ~= 0 then
-        djui_chat_message_create(tostring(e.poundMaxVel))
         mario_set_forward_vel(m, e.poundMaxVel)
         m.faceAngle.y = m.intendedYaw
         e.poundMaxVel = 0
-        m.input = 0
-        return set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
+        set_mario_particle_flags(m, PARTICLE_MIST_CIRCLE, 0);
+        return set_mario_action(m, ACT_SQUISHY_SLIDE_AIR, 0)
     end
 
     landing_step(m, CHAR_ANIM_START_CROUCHING, ACT_CROUCHING);
@@ -186,6 +212,17 @@ end
 local function act_squishy_slide_air(m)
     if not m then return 0 end
     local e = gSquishyStates[m.playerIndex]
+
+    if m.actionTimer == 0 then -- Transistion into slide
+        m.slideYaw = m.faceAngle.y
+        m.slideVelX = m.forwardVel*sins(m.faceAngle.y)
+        m.slideVelZ = m.forwardVel*coss(m.faceAngle.y)
+        m.vel.x = m.slideVelX
+        m.vel.z = m.slideVelZ
+    elseif (m.input & (INPUT_A_PRESSED | INPUT_B_PRESSED) ~= 0) then -- Check for Rollout
+        set_mario_particle_flags(m, PARTICLE_MIST_CIRCLE, 0);
+        return set_mario_action(m, (m.forwardVel > 0 and ACT_FORWARD_ROLLOUT or ACT_BACKWARD_ROLLOUT), 0)
+    end
 
     common_air_action_step(m, ACT_SQUISHY_SLIDE, CHAR_ANIM_SLIDE_KICK, AIR_STEP_NONE)
 
