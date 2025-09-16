@@ -303,6 +303,7 @@ local function squishy_before_action(m, nextAct)
     if nextAct == ACT_GROUND_POUND then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_GROUND_POUND, 0, 60)
     end
+    --[[
     if nextAct == ACT_DIVE then
         return set_mario_action(m, ACT_SQUISHY_DIVE, 0)
     end
@@ -312,6 +313,7 @@ local function squishy_before_action(m, nextAct)
     if nextAct == ACT_WALL_KICK_AIR then
         return set_mario_action_and_y_vel(m, ACT_SQUISHY_WALL_KICK_AIR, 0)
     end
+    ]]
     if nextAct == ACT_BUTT_SLIDE then
         return set_mario_action(m, ACT_SQUISHY_SLIDE, 1)
     end
@@ -328,24 +330,6 @@ local function squishy_before_action(m, nextAct)
         m.actionTimer = 0
     end
 end
-
-local forwardVelActs = {
-    [ACT_WALKING] = true,
-    [ACT_LONG_JUMP] = true,
-    [ACT_CROUCH_SLIDE] = true,
-}
-
-local strainingBlacklist = {
-    --[ACT_SQUISHY_CEILING_STICK] = true,
-    [ACT_SQUISHY_WALL_SLIDE] = true,
-    [ACT_FALLING_EXIT_AIRBORNE] = true,
-    [ACT_EXIT_AIRBORNE] = true,
-    [ACT_SPECIAL_EXIT_AIRBORNE] = true,
-    [ACT_SPECIAL_DEATH_EXIT] = true,
-    [ACT_DEATH_EXIT] = true,
-    [ACT_SPAWN_NO_SPIN_AIRBORNE] = true,
-    [ACT_SPAWN_SPIN_AIRBORNE] = true,
-}
 
 local function squishy_before_phys_step(m)
     local e = gSquishyStates[m.playerIndex]
