@@ -158,7 +158,7 @@ function set_mario_particle_flag(m, particle)
 end
 
 function set_mario_action_and_y_vel(m, action, arg, velY)
-    m.vel.y = velY
+    m.vel.y = velY or 0
     return set_mario_action(m, action, arg)
 end
 
