@@ -250,6 +250,8 @@ for i = 1, #PALETTES_SHELL do
     _G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTES_SHELL[i], PALETTES_SHELL[i].name)
 end
 
+_G.charSelect.character_add_peach_custom(E_MODEL_SQUISHY, E_MODEL_SHELL, E_MODEL_SHELL, nil, nil, nil)
+
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
 _G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Taunts / Prettyy >//<")
