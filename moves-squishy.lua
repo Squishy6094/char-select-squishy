@@ -214,6 +214,16 @@ local function squishy_update(m)
         e.forwardVelStore = 70
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
+
+    if m.controller.buttonPressed & L_TRIG ~= 0 then
+        spawn_non_sync_object(id_bhvSquishyNail, E_MODEL_SQUISHY_NAIL, m.pos.x, m.pos.y, m.pos.z,
+            function(obj)
+                --obj.oPlayerIndex = m.playerIndex
+                obj.oVelY = 10 + m.vel.y
+                obj.oFaceAngleYaw = m.faceAngle.y
+                obj.oForwardVel = 100
+            end)
+    end
     
     if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = m.faceAngle.x + e.gfx.x end
     if e.gfx.y ~= 0 then m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfx.y end
