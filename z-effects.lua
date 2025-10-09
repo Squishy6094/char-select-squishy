@@ -80,7 +80,7 @@ end
 
 local function bhv_held_shell_loop(obj)
     local m = gMarioStates[obj.oPlayerIndex]
-    local e = gSquishyExtraStates[obj.oPlayerIndex]
+    local e = gSquishyStates[obj.oPlayerIndex]
     --local s = gPlayerSyncTable[obj.oPlayerIndex]
     --local e = gMarioStateExtras[obj.oPlayerIndex]
 

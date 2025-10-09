@@ -1,8 +1,8 @@
--- name: [CS] Squishy
+-- name: [CS] \\#008800\\Squishy
 -- description: Omgg the CS dev made a self insert,, why would she do that is she stupid???\n\n\\#ff7777\\Dudee you'd never guess what API this mod needs o.o
 -- category: cs
 
-local VERSION_NUM = "1 Pre-Release"
+local VERSION_NUM = "2 Pre-Release"
 
 if not _G.charSelectExists then
     local noCSMessages = {
@@ -52,6 +52,10 @@ if not _G.charSelectExists then
 end
 
 E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
+E_MODEL_SHELL = smlua_model_util_get_id("player_shell_geo")
+E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
+E_MODEL_SQUISHY_PLUSH = smlua_model_util_get_id("squishy_plush_geo")
+E_MODEL_SQUISHY_PLUSH_PET = smlua_model_util_get_id("squishy_plush_pet_geo")
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
 
@@ -61,15 +65,148 @@ local CAPS_SQUISHY = {
     metal = smlua_model_util_get_id("squishy_cap_metal_geo"),
     metalWing = smlua_model_util_get_id("squishy_cap_metal_geo")
 }
+local VOICETABLE_SQUISHY = {nil}
 
-local PALETTE_SQUISHY = {
-    [SHOES] = "1C1C1C",
-    [GLOVES] = "BFC72F",
-    [EMBLEM] = "FFFFFF",
-    [HAIR] = "130D0A",
-    [SKIN] = "FBE7B7",
-    [SHIRT] = "12250B",
-    [PANTS] = "0B0E20",
+local SQUISHY_SKIN_TONE = "f3b789"
+local PALETTES_SQUISHY = {
+    {
+        name = "Default",
+        [SHOES] = "363636",
+        [GLOVES] = "d5c600",
+        [EMBLEM] = "FFFFFF",
+        [HAIR] = "3d2121",
+        [SKIN] = SQUISHY_SKIN_TONE,
+        [SHIRT] = "0e2502",
+        [CAP] = "2a2a30",
+        [PANTS] = "121331",
+    },
+    --[[
+    {
+        name = "Soft Spoken",
+        [PANTS] = "221C1A",
+        [SHIRT] = "122020",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "4A5462",
+        [HAIR] = "3B1725",
+        [SKIN] = "E9B5A3",
+        [CAP] = "221C1A",
+        [EMBLEM] = "FFFFFF",
+    },
+    {
+        name = "Pretttyy",
+        [PANTS]  = "0C0A15",
+        [SHIRT]  = "1A152C",
+        [GLOVES] = "FFFFFF",
+        [SHOES]  = "FFFFFF",
+        [HAIR]   = "867EDD",
+        [SKIN]   = "FEFFFF",
+        [CAP]    = "1A152C",
+        [EMBLEM] = "8176FF",
+    },
+    ]]
+    {
+        name = "Yo-Yo Girl",
+        [PANTS] = "4D463B",
+        [SHIRT] = "648CAA",
+        [GLOVES] = "EAD382",
+        [SHOES] = "648CAA",
+        [HAIR] = "F0CE93",
+        [SKIN] = SQUISHY_SKIN_TONE,
+        [CAP] = "648CAA",
+        [EMBLEM] = "EAD382",
+    },
+    {
+        name = "Eastward",
+        [PANTS] = "738F17",
+        [SHIRT] = "FFB620",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "738F17",
+        [HAIR] = "8B511E",
+        [SKIN] = "AF7A2E",
+        [CAP] = "FFB620",
+        [EMBLEM] = "FFF03A",
+    },
+    --[[
+    {
+        name = "Modeled",
+        [PANTS] = "000000",
+        [SHIRT] = "6B86FF",
+        [GLOVES] = "291CA8",
+        [SHOES] = "000000",
+        [HAIR] = "A63404",
+        [SKIN] = "FFFFFF",
+        [CAP] = "6B86FF",
+        [EMBLEM] = "291CA8",
+    },
+    {
+        name = "Rigged",
+        [SHOES] = "626262",
+        [GLOVES] = "15151C",
+        [EMBLEM] = "FFFFFF",
+        [HAIR] = "543100",
+        [SKIN] = SQUISHY_SKIN_TONE,
+        [SHIRT] = "9BE4FF",
+        [PANTS] = "70EA81",
+    },
+    ]]
+    {
+        name = "Saturn",
+        [PANTS] = "E90037",
+        [SHIRT] = "D25400",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "701C0F",
+        [HAIR] = "FFC000",
+        [SKIN] = SQUISHY_SKIN_TONE,
+        [CAP] = "E90037",
+        [EMBLEM] = "FFFFFF",
+    },
+    {
+        name = "So True :3",
+        [PANTS] = "398FBE",
+        [SHIRT] = "B96C86",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "620E22",
+        [HAIR] = "FF9BCD",
+        [SKIN] = SQUISHY_SKIN_TONE,
+        [CAP] = "398FBE",
+        [EMBLEM] = "FFFFFF",
+    },
+    {
+        name = "Gum",
+        [PANTS] = "67606F",
+        [SHIRT] = "322C3C",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "1A1C1E",
+        [HAIR] = "42C689",
+        [SKIN] = "F0FFEC",
+        [CAP] = "121210",
+        [EMBLEM] = "FFFFF9",
+    },
+    {
+        name = "Mayo",
+        [PANTS] = "FFFFFF",
+        [SHIRT] = "FFFFFF",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "FFFFFF",
+        [HAIR] = "FFFFFF",
+        [SKIN] = "FFFFFF",
+        [CAP] = "FFFFFF",
+        [EMBLEM] = "FFFFFF",
+    },
+}
+
+local PALETTES_SHELL = {
+    {
+        name = "Default",
+        [PANTS] = "373090",
+        [SHIRT] = "34305F",
+        [GLOVES] = "FFFFFF",
+        [SHOES] = "1B162D",
+        [HAIR] = "D7D3FF",
+        [SKIN] = "FFFFFF",
+        [CAP] = "1B162D",
+        [EMBLEM] = "6B5EFF",
+    }
 }
 
 local COURSE_SQUISHY = {
@@ -77,27 +214,48 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
-CT_SQUISHY = _G.charSelect.character_add("Squishy", {"Creator of Character Select!!", "Transgender ladyy full of", "coderinggg"}, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
-_G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTE_SQUISHY)
+local ANIMS_SQUISHY = {
+    [CHAR_ANIM_IDLE_HEAD_LEFT] = GAMEMODE_ACTIVE and ANIM_SQUISHY_IDLE_GAMEMODE or SQUISHY_ANIM_HEAD_LEFT,
+    [CHAR_ANIM_IDLE_HEAD_RIGHT] = GAMEMODE_ACTIVE and ANIM_SQUISHY_IDLE_GAMEMODE or SQUISHY_ANIM_HEAD_RIGHT,
+    [CHAR_ANIM_IDLE_HEAD_CENTER] = GAMEMODE_ACTIVE and ANIM_SQUISHY_IDLE_GAMEMODE or SQUISHY_ANIM_HEAD_CENTER,
+    [CHAR_ANIM_RUNNING] = SQUISHY_ANIM_RUNNING,
+    [CHAR_ANIM_CROUCHING] = SQUISHY_ANIM_CROUCHING,
+    [CHAR_ANIM_START_CROUCHING] = SQUISHY_ANIM_START_CROUCHING,
+    [CHAR_ANIM_STOP_CROUCHING] = SQUISHY_ANIM_STOP_CROUCHING,
+    [CHAR_ANIM_CRAWLING] = SQUISHY_ANIM_CRAWLING,
+    [CHAR_ANIM_START_CRAWLING] = SQUISHY_ANIM_START_CRAWLING,
+    [CHAR_ANIM_STOP_CRAWLING] = SQUISHY_ANIM_STOP_CRAWLING,
+    [CHAR_ANIM_START_GROUND_POUND] = SQUISHY_ANIM_START_GROUND_POUND,
+    [CHAR_ANIM_GROUND_POUND] = SQUISHY_ANIM_GROUND_POUND,
+    [charSelect.CS_ANIM_MENU] = SQUISHY_ANIM_TRICK_TETO
+}
+
+local EYES_SQUISHY = {
+    [charSelect.CS_ANIM_MENU] = MARIO_EYES_LOOK_RIGHT
+}
+
+-- Squishy Character
+CT_SQUISHY = _G.charSelect.character_add("Squishy", "Creator of Character Select!! Transgender ladyy full of coderinggg - Version " .. VERSION_NUM, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.1)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
+_G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY, EYES_SQUISHY)
+_G.charSelect.character_add_voice(E_MODEL_SQUISHY, VOICETABLE_SQUISHY)
+_G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
+for i = 1, #PALETTES_SQUISHY do
+    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTES_SQUISHY[i], PALETTES_SQUISHY[i].name)
+    _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY_PLUSH, PALETTES_SQUISHY[i], PALETTES_SQUISHY[i].name)
+end
+
+-- Shell Character
+CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "D7D3FF", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
+_G.charSelect.character_add_voice(E_MODEL_SHELL, VOICETABLE_SQUISHY)
+for i = 1, #PALETTES_SHELL do
+    _G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTES_SHELL[i], PALETTES_SHELL[i].name)
+end
 
 local MOD_NAME = "Squishy Pack"
 _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
 _G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Taunts / Prettyy >//<")
-_G.charSelect.credit_add(MOD_NAME, "SprSn64", "Squishy Model / Taunts")
-_G.charSelect.credit_add(MOD_NAME, "KF", "Model Rigging")
-_G.charSelect.credit_add(MOD_NAME, "DM-Kun", "Taunts / Icon")
+_G.charSelect.credit_add(MOD_NAME, "JerThePear", "Shell Model")
 
-local TEXT_VERSION = "[CS] Squishy v" .. tostring(VERSION_NUM)
-local function hud_render_menu()
-    if _G.charSelect.character_get_current_number() ~= CT_SQUISHY then return end
-    local width = djui_hud_get_screen_width() + 1
-    local menuColor = _G.charSelect.get_menu_color()
-
-    djui_hud_set_color(menuColor.r, menuColor.g, menuColor.b, 255)
-    djui_hud_set_font(FONT_TINY)
-    djui_hud_print_text(TEXT_VERSION, width - 5 - djui_hud_measure_text(TEXT_VERSION)*0.5, 3, 0.5)
-end
-
-_G.charSelect.hook_render_in_menu(hud_render_menu)
+_G.charSelect.config_character_sounds()
