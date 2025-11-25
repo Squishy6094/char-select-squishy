@@ -247,7 +247,7 @@ for i = 1, #PALETTES_SQUISHY do
 end
 
 -- Shell Character
-CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "D7D3FF", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
+CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "6b5eff", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
 _G.charSelect.character_add_voice(E_MODEL_SHELL, VOICETABLE_SQUISHY)
 for i = 1, #PALETTES_SHELL do
     _G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTES_SHELL[i], PALETTES_SHELL[i].name)
