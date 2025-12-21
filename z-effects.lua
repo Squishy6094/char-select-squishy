@@ -26,6 +26,7 @@ end
 
 local function bhv_spark_loop(obj)
     local m = gMarioStates[obj.oPlayerIndex]
+    if not m then return end
     --local s = gPlayerSyncTable[obj.oPlayerIndex]
     --local e = gMarioStateExtras[obj.oPlayerIndex]
 
@@ -80,6 +81,7 @@ end
 
 local function bhv_held_shell_loop(obj)
     local m = gMarioStates[obj.oPlayerIndex]
+    if not m then return end
     local e = gSquishyStates[obj.oPlayerIndex]
     --local s = gPlayerSyncTable[obj.oPlayerIndex]
     --local e = gMarioStateExtras[obj.oPlayerIndex]
@@ -132,16 +134,17 @@ local function on_sync_valid()
             function(obj)
                 obj.oPlayerIndex = i
             end),
-            [2] = spawn_non_sync_object(id_bhvSquishyHeldShell, E_MODEL_KOOPA_SHELL, 0, 0, 0,
-            function(obj)
-                obj.oPlayerIndex = i
-            end)
+            --[2] = spawn_non_sync_object(id_bhvSquishyHeldShell, E_MODEL_KOOPA_SHELL, 0, 0, 0,
+            --function(obj)
+            --    obj.oPlayerIndex = i
+            --end)
         }
     end
 end
 
 local function on_object_render(obj)
     local m = gMarioStates[obj.oPlayerIndex]
+    if not m then return end
     if get_id_from_behavior(obj.behavior) == id_bhvSquishySlideSpark then
         obj.oFaceAngleYaw = m.faceAngle.y--obj.oFaceAngleYaw + 0x800
         obj.oFaceAnglePitch = 0--obj.oFaceAnglePitch + 0x2800

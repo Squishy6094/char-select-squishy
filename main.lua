@@ -51,11 +51,15 @@ if not _G.charSelectExists then
     return 0
 end
 
+-- Character Models
 E_MODEL_SQUISHY = smlua_model_util_get_id("squishy_geo")
 E_MODEL_SHELL = smlua_model_util_get_id("player_shell_geo")
 E_MODEL_SQUISHY_BALATRO = smlua_model_util_get_id("squishy_card_geo")
 E_MODEL_SQUISHY_PLUSH = smlua_model_util_get_id("squishy_plush_geo")
 E_MODEL_SQUISHY_PLUSH_PET = smlua_model_util_get_id("squishy_plush_pet_geo")
+
+-- Enemy/Object Models
+E_MODEL_STUMPA = smlua_model_util_get_id("stumpa_geo")
 
 local TEX_ICON_SQUISHY = get_texture_info("squishy-icon")
 
@@ -246,6 +250,7 @@ for i = 1, #PALETTES_SQUISHY do
     _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY_PLUSH, PALETTES_SQUISHY[i], PALETTES_SQUISHY[i].name)
 end
 
+_G.charSelect.character_add_model_replacement(CT_SQUISHY, id_bhvGoomba, E_MODEL_STUMPA)
 -- Shell Character
 CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "6b5eff", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
 _G.charSelect.character_add_voice(E_MODEL_SHELL, VOICETABLE_SQUISHY)
