@@ -8,14 +8,14 @@ if not _G.charSelectExists then
     local noCSMessages = {
         {
             name = "\\#008800\\Squishy",
-            {text = "Hey turn on Character Select stupid!!", timer = 5.2*30},
-            {text = "OOOoooohhhhh you want to turn on character selecttt ooooohhh,,", timer = 7.8*30},
-            {text = "Wha,, where's my character selectt?", timer = 4.6*30},
-            {text = "OWWWW FUCKKK AUGHH IT HURTSSS!!! I NEED MY API!! OWWWWWWW!!!!", timer = 9.1*30},
+            {text = "Hey turn on Character Select stupid!!", timer = 5.2},
+            {text = "OOOoooohhhhh you want to turn on character selecttt ooooohhh,,", timer = 7.8},
+            {text = "Wha,, where's my character selectt?", timer = 4.6},
+            {text = "OWWWW FUCKKK AUGHH IT HURTSSS!!! I NEED MY API!! OWWWWWWW!!!!", timer = 9.1},
         },
         {
             name = "\\#3f48cc\\Trashcam",
-            {text = "Hey man I think ya need some of that character select, if not you a bitch!", timer = 11.5*30},
+            {text = "Hey man I think ya need some of that character select, if not you a bitch!", timer = 11.5},
         },
         {
             name = "\\#2b0013\\Fłorałys",
@@ -36,15 +36,16 @@ if not _G.charSelectExists then
 
     }
     local frameCount = 0
-    local rngPerson = (math.random(1, 3) == 3 and math.random(2, #noCSMessages) or 1)
+    local rngPerson = ((math.random(1, 3) == 3) and math.random(2, #noCSMessages) or 1)
     local rngMessage = math.random(1, #noCSMessages[rngPerson])
     local name = noCSMessages[rngPerson].name
     local message = noCSMessages[rngPerson][rngMessage].text
-    local sendTime = noCSMessages[rngPerson][rngMessage].timer + math.random(-30, 30)
+    local sendTime = math.floor(noCSMessages[rngPerson][rngMessage].timer*30 + math.random(-30, 30))
     hook_event(HOOK_UPDATE, function ()
         frameCount = frameCount + 1
         if frameCount == sendTime then
             djui_chat_message_create(name.."\\#dcdcdc\\: "..message)
+            log_to_console("[CHARACTER_SELECT_SQUISHY] "..name..": "..message)
             play_sound(SOUND_MENU_MESSAGE_APPEAR, gLakituState.curPos)
         end
     end)
