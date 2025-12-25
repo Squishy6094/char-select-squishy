@@ -4,14 +4,13 @@ if not _G.charSelectExists then return end
 -- Moveset --
 -------------
 
-gGlobalSyncTable.squishySpeedMult = 1
-
 gSquishyStates = {}
 
 local function squishy_reset_extra_states(index)
     if index == nil then index = 0 end
     gSquishyStates[index] = {
         index = network_global_index_from_local(0),
+        actionTick = 0,
         forwardVelStore = 0,
         yVelStore = 0,
         groundPoundFromRollout = true,
@@ -26,7 +25,6 @@ local function squishy_reset_extra_states(index)
         panicking = false,
         trickAnim = 0,
         trickCount = 0,
-        actionTick = 0,
         prevFrameAction = 0,
         hasKoopaShell = false,
 
@@ -1282,10 +1280,6 @@ local function squishy_update(m)
 
     -- Global Action Timer 
     e.actionTick = e.actionTick + 1
-    if e.prevFrameAction ~= m.action then
-        e.prevFrameAction = m.action
-        e.actionTick = 0
-    end
     add_debug_display(m, "Action Tick: " .. (e.actionTick))
 
     e.panicking = false
@@ -1425,6 +1419,7 @@ local function squishy_before_action(m, nextAct)
         e.gfx.z = 0
 
         m.actionTimer = 0
+        e.actionTick = 0
     end
 end
 
