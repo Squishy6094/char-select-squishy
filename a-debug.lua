@@ -1,7 +1,9 @@
 if not _G.charSelectExists then return end
 
+local OPTION_SQUISHY_DEBUG = _G.charSelect.add_option("Squishy Debugging", 0, 1, nil, {"Toggles Displaying Debug Info", "while playing as a", "[CS] Squishy Character"})
+
 local function get_debug_enabled()
-    return _G.charSelect.get_options_status(_G.charSelect.optionTableRef.debugInfo) ~= 0
+    return _G.charSelect.get_options_status(OPTION_SQUISHY_DEBUG) ~= 0
 end
 
 local debugLines = {"Squishy Debugging:"}

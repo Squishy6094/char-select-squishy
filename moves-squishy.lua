@@ -1344,9 +1344,9 @@ local function squishy_update(m)
         e.hasKoopaShell = false
     end
 
-    if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = m.faceAngle.x + e.gfx.x end
+    if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = e.gfx.x end
     if e.gfx.y ~= 0 then m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfx.y end
-    if e.gfx.z ~= 0 then m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfx.z end
+    if e.gfx.z ~= 0 then m.marioObj.header.gfx.angle.z = e.gfx.z end
 end
 
 ---@param m MarioState

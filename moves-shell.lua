@@ -15,6 +15,7 @@ local function shell_reset_extra_states(index)
         crouchScale = 0,
 
         gfx = {x = 0, y = 0, z = 0},
+        animAccel = 1,
     }
 end
 for i = 0, MAX_PLAYERS - 1 do
@@ -31,11 +32,22 @@ local function act_shell_air_jump(m)
     if not m then return 0 end
     local e = gShellStates[m.playerIndex]
 
+    -- Fix Camera from acts like Cannon
+    if m.playerIndex == 0 then
+        if (not camera_config_is_free_cam_enabled()) then
+            set_camera_mode(m.area.camera, m.area.camera.defMode, 1);
+        else
+            m.area.camera.mode = CAMERA_MODE_NEWCAM;
+            gLakituState.mode = CAMERA_MODE_NEWCAM;
+        end
+    end
+
     local animation = (m.vel.y >= 0.0) and CHAR_ANIM_DOUBLE_JUMP_RISE or CHAR_ANIM_DOUBLE_JUMP_FALL;
     if m.actionState == 0 then
         m.vel.y = 40
         e.gfx.y = 0x10000
         m.actionState = m.actionState + 1
+        set_mario_particle_flag(m, PARTICLE_MIST_CIRCLE)
     end
 
     if (check_kick_or_dive_in_air(m) ~= 0) then
@@ -53,12 +65,20 @@ local function act_shell_air_jump(m)
 end
 
 local function act_shell_air_jump_gravity(m)
-    m.vel.y = m.vel.y - 3
+    m.vel.y = math.max(m.vel.y - 3, -70)
 end
 
+---@param m MarioState
 local function act_shell_flutter(m)
-    if m.vel.y >= 30 or (m.input & INPUT_A_DOWN) == 0 then
-        return set_mario_action(m, ACT_FORWARD_ROLLOUT, 0)
+    local e = gShellStates[m.playerIndex]
+    if (m.vel.y >= 25) or (m.input & INPUT_A_DOWN) == 0 or (m.actionTimer > 45) or (m.ceilHeight - m.pos.y <= 190) then
+        e.gfx.x = 0
+        if m.flags & MARIO_WING_CAP ~= 0 then
+            e.canAirJump = 1
+            return set_mario_action(m, ACT_SHELL_AIR_JUMP, 0)
+        else
+            return set_mario_action(m, ACT_FORWARD_ROLLOUT, 0)
+        end
     end
 
     if (check_kick_or_dive_in_air(m) ~= 0) then
@@ -73,22 +93,24 @@ local function act_shell_flutter(m)
         play_character_sound(m, CHAR_SOUND_TWIRL_BOUNCE) -- Play audio sample
         m.actionState = m.actionState + 1
     end
-
     
     if m.forwardVel > 0 then
-        m.forwardVel = math.lerp(m.forwardVel, 0, 0.1)
-        add_debug_display(m, "Flutter Vel: " .. (m.forwardVel))
+        m.forwardVel = math.lerp(m.forwardVel, 0, 0.05)
     end
 
     common_air_action_step(m, ACT_JUMP_LAND, CHAR_ANIM_RUNNING_UNUSED, 0)
     m.marioBodyState.eyeState = MARIO_EYES_DEAD
-    m.marioObj.header.gfx.animInfo.animAccel = 0x10000 * 15
+    e.animAccel = 15
+    e.gfx.x = m.vel.y * -0xC0
+    set_mario_particle_flag(m, PARTICLE_DUST)
 
+    m.actionTimer = m.actionTimer + 1
     return false
 end
 
 local function act_shell_flutter_gravity(m)
     m.vel.y = math.lerp(m.vel.y, 40, 0.06)
+    add_debug_display(m, "Flutter Vel: " .. math.round(m.vel.y))
 end
 
 local function act_shell_crouching(m)
@@ -129,29 +151,34 @@ local function act_shell_crouch_jump(m)
 end
 
 local function act_shell_breakdance(m)
+    local e = gShellStates[m.playerIndex]
+    local spinout = m.forwardVel > 0
     if m.actionArg == 0 then
         local t = (m.actionTimer - 17) / 13
         if m.actionState == 0 then
             m.forwardVel = math.max(m.forwardVel, 50)
             m.actionState = 1
         else
-            if m.forwardVel > 10 and (m.input & INPUT_A_PRESSED ~= 0 or m.input & INPUT_B_PRESSED ~= 0) then
+            add_debug_display(m, "Breakdance Vel: " .. math.round(m.forwardVel) .. " (" .. math.round(m.forwardVel*1.5) .. ")")
+            if m.forwardVel > 10 and (m.input & INPUT_B_PRESSED ~= 0) then
                 m.vel.y = 30
                 return set_mario_action(m, ACT_SHELL_BREAKDANCE, 1)
             end
         end
         
-        step = common_slide_action_with_jump(m, ACT_SHELL_CROUCHING, ACT_SHELL_BREAKDANCE, ACT_SHELL_CROUCH_JUMP, CHAR_ANIM_BREAKDANCE)
+        step = common_slide_action_with_jump(m, ACT_SHELL_CROUCHING, ACT_SHELL_AIR_JUMP, ACT_SHELL_CROUCH_JUMP, spinout and CHAR_ANIM_BREAKDANCE or CHAR_ANIM_AIRBORNE_ON_STOMACH)
 
-        -- From Pasta Castle
+        -- Breakdance Anim
         vec3f_set(m.marioObj.header.gfx.pos, m.pos.x + -20 * sins(m.faceAngle.y), m.pos.y, m.pos.z + -20 * coss(m.faceAngle.y))
         if m.marioObj.header.gfx.animInfo.animFrame >= 16 then
-            if t >= 1 then
-                m.actionState = m.actionState + 1
-            end
             set_anim_to_frame(m, 1)
         end
-        m.marioObj.header.gfx.animInfo.animAccel = 0x10000 * (math.abs(m.forwardVel) + 10)*0.03
+
+        if spinout then
+            e.gfx.y = e.gfx.y + 0x100
+        else
+            e.animAccel = (math.abs(m.forwardVel) + 10)*0.04
+        end
     else
         if m.actionState == 0 then
             m.forwardVel = m.forwardVel*1.5
@@ -205,17 +232,18 @@ local function shell_update(m)
     end
 
     -- Crouch Anim
-    if e.crouchScale ~= 1 then
+    if math.round(e.crouchScale*100) ~= 100 then
         local newScale = math.lerp(e.crouchScale, 1, 0.4)
         local objScale = (e.crouchScale - newScale)
-        add_debug_display(m, "Crouch Scale: " .. objScale)
+        add_debug_display(m, "Crouch Scale: " .. math.floor(objScale * 1000)*0.01)
         obj_set_gfx_scale(m.marioObj, 1 - objScale, 1 + objScale, 1 - objScale)
         e.crouchScale = newScale
     end
 
-    if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = m.faceAngle.x + e.gfx.x end
+    if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = e.gfx.x end
     if e.gfx.y ~= 0 then m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfx.y end
-    if e.gfx.z ~= 0 then m.marioObj.header.gfx.angle.z = m.faceAngle.z + e.gfx.z end
+    if e.gfx.z ~= 0 then m.marioObj.header.gfx.angle.z = e.gfx.z end
+    if e.animAccel ~= 1 then m.marioObj.header.gfx.animInfo.animAccel = 0x10000 * e.animAccel end
 end
 
 local function shell_before_action(m, nextAct)
@@ -225,6 +253,12 @@ local function shell_before_action(m, nextAct)
         e.gfx.x = 0
         e.gfx.y = 0
         e.gfx.z = 0
+        e.animAccel = 1
+
+        m.marioObj.header.gfx.angle.x = 0
+        m.marioObj.header.gfx.angle.y = m.faceAngle.y
+        m.marioObj.header.gfx.angle.z = 0
+        m.marioObj.header.gfx.animInfo.animAccel = 0x10000
 
         m.actionTimer = 0
         e.actionTick = 0
