@@ -174,11 +174,7 @@ local function act_shell_breakdance(m)
             set_anim_to_frame(m, 1)
         end
 
-        if spinout then
-            e.gfx.y = e.gfx.y + 0x100
-        else
-            e.animAccel = (math.abs(m.forwardVel) + 10)*0.04
-        end
+        e.animAccel = (math.abs(m.forwardVel) + 10)*0.04
     else
         if m.actionState == 0 then
             m.forwardVel = m.forwardVel*1.5
