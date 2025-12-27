@@ -119,7 +119,7 @@ local function act_shell_crouching(m)
         return set_mario_action(m, ACT_SHELL_CROUCH_JUMP, 0)
     end
 
-    if m.forwardVel > 0 then
+    if math.sqrt(m.vel.x^2 + m.vel.z^2) > 0 then
         if m.input & INPUT_B_PRESSED ~= 0 then
             return set_mario_action(m, ACT_SHELL_BREAKDANCE, 0)
         end
@@ -215,7 +215,7 @@ local function shell_update(m)
 
     -- Air Actions
     if m.action & ACT_FLAG_AIR ~= 0 then
-        if m.action & ACT_FLAG_INVULNERABLE == 0 and e.actionTick > 1 and m.input & INPUT_A_PRESSED ~= 0 then
+        if m.action & ACT_FLAG_INVULNERABLE == 0 and e.actionTick >= 5 and m.input & INPUT_A_PRESSED ~= 0 then
             if e.canAirJump == 0 then
                 set_mario_action(m, ACT_SHELL_AIR_JUMP, 0)
             elseif e.canAirJump == 1 then
