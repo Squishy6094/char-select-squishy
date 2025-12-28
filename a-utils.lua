@@ -119,10 +119,6 @@ function clamp_soft(num, min, max, rate)
     return num
 end
 
-function lerp(a, b, t)
-    return a * (1 - t) + b * t
-end
-
 function invlerp(x, a, b)
     return clamp((x - a) / (b - a), 0.0, 1.0)
 end

@@ -215,7 +215,7 @@ local function shell_update(m)
 
     -- Air Actions
     if m.action & ACT_FLAG_AIR ~= 0 then
-        if m.action & ACT_FLAG_INVULNERABLE == 0 and e.actionTick >= 5 and m.input & INPUT_A_PRESSED ~= 0 then
+        if (m.action & ACT_FLAG_INVULNERABLE == 0 and m.action & ACT_FLAG_INTANGIBLE == 0) and e.actionTick >= 5 and m.input & INPUT_A_PRESSED ~= 0 then
             if e.canAirJump == 0 then
                 set_mario_action(m, ACT_SHELL_AIR_JUMP, 0)
             elseif e.canAirJump == 1 then
