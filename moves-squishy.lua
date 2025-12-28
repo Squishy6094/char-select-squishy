@@ -201,7 +201,7 @@ local function update_squishy_walking_speed(m)
             m.forwardVel = m.forwardVel - 1.0;
         end
         ]]
-        m.forwardVel = lerp(m.forwardVel, (m.intendedMag/32 * squishyTopSpeed), squishyAcceleration)
+        m.forwardVel = math.lerp(m.forwardVel, (m.intendedMag/32 * squishyTopSpeed), squishyAcceleration)
     else
         -- Acceleration
         if m.forwardVel <= 32 then
