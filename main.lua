@@ -211,6 +211,17 @@ local PALETTES_SHELL = {
         [SKIN] = "FFFFFF",
         [CAP] = "1B162D",
         [EMBLEM] = "6B5EFF",
+    },
+    {
+        name = "Green",
+        [PANTS] = "081610",
+        [SHIRT] = "f6fffa",
+        [GLOVES] = "5effa9",
+        [SHOES] = "081610",
+        [HAIR] = "94ffc6",
+        [SKIN] = "f6fffa",
+        [CAP] = "081610",
+        [EMBLEM] = "5effa9",
     }
 }
 
@@ -245,7 +256,7 @@ _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
 _G.charSelect.character_add_course_texture(CT_SQUISHY, COURSE_SQUISHY)
 _G.charSelect.character_add_animations(E_MODEL_SQUISHY, ANIMS_SQUISHY, EYES_SQUISHY)
 _G.charSelect.character_add_voice(E_MODEL_SQUISHY, VOICETABLE_SQUISHY)
-_G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop")
+_G.charSelect.character_set_category(CT_SQUISHY, "Squishy Workshop", true)
 for i = 1, #PALETTES_SQUISHY do
     _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY, PALETTES_SQUISHY[i], PALETTES_SQUISHY[i].name)
     _G.charSelect.character_add_palette_preset(E_MODEL_SQUISHY_PLUSH, PALETTES_SQUISHY[i], PALETTES_SQUISHY[i].name)
@@ -255,6 +266,7 @@ _G.charSelect.character_add_model_replacement(CT_SQUISHY, id_bhvGoomba, E_MODEL_
 -- Shell Character
 CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "6b5eff", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
 _G.charSelect.character_add_voice(E_MODEL_SHELL, VOICETABLE_SQUISHY)
+_G.charSelect.character_set_category(CT_SHELL, "Squishy Workshop", true)
 for i = 1, #PALETTES_SHELL do
     _G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTES_SHELL[i], PALETTES_SHELL[i].name)
 end
