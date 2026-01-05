@@ -2,7 +2,7 @@ Lights1 player_shell_Black_lights = gdSPDefLights1(
 	0x0, 0x0, 0x0,
 	0x0, 0x0, 0x0, 0x28, 0x28, 0x28);
 
-Lights1 player_shell_Cap__SHOES__lights = gdSPDefLights1(
+Lights1 player_shell_Clothes_1__GLOVES__lights = gdSPDefLights1(
 	0x8, 0x6, 0x11,
 	0x1B, 0x16, 0x2D, 0x28, 0x28, 0x28);
 
@@ -10,7 +10,7 @@ Lights1 player_shell_Skin__SKIN__lights = gdSPDefLights1(
 	0x7F, 0x7F, 0x7F,
 	0xFF, 0xFF, 0xFF, 0x28, 0x28, 0x28);
 
-Lights1 player_shell_Emblem__EMBLEM__lights = gdSPDefLights1(
+Lights1 player_shell_Clothes_Lines__CAP__lights = gdSPDefLights1(
 	0x32, 0x2B, 0x7F,
 	0x6B, 0x5E, 0xFF, 0x28, 0x28, 0x28);
 
@@ -18,35 +18,35 @@ Lights1 player_shell_Pants__PANTS__lights = gdSPDefLights1(
 	0x16, 0x13, 0x45,
 	0x37, 0x30, 0x90, 0x28, 0x28, 0x28);
 
+Lights1 player_shell_Clothes_2__SHIRT__lights = gdSPDefLights1(
+	0x6A, 0x68, 0x7F,
+	0xD7, 0xD3, 0xFF, 0x28, 0x28, 0x28);
+
+Lights1 player_shell_Belt__GLOVES__lights = gdSPDefLights1(
+	0x8, 0x6, 0x11,
+	0x1B, 0x16, 0x2D, 0x28, 0x28, 0x28);
+
+Lights1 player_shell_Zipper__SHOES__lights = gdSPDefLights1(
+	0x7F, 0x7F, 0x7F,
+	0xFF, 0xFF, 0xFF, 0x28, 0x28, 0x28);
+
+Lights1 player_shell_S__CAP__lights = gdSPDefLights1(
+	0x32, 0x2B, 0x7F,
+	0x6B, 0x5E, 0xFF, 0x28, 0x28, 0x28);
+
 Lights1 player_shell_Hair__HAIR__lights = gdSPDefLights1(
 	0x68, 0x62, 0xA9,
 	0xD7, 0xD3, 0xFF, 0x28, 0x28, 0x28);
 
-Lights1 player_shell_Belt__SHIRT__lights = gdSPDefLights1(
-	0x15, 0x13, 0x2B,
-	0x34, 0x30, 0x5F, 0x28, 0x28, 0x28);
-
-Lights1 player_shell_Shirt__SHIRT__lights = gdSPDefLights1(
-	0x15, 0x13, 0x2B,
-	0x34, 0x30, 0x5F, 0x28, 0x28, 0x28);
-
-Lights1 player_shell_Zipper_lights = gdSPDefLights1(
-	0x7F, 0x7F, 0x7F,
-	0xFF, 0xFF, 0xFF, 0x28, 0x28, 0x28);
-
-Lights1 player_shell_S__EMBLEM__lights = gdSPDefLights1(
-	0x32, 0x2B, 0x7F,
-	0x6B, 0x5E, 0xFF, 0x28, 0x28, 0x28);
-
-Lights1 player_shell_Cap_Logo__SHOES__lights = gdSPDefLights1(
+Lights1 player_shell_Cap_Logo__GLOVES__lights = gdSPDefLights1(
 	0x8, 0x6, 0x11,
 	0x1B, 0x16, 0x2D, 0x28, 0x28, 0x28);
 
-Lights1 player_shell_Shell_Blush__HAIR__lights = gdSPDefLights1(
+Lights1 player_shell_Shell_Blush__EMBLEM__lights = gdSPDefLights1(
 	0x6A, 0x68, 0x7F,
 	0xD7, 0xD3, 0xFF, 0x28, 0x28, 0x28);
 
-Lights1 player_shell_Shoes__GLOVES__lights = gdSPDefLights1(
+Lights1 player_shell_Shoes__SHOES__lights = gdSPDefLights1(
 	0x7F, 0x7F, 0x7F,
 	0xFF, 0xFF, 0xFF, 0x28, 0x28, 0x28);
 
@@ -15474,13 +15474,20 @@ Gfx player_shell_Head_DL_mesh_layer_1_tri_2[] = {
 	gsSPEndDisplayList(),
 };
 
-Vtx player_shell_Head_DL_mesh_layer_1_vtx_3[21] = {
+Vtx player_shell_Head_DL_mesh_layer_1_vtx_3[24] = {
 	{{{120, 39, 85}, 0, {368, 752}, {0x38, 0xD5, 0x6A, 0xFF}}},
 	{{{114, 102, 93}, 0, {368, 752}, {0x9A, 0x22, 0x44, 0xFF}}},
 	{{{93, -79, 57}, 0, {368, 752}, {0xE9, 0x85, 0xEA, 0xFF}}},
 	{{{93, -79, 57}, 0, {-16, 1008}, {0xE9, 0x85, 0xEA, 0xFF}}},
 	{{{113, 19, 68}, 0, {-16, 1008}, {0x1D, 0xF0, 0x85, 0xFF}}},
 	{{{121, 50, 0}, 0, {-16, 1008}, {0x9F, 0xAE, 0x00, 0xFF}}},
+	{{{203, 22, 82}, 0, {624, 496}, {0x55, 0xD1, 0x52, 0xFF}}},
+	{{{215, 56, 0}, 0, {624, 368}, {0x7D, 0x14, 0x00, 0xFF}}},
+	{{{203, 22, -82}, 0, {624, 496}, {0x55, 0xD1, 0xAE, 0xFF}}},
+	{{{120, 39, -85}, 0, {368, 752}, {0x38, 0xD5, 0x96, 0xFF}}},
+	{{{113, 19, -68}, 0, {-16, 1008}, {0x1D, 0xF0, 0x7B, 0xFF}}},
+	{{{93, -79, -57}, 0, {368, 752}, {0xE9, 0x85, 0x16, 0xFF}}},
+	{{{114, 102, -93}, 0, {368, 752}, {0x9A, 0x22, 0xBC, 0xFF}}},
 	{{{114, 102, 93}, 0, {368, 496}, {0x9A, 0x22, 0x44, 0xFF}}},
 	{{{121, 50, 0}, 0, {368, 368}, {0x9F, 0xAE, 0x00, 0xFF}}},
 	{{{127, 123, 0}, 0, {368, 368}, {0x95, 0x44, 0x00, 0xFF}}},
@@ -15491,26 +15498,24 @@ Vtx player_shell_Head_DL_mesh_layer_1_vtx_3[21] = {
 	{{{120, 39, -85}, 0, {368, 496}, {0x38, 0xD5, 0x96, 0xFF}}},
 	{{{135, 117, -102}, 0, {368, 496}, {0x2D, 0x49, 0xA2, 0xFF}}},
 	{{{114, 102, -93}, 0, {368, 496}, {0x9A, 0x22, 0xBC, 0xFF}}},
-	{{{113, 19, -68}, 0, {-16, 1008}, {0x1D, 0xF0, 0x7B, 0xFF}}},
 	{{{93, -79, -57}, 0, {-16, 1008}, {0xE9, 0x85, 0x16, 0xFF}}},
-	{{{120, 39, -85}, 0, {368, 752}, {0x38, 0xD5, 0x96, 0xFF}}},
-	{{{93, -79, -57}, 0, {368, 752}, {0xE9, 0x85, 0x16, 0xFF}}},
-	{{{114, 102, -93}, 0, {368, 752}, {0x9A, 0x22, 0xBC, 0xFF}}},
 };
 
 Gfx player_shell_Head_DL_mesh_layer_1_tri_3[] = {
-	gsSPVertex(player_shell_Head_DL_mesh_layer_1_vtx_3 + 0, 21, 0),
+	gsSPVertex(player_shell_Head_DL_mesh_layer_1_vtx_3 + 0, 24, 0),
 	gsSP2Triangles(0, 1, 2, 0, 3, 4, 0, 0),
-	gsSP2Triangles(5, 0, 4, 0, 6, 4, 2, 0),
-	gsSP2Triangles(6, 7, 4, 0, 7, 6, 8, 0),
-	gsSP2Triangles(9, 8, 6, 0, 6, 10, 9, 0),
-	gsSP2Triangles(10, 11, 9, 0, 10, 12, 11, 0),
-	gsSP2Triangles(13, 11, 12, 0, 13, 14, 11, 0),
-	gsSP2Triangles(15, 14, 13, 0, 14, 15, 8, 0),
-	gsSP2Triangles(7, 8, 15, 0, 15, 16, 7, 0),
-	gsSP2Triangles(15, 17, 16, 0, 14, 8, 11, 0),
-	gsSP2Triangles(9, 11, 8, 0, 18, 19, 20, 0),
-	gsSP2Triangles(19, 18, 16, 0, 5, 16, 18, 0),
+	gsSP2Triangles(5, 0, 4, 0, 0, 5, 6, 0),
+	gsSP2Triangles(7, 6, 5, 0, 7, 5, 8, 0),
+	gsSP2Triangles(9, 8, 5, 0, 5, 10, 9, 0),
+	gsSP2Triangles(11, 9, 10, 0, 9, 11, 12, 0),
+	gsSP2Triangles(13, 4, 2, 0, 13, 14, 4, 0),
+	gsSP2Triangles(14, 13, 15, 0, 16, 15, 13, 0),
+	gsSP2Triangles(13, 17, 16, 0, 17, 18, 16, 0),
+	gsSP2Triangles(17, 19, 18, 0, 20, 18, 19, 0),
+	gsSP2Triangles(20, 21, 18, 0, 22, 21, 20, 0),
+	gsSP2Triangles(21, 22, 15, 0, 14, 15, 22, 0),
+	gsSP2Triangles(22, 10, 14, 0, 22, 23, 10, 0),
+	gsSP2Triangles(21, 15, 18, 0, 16, 18, 15, 0),
 	gsSPEndDisplayList(),
 };
 
@@ -15527,22 +15532,6 @@ Gfx player_shell_Head_DL_mesh_layer_1_tri_4[] = {
 	gsSPVertex(player_shell_Head_DL_mesh_layer_1_vtx_4 + 0, 6, 0),
 	gsSP2Triangles(0, 1, 2, 0, 0, 2, 3, 0),
 	gsSP2Triangles(4, 3, 2, 0, 4, 2, 5, 0),
-	gsSPEndDisplayList(),
-};
-
-Vtx player_shell_Head_DL_mesh_layer_1_vtx_5[6] = {
-	{{{120, 39, 85}, 0, {368, 752}, {0x38, 0xD5, 0x6A, 0xFF}}},
-	{{{121, 50, 0}, 0, {-16, 1008}, {0x9F, 0xAE, 0x00, 0xFF}}},
-	{{{203, 22, 82}, 0, {624, 496}, {0x55, 0xD1, 0x52, 0xFF}}},
-	{{{215, 56, 0}, 0, {624, 368}, {0x7D, 0x14, 0x00, 0xFF}}},
-	{{{203, 22, -82}, 0, {624, 496}, {0x55, 0xD1, 0xAE, 0xFF}}},
-	{{{120, 39, -85}, 0, {368, 752}, {0x38, 0xD5, 0x96, 0xFF}}},
-};
-
-Gfx player_shell_Head_DL_mesh_layer_1_tri_5[] = {
-	gsSPVertex(player_shell_Head_DL_mesh_layer_1_vtx_5 + 0, 6, 0),
-	gsSP2Triangles(0, 1, 2, 0, 3, 2, 1, 0),
-	gsSP2Triangles(3, 1, 4, 0, 5, 4, 1, 0),
 	gsSPEndDisplayList(),
 };
 
@@ -20239,8 +20228,8 @@ Gfx mat_revert_player_shell_Black[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_player_shell_Cap__SHOES_[] = {
-	gsSPCopyLightsPlayerPart(SHOES),
+Gfx mat_player_shell_Clothes_1__GLOVES_[] = {
+	gsSPCopyLightsPlayerPart(GLOVES),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsDPSetAlphaDither(G_AD_NOISE),
@@ -20248,7 +20237,7 @@ Gfx mat_player_shell_Cap__SHOES_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_revert_player_shell_Cap__SHOES_[] = {
+Gfx mat_revert_player_shell_Clothes_1__GLOVES_[] = {
 	gsDPPipeSync(),
 	gsDPSetAlphaDither(G_AD_DISABLE),
 	gsSPEndDisplayList(),
@@ -20269,8 +20258,8 @@ Gfx mat_revert_player_shell_Skin__SKIN_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_player_shell_Emblem__EMBLEM_[] = {
-	gsSPCopyLightsPlayerPart(EMBLEM),
+Gfx mat_player_shell_Clothes_Lines__CAP_[] = {
+	gsSPCopyLightsPlayerPart(CAP),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsDPSetAlphaDither(G_AD_NOISE),
@@ -20278,7 +20267,7 @@ Gfx mat_player_shell_Emblem__EMBLEM_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_revert_player_shell_Emblem__EMBLEM_[] = {
+Gfx mat_revert_player_shell_Clothes_Lines__CAP_[] = {
 	gsDPPipeSync(),
 	gsDPSetAlphaDither(G_AD_DISABLE),
 	gsSPEndDisplayList(),
@@ -20299,6 +20288,85 @@ Gfx mat_revert_player_shell_Pants__PANTS_[] = {
 	gsSPEndDisplayList(),
 };
 
+Gfx mat_player_shell_Clothes_2__SHIRT_[] = {
+	gsSPCopyLightsPlayerPart(SHIRT),
+	gsDPPipeSync(),
+	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
+	gsDPSetAlphaDither(G_AD_NOISE),
+	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_revert_player_shell_Clothes_2__SHIRT_[] = {
+	gsDPPipeSync(),
+	gsDPSetAlphaDither(G_AD_DISABLE),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_player_shell_Belt__GLOVES_[] = {
+	gsSPClearGeometryMode(G_CULL_BACK),
+	gsSPCopyLightsPlayerPart(GLOVES),
+	gsDPPipeSync(),
+	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
+	gsDPSetAlphaDither(G_AD_NOISE),
+	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, player_shell_belt_ia8),
+	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
+	gsDPLoadBlock(7, 0, 0, 63, 1024),
+	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 2, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 3, 0, G_TX_WRAP | G_TX_NOMIRROR, 4, 0),
+	gsDPSetTileSize(0, 0, 0, 60, 28),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_revert_player_shell_Belt__GLOVES_[] = {
+	gsSPSetGeometryMode(G_CULL_BACK),
+	gsDPPipeSync(),
+	gsDPSetAlphaDither(G_AD_DISABLE),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_player_shell_Zipper__SHOES_[] = {
+	gsSPCopyLightsPlayerPart(SHOES),
+	gsDPPipeSync(),
+	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
+	gsDPSetAlphaDither(G_AD_NOISE),
+	gsDPSetTextureFilter(G_TF_POINT),
+	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 1, player_shell_zipper_rgba16),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
+	gsDPLoadBlock(7, 0, 0, 15, 2048),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, 0, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 2, 0, G_TX_WRAP | G_TX_NOMIRROR, 2, 0),
+	gsDPSetTileSize(0, 0, 0, 12, 12),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_revert_player_shell_Zipper__SHOES_[] = {
+	gsDPPipeSync(),
+	gsDPSetAlphaDither(G_AD_DISABLE),
+	gsDPSetTextureFilter(G_TF_BILERP),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_player_shell_S__CAP_[] = {
+	gsSPCopyLightsPlayerPart(CAP),
+	gsDPPipeSync(),
+	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
+	gsDPSetAlphaDither(G_AD_NOISE),
+	gsSPTexture(65535, 65535, 0, 0, 1),
+	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 1, player_shell_S_rgba16),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
+	gsDPLoadBlock(7, 0, 0, 255, 512),
+	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 4, 0, G_TX_CLAMP | G_TX_NOMIRROR, 4, 0),
+	gsDPSetTileSize(0, 0, 0, 60, 60),
+	gsSPEndDisplayList(),
+};
+
+Gfx mat_revert_player_shell_S__CAP_[] = {
+	gsDPPipeSync(),
+	gsDPSetAlphaDither(G_AD_DISABLE),
+	gsSPEndDisplayList(),
+};
+
 Gfx mat_player_shell_Hair__HAIR_[] = {
 	gsSPCopyLightsPlayerPart(HAIR),
 	gsDPPipeSync(),
@@ -20314,87 +20382,8 @@ Gfx mat_revert_player_shell_Hair__HAIR_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_player_shell_Belt__SHIRT_[] = {
-	gsSPClearGeometryMode(G_CULL_BACK),
-	gsSPCopyLightsPlayerPart(SHIRT),
-	gsDPPipeSync(),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
-	gsDPSetAlphaDither(G_AD_NOISE),
-	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetTextureImage(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 1, player_shell_belt_ia8),
-	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
-	gsDPLoadBlock(7, 0, 0, 63, 1024),
-	gsDPSetTile(G_IM_FMT_IA, G_IM_SIZ_8b, 2, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 3, 0, G_TX_WRAP | G_TX_NOMIRROR, 4, 0),
-	gsDPSetTileSize(0, 0, 0, 60, 28),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_revert_player_shell_Belt__SHIRT_[] = {
-	gsSPSetGeometryMode(G_CULL_BACK),
-	gsDPPipeSync(),
-	gsDPSetAlphaDither(G_AD_DISABLE),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_player_shell_Shirt__SHIRT_[] = {
-	gsSPCopyLightsPlayerPart(SHIRT),
-	gsDPPipeSync(),
-	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
-	gsDPSetAlphaDither(G_AD_NOISE),
-	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_revert_player_shell_Shirt__SHIRT_[] = {
-	gsDPPipeSync(),
-	gsDPSetAlphaDither(G_AD_DISABLE),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_player_shell_Zipper[] = {
-	gsSPSetLights1(player_shell_Zipper_lights),
-	gsDPPipeSync(),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
-	gsDPSetAlphaDither(G_AD_NOISE),
-	gsDPSetTextureFilter(G_TF_POINT),
-	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 1, player_shell_zipper_rgba16),
-	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
-	gsDPLoadBlock(7, 0, 0, 15, 2048),
-	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 1, 0, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 2, 0, G_TX_WRAP | G_TX_NOMIRROR, 2, 0),
-	gsDPSetTileSize(0, 0, 0, 12, 12),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_revert_player_shell_Zipper[] = {
-	gsDPPipeSync(),
-	gsDPSetAlphaDither(G_AD_DISABLE),
-	gsDPSetTextureFilter(G_TF_BILERP),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_player_shell_S__EMBLEM_[] = {
-	gsSPCopyLightsPlayerPart(EMBLEM),
-	gsDPPipeSync(),
-	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
-	gsDPSetAlphaDither(G_AD_NOISE),
-	gsSPTexture(65535, 65535, 0, 0, 1),
-	gsDPSetTextureImage(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 1, player_shell_S_rgba16),
-	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b_LOAD_BLOCK, 0, 0, 7, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0, G_TX_WRAP | G_TX_NOMIRROR, 0, 0),
-	gsDPLoadBlock(7, 0, 0, 255, 512),
-	gsDPSetTile(G_IM_FMT_RGBA, G_IM_SIZ_16b, 4, 0, 0, 0, G_TX_CLAMP | G_TX_NOMIRROR, 4, 0, G_TX_CLAMP | G_TX_NOMIRROR, 4, 0),
-	gsDPSetTileSize(0, 0, 0, 60, 60),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_revert_player_shell_S__EMBLEM_[] = {
-	gsDPPipeSync(),
-	gsDPSetAlphaDither(G_AD_DISABLE),
-	gsSPEndDisplayList(),
-};
-
-Gfx mat_player_shell_Cap_Logo__SHOES_[] = {
-	gsSPCopyLightsPlayerPart(SHOES),
+Gfx mat_player_shell_Cap_Logo__GLOVES_[] = {
+	gsSPCopyLightsPlayerPart(GLOVES),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(TEXEL0, SHADE, TEXEL0_ALPHA, SHADE, 0, 0, 0, ENVIRONMENT, TEXEL0, SHADE, TEXEL0_ALPHA, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsDPSetAlphaDither(G_AD_NOISE),
@@ -20407,7 +20396,7 @@ Gfx mat_player_shell_Cap_Logo__SHOES_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_revert_player_shell_Cap_Logo__SHOES_[] = {
+Gfx mat_revert_player_shell_Cap_Logo__GLOVES_[] = {
 	gsDPPipeSync(),
 	gsDPSetAlphaDither(G_AD_DISABLE),
 	gsSPEndDisplayList(),
@@ -20434,9 +20423,9 @@ Gfx mat_revert_player_shell_Shell_Eyes_Open[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_player_shell_Shell_Blush__HAIR_[] = {
+Gfx mat_player_shell_Shell_Blush__EMBLEM_[] = {
 	gsSPClearGeometryMode(G_CULL_BACK),
-	gsSPCopyLightsPlayerPart(HAIR),
+	gsSPCopyLightsPlayerPart(EMBLEM),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0, TEXEL0, 0, SHADE, 0, TEXEL0, 0, ENVIRONMENT, 0),
 	gsDPSetAlphaDither(G_AD_NOISE),
@@ -20449,7 +20438,7 @@ Gfx mat_player_shell_Shell_Blush__HAIR_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_revert_player_shell_Shell_Blush__HAIR_[] = {
+Gfx mat_revert_player_shell_Shell_Blush__EMBLEM_[] = {
 	gsSPSetGeometryMode(G_CULL_BACK),
 	gsDPPipeSync(),
 	gsDPSetAlphaDither(G_AD_DISABLE),
@@ -20666,8 +20655,8 @@ Gfx mat_revert_player_shell_Wing_Base[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_player_shell_Shoes__GLOVES_[] = {
-	gsSPCopyLightsPlayerPart(GLOVES),
+Gfx mat_player_shell_Shoes__SHOES_[] = {
+	gsSPCopyLightsPlayerPart(SHOES),
 	gsDPPipeSync(),
 	gsDPSetCombineLERP(0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT, 0, 0, 0, SHADE, 0, 0, 0, ENVIRONMENT),
 	gsDPSetAlphaDither(G_AD_NOISE),
@@ -20675,7 +20664,7 @@ Gfx mat_player_shell_Shoes__GLOVES_[] = {
 	gsSPEndDisplayList(),
 };
 
-Gfx mat_revert_player_shell_Shoes__GLOVES_[] = {
+Gfx mat_revert_player_shell_Shoes__SHOES_[] = {
 	gsDPPipeSync(),
 	gsDPSetAlphaDither(G_AD_DISABLE),
 	gsSPEndDisplayList(),
@@ -20766,51 +20755,51 @@ Gfx player_shell_Butt_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Black),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_1_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Black),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(mat_player_shell_Skin__SKIN_),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_1_tri_2),
 	gsSPDisplayList(mat_revert_player_shell_Skin__SKIN_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(mat_player_shell_Pants__PANTS_),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_1_tri_4),
 	gsSPDisplayList(mat_revert_player_shell_Pants__PANTS_),
-	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Butt_mesh_layer_4[] = {
-	gsSPDisplayList(mat_player_shell_Belt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Belt__GLOVES_),
 	gsSPDisplayList(player_shell_Butt_mesh_layer_4_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Belt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Belt__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Torso_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Torso_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Torso_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Torso_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Torso_mesh_layer_4[] = {
-	gsSPDisplayList(mat_player_shell_Zipper),
+	gsSPDisplayList(mat_player_shell_Zipper__SHOES_),
 	gsSPDisplayList(player_shell_Torso_mesh_layer_4_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Zipper),
-	gsSPDisplayList(mat_player_shell_S__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Zipper__SHOES_),
+	gsSPDisplayList(mat_player_shell_S__CAP_),
 	gsSPDisplayList(player_shell_Torso_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_S__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_S__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -20821,18 +20810,15 @@ Gfx player_shell_Head_DL_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20843,18 +20829,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Half_0[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20865,18 +20848,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Closed_1[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20887,18 +20867,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Left_2[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20909,18 +20886,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Right_3[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20931,18 +20905,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Up_4[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20953,18 +20924,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Down_5[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20975,18 +20943,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Dead_6[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -20997,18 +20962,15 @@ Gfx player_shell_Head_DL_mesh_layer_1_mat_override_Shell_Eyes_Wink_7[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
-	gsSPDisplayList(player_shell_Head_DL_mesh_layer_1_tri_5),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -21016,9 +20978,9 @@ Gfx player_shell_Head_DL_mesh_layer_4[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Open),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Open),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21026,9 +20988,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Half_0[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Half),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Half),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21036,9 +20998,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Closed_1[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Closed),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Closed),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21046,9 +21008,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Left_2[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Left),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Left),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21056,9 +21018,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Right_3[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Right),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Right),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21066,9 +21028,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Up_4[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Up),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Up),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21076,9 +21038,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Down_5[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Down),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Down),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21086,9 +21048,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Dead_6[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Dead),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Dead),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21096,9 +21058,9 @@ Gfx player_shell_Head_DL_mesh_layer_4_mat_override_Shell_Eyes_Wink_7[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Wink),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Wink),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Head_DL_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21109,9 +21071,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21122,9 +21084,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21135,9 +21097,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21148,9 +21110,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21161,9 +21123,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21174,9 +21136,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21187,9 +21149,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21200,9 +21162,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21213,9 +21175,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_mat_overri
 	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21223,9 +21185,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4[] = {
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Open),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Open),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21233,9 +21195,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Half),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Half),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21243,9 +21205,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Closed),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Closed),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21253,9 +21215,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Left),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Left),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21263,9 +21225,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Right),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Right),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21273,9 +21235,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Up),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Up),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21283,9 +21245,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Down),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Down),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21293,9 +21255,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Dead),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Dead),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21303,9 +21265,9 @@ Gfx player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_mat_overri
 	gsSPDisplayList(mat_player_shell_Shell_Eyes_Wink),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Shell_Eyes_Wink),
-	gsSPDisplayList(mat_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_player_shell_Shell_Blush__EMBLEM_),
 	gsSPDisplayList(player_shell_Capless_Head_Switch_Option_Capless_Head_mesh_layer_4_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Shell_Blush__EMBLEM_),
 	gsSPEndDisplayList(),
 };
 
@@ -21330,25 +21292,25 @@ Gfx player_shell_Right_Wing_DL_mesh_layer_4[] = {
 };
 
 Gfx player_shell_Left_Arm_Color_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Left_Arm_Color_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Left_Arm_Color_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Left_Forearm_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Left_Forearm_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Left_Forearm_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Left_Forearm_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21367,25 +21329,25 @@ Gfx player_shell_Left_Hand_Open_Switch_Option_Left_Hand_Open_mesh_layer_1[] = {
 };
 
 Gfx player_shell_Right_Arm_Color_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Right_Arm_Color_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Arm_Color_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Right_Forearm_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Forearm_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Hair__HAIR_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Right_Forearm_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Hair__HAIR_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Right_Forearm_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21414,18 +21376,18 @@ Gfx player_shell_Right_Hand_Cap_Switch_Option_Right_Hand_Cap_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Skin__SKIN_),
 	gsSPDisplayList(player_shell_Right_Hand_Cap_Switch_Option_Right_Hand_Cap_mesh_layer_1_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Skin__SKIN_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Right_Hand_Cap_Switch_Option_Right_Hand_Cap_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Hand_Cap_Switch_Option_Right_Hand_Cap_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Right_Hand_Cap_Switch_Option_Right_Hand_Cap_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Hand_Cap_Switch_Option_Right_Hand_Cap_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -21433,18 +21395,18 @@ Gfx player_shell_Right_Hand_Wing_Cap_Swtich_Option_Right_Hand_Wing_Cap_mesh_laye
 	gsSPDisplayList(mat_player_shell_Skin__SKIN_),
 	gsSPDisplayList(player_shell_Right_Hand_Wing_Cap_Swtich_Option_Right_Hand_Wing_Cap_mesh_layer_1_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Skin__SKIN_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Right_Hand_Wing_Cap_Swtich_Option_Right_Hand_Wing_Cap_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
-	gsSPDisplayList(mat_player_shell_Cap_Logo__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Cap_Logo__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Hand_Wing_Cap_Swtich_Option_Right_Hand_Wing_Cap_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__SHOES_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Cap_Logo__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Right_Hand_Wing_Cap_Swtich_Option_Right_Hand_Wing_Cap_mesh_layer_1_tri_3),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Hand_Wing_Cap_Swtich_Option_Right_Hand_Wing_Cap_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
@@ -21465,15 +21427,15 @@ Gfx player_shell_Left_Thigh_Color_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Black),
 	gsSPDisplayList(player_shell_Left_Thigh_Color_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Black),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Left_Thigh_Color_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(mat_player_shell_Skin__SKIN_),
 	gsSPDisplayList(player_shell_Left_Thigh_Color_mesh_layer_1_tri_3),
 	gsSPDisplayList(mat_revert_player_shell_Skin__SKIN_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Left_Thigh_Color_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
 	gsSPEndDisplayList(),
 };
 
@@ -21481,22 +21443,22 @@ Gfx player_shell_Left_Leg_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Pants__PANTS_),
 	gsSPDisplayList(player_shell_Left_Leg_mesh_layer_1_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Pants__PANTS_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Left_Leg_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Left_Shoe_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Left_Shoe_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
-	gsSPDisplayList(mat_player_shell_Shoes__GLOVES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Shoes__SHOES_),
 	gsSPDisplayList(player_shell_Left_Shoe_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shoes__GLOVES_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Shoes__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Left_Shoe_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
@@ -21507,15 +21469,15 @@ Gfx player_shell_Right_Thigh_Color_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Black),
 	gsSPDisplayList(player_shell_Right_Thigh_Color_mesh_layer_1_tri_1),
 	gsSPDisplayList(mat_revert_player_shell_Black),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Thigh_Color_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(mat_player_shell_Skin__SKIN_),
 	gsSPDisplayList(player_shell_Right_Thigh_Color_mesh_layer_1_tri_3),
 	gsSPDisplayList(mat_revert_player_shell_Skin__SKIN_),
-	gsSPDisplayList(mat_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_player_shell_Clothes_2__SHIRT_),
 	gsSPDisplayList(player_shell_Right_Thigh_Color_mesh_layer_1_tri_4),
-	gsSPDisplayList(mat_revert_player_shell_Shirt__SHIRT_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_2__SHIRT_),
 	gsSPEndDisplayList(),
 };
 
@@ -21523,22 +21485,22 @@ Gfx player_shell_Right_Leg_mesh_layer_1[] = {
 	gsSPDisplayList(mat_player_shell_Pants__PANTS_),
 	gsSPDisplayList(player_shell_Right_Leg_mesh_layer_1_tri_0),
 	gsSPDisplayList(mat_revert_player_shell_Pants__PANTS_),
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Leg_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
 	gsSPEndDisplayList(),
 };
 
 Gfx player_shell_Right_Shoe_DL_mesh_layer_1[] = {
-	gsSPDisplayList(mat_player_shell_Cap__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_1__GLOVES_),
 	gsSPDisplayList(player_shell_Right_Shoe_DL_mesh_layer_1_tri_0),
-	gsSPDisplayList(mat_revert_player_shell_Cap__SHOES_),
-	gsSPDisplayList(mat_player_shell_Shoes__GLOVES_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_1__GLOVES_),
+	gsSPDisplayList(mat_player_shell_Shoes__SHOES_),
 	gsSPDisplayList(player_shell_Right_Shoe_DL_mesh_layer_1_tri_1),
-	gsSPDisplayList(mat_revert_player_shell_Shoes__GLOVES_),
-	gsSPDisplayList(mat_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Shoes__SHOES_),
+	gsSPDisplayList(mat_player_shell_Clothes_Lines__CAP_),
 	gsSPDisplayList(player_shell_Right_Shoe_DL_mesh_layer_1_tri_2),
-	gsSPDisplayList(mat_revert_player_shell_Emblem__EMBLEM_),
+	gsSPDisplayList(mat_revert_player_shell_Clothes_Lines__CAP_),
 	gsSPEndDisplayList(),
 };
 
