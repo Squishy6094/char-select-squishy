@@ -230,6 +230,9 @@ local COURSE_SQUISHY = {
     bottom = get_texture_info("squishy-course-bottom"),
 }
 
+-- Custom Eye States
+SHELL_EYES_WINK = 9
+
 local ANIMS_SQUISHY = {
     [CHAR_ANIM_IDLE_HEAD_LEFT] = GAMEMODE_ACTIVE and ANIM_SQUISHY_IDLE_GAMEMODE or SQUISHY_ANIM_HEAD_LEFT,
     [CHAR_ANIM_IDLE_HEAD_RIGHT] = GAMEMODE_ACTIVE and ANIM_SQUISHY_IDLE_GAMEMODE or SQUISHY_ANIM_HEAD_RIGHT,
@@ -250,6 +253,14 @@ local EYES_SQUISHY = {
     [charSelect.CS_ANIM_MENU] = MARIO_EYES_LOOK_RIGHT
 }
 
+local ANIMS_SHELL = {
+}
+
+local EYES_SHELL = {
+    --[charSelect.CS_ANIM_MENU] = SHELL_EYES_WINK,
+    --[CHAR_ANIM_FIRST_PERSON] = SHELL_EYES_WINK,
+}
+
 -- Squishy Character
 CT_SQUISHY = _G.charSelect.character_add("Squishy", "Creator of Character Select!! Transgender ladyy full of coderinggg - Version " .. VERSION_NUM, "Squishy / SprSn64", "008800", E_MODEL_SQUISHY, CT_MARIO, TEX_ICON_SQUISHY, 1.4)
 _G.charSelect.character_add_caps(E_MODEL_SQUISHY, CAPS_SQUISHY)
@@ -267,6 +278,7 @@ _G.charSelect.character_add_model_replacement(CT_SQUISHY, id_bhvGoomba, E_MODEL_
 CT_SHELL = _G.charSelect.character_add("Shell", "Lalala QUEERR!!!", "Squishy / Jer", "6b5eff", E_MODEL_SHELL, CT_LUIGI, "S", 1.1)
 _G.charSelect.character_add_voice(E_MODEL_SHELL, VOICETABLE_SQUISHY)
 _G.charSelect.character_set_category(CT_SHELL, "Squishy Workshop", true)
+_G.charSelect.character_add_animations(E_MODEL_SHELL, ANIMS_SHELL, EYES_SHELL)
 for i = 1, #PALETTES_SHELL do
     _G.charSelect.character_add_palette_preset(E_MODEL_SHELL, PALETTES_SHELL[i], PALETTES_SHELL[i].name)
 end
