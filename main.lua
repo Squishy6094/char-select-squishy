@@ -257,8 +257,9 @@ local ANIMS_SHELL = {
 }
 
 local EYES_SHELL = {
-    --[charSelect.CS_ANIM_MENU] = SHELL_EYES_WINK,
-    --[CHAR_ANIM_FIRST_PERSON] = SHELL_EYES_WINK,
+    [charSelect.CS_ANIM_MENU] = SHELL_EYES_WINK,
+    [CHAR_ANIM_FIRST_PERSON] = SHELL_EYES_WINK,
+    [CHAR_ANIM_STAR_DANCE] = SHELL_EYES_WINK,
 }
 
 -- Squishy Character
