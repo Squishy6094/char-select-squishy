@@ -81,10 +81,6 @@ local function act_shell_flutter(m)
         end
     end
 
-    if (check_kick_or_dive_in_air(m) ~= 0) then
-        return 1;
-    end
-
     if (m.input & INPUT_Z_PRESSED ~= 0) then
         return set_mario_action(m, ACT_GROUND_POUND, 0);
     end
