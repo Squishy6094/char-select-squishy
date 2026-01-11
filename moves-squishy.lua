@@ -28,6 +28,11 @@ local function squishy_reset_extra_states(index)
         prevFrameAction = 0,
         hasKoopaShell = false,
 
+        prevAction = 0,
+        prevActionTimer = 0,
+        prevActionState = 0,
+        prevActionArg = 0,
+
         poundVel = 0,
 
         wallkickAngle = 0,
@@ -37,6 +42,10 @@ local function squishy_reset_extra_states(index)
 end
 for i = 0, MAX_PLAYERS - 1 do
     squishy_reset_extra_states(i)
+end
+
+function squishy_reset_gfx_states(index)
+    gSquishyStates[index].gfx = {x = 0, y = 0, z = 0}
 end
 
 ----------------------------------------
@@ -391,10 +400,16 @@ end
 --- @param m MarioState
 local function act_squishy_dive(m)
     local e = gSquishyStates[m.playerIndex]
-    common_air_action_step(m, ACT_SQUISHY_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
+    local step = common_air_action_step(m, ACT_SQUISHY_DIVE_SLIDE, CHAR_ANIM_DIVE, AIR_STEP_NONE)
+    if step == AIR_STEP_HIT_WALL then
+        return set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
+    end
     update_omm_air_rotation(m)
-    if m.actionTimer == 0 then
-        mario_set_forward_vel(m, m.forwardVel + 12)
+    if m.actionState == 0 then
+        if m.forwardVel < 50 then
+            mario_set_forward_vel(m, m.forwardVel + 10)
+        end
+        m.actionState = m.actionState + 1
     end
     
     if mario_check_object_grab(m) ~= 0 then
@@ -410,8 +425,6 @@ local function act_squishy_dive(m)
             return true
         end
     end
-
-    m.actionTimer = m.actionTimer + 1
 end
 
 local function act_squishy_dive_slide(m)
@@ -557,9 +570,9 @@ local function act_squishy_forward_rollout(m)
     if switch == AIR_STEP_NONE then
     elseif switch == AIR_STEP_LANDED then
         play_mario_landing_sound(m, SOUND_ACTION_TERRAIN_LANDING);
-        return set_mario_action(m, ACT_FREEFALL_LAND_STOP, 0);
+        set_mario_action(m, ACT_FREEFALL_LAND_STOP, 0);
     elseif switch == AIR_STEP_HIT_WALL then
-        return set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
+        set_mario_action(m, ACT_SQUISHY_WALL_SLIDE, 0)
     elseif switch == AIR_STEP_HIT_LAVA_WALL then
         lava_boost_on_wall(m);
     end
@@ -1182,7 +1195,7 @@ local function act_squishy_trick(m)
         audio_squishy_taunt_sound(m, trickData.sound)
     end
     add_debug_display(m, ((trickAnims[m.actionArg] and trickAnims[m.actionArg].name) and trickAnims[m.actionArg].name or "???") .. " - " .. m.actionArg)
-    m.vel.y = m.vel.y + 2.5/e.trickCount
+    m.vel.y = m.vel.y + 1
 
     update_air_without_turn(m);
 
@@ -1224,8 +1237,16 @@ local function act_squishy_trick(m)
         end
         _G.charSelect.character_edit(CT_SQUISHY, nil, nil, nil, nil, E_MODEL_SQUISHY)
     end
+
+    -- Manually set back action
     if m.actionTimer > 15 then
-        set_mario_action(m, ACT_FREEFALL, 0)
+        m.action = e.prevAction
+        m.actionArg = e.prevActionArg
+        m.marioObj.header.gfx.animInfo.animFrame = e.prevActionAnimFrame
+        m.actionTimer = e.prevActionTimer
+        m.actionState = e.prevActionState
+
+        squishy_reset_gfx_states(m.playerIndex)
     end
 end
 
@@ -1270,11 +1291,11 @@ local hitActs = {
 local trickBlacklist = {
     [ACT_SQUISHY_TRICK] = true,
     [ACT_SQUISHY_GROUND_POUND] = true,
-    [ACT_FLYING] = true,
+    --[ACT_FLYING] = true,
     [ACT_FALL_AFTER_STAR_GRAB] = true,
-    [ACT_LONG_JUMP] = true,
 }
 
+---@param m MarioState
 local function squishy_update(m)
     local e = gSquishyStates[m.playerIndex]
 
@@ -1342,6 +1363,14 @@ local function squishy_update(m)
 
     if hitActs[m.action] then
         e.hasKoopaShell = false
+    end
+
+    if m.action ~= ACT_SQUISHY_TRICK then
+        e.prevActionAnimFrame = m.marioObj.header.gfx.animInfo.animFrame
+        e.prevAction = m.action
+        e.prevActionTimer = m.actionTimer
+        e.prevActionState = m.actionState
+        e.prevActionArg = m.actionArg
     end
 
     if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = e.gfx.x end
@@ -1413,9 +1442,7 @@ local function squishy_before_action(m, nextAct)
 
     -- Update Anims
     if nextAct ~= m.action then
-        e.gfx.x = 0
-        e.gfx.y = 0
-        e.gfx.z = 0
+        squishy_reset_gfx_states(m.playerIndex)
 
         m.actionTimer = 0
         e.actionTick = 0
@@ -1636,6 +1663,7 @@ end
 local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_MARIO_UPDATE, squishy_update)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_SET_MARIO_ACTION, squishy_before_action)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_SET_MARIO_ACTION, squishy_before_action)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_BEFORE_PHYS_STEP, squishy_before_phys_step)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_HUD_RENDER_BEHIND, hud_render_behind)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, squishy_reset_extra_states)
