@@ -1392,7 +1392,6 @@ local function squishy_before_action(m, nextAct)
     end
     if nextAct == ACT_RIDING_SHELL_GROUND then
         e.hasKoopaShell = true
-        return set_mario_action(m, ACT_RIDING_SHELL_GROUND, 0)
     end
     if (m.flags & MARIO_METAL_CAP == 0) then
         if nextAct == ACT_WATER_IDLE then
