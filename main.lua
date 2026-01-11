@@ -399,4 +399,6 @@ _G.charSelect.credit_add(MOD_NAME, "Squishy6094", "Coderingg :3")
 _G.charSelect.credit_add(MOD_NAME, "Shell_x33", "Taunts / Prettyy >//<")
 _G.charSelect.credit_add(MOD_NAME, "JerThePear", "Shell Model")
 
-_G.charSelect.config_character_sounds()
+_G.charSelect.character_add_texture_replacement(CT_SQUISHY, "generic_09005800", get_texture_info("squishy_bob_texture_grass"))
+_G.charSelect.character_add_texture_replacement(CT_SQUISHY, "generic_09009800", get_texture_info("squishy_bob_texture_path"))
+_G.charSelect.character_add_texture_replacement(CT_SQUISHY, "generic_09009000", get_texture_info("squishy_bob_texture_rockwall"))
