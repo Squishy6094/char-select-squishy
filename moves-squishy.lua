@@ -290,6 +290,7 @@ ACT_SQUISHY_WALL_KICK_AIR = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_
 ACT_SQUISHY_SIDE_FLIP = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
 ACT_SQUISHY_LEDGE_GRAB = allocate_mario_action(ACT_GROUP_AUTOMATIC | ACT_FLAG_STATIONARY)
 ACT_SQUISHY_TRICK = allocate_mario_action(ACT_GROUP_AIRBORNE | ACT_FLAG_MOVING | ACT_FLAG_AIR)
+ACT_SQUISHY_HIT_FREEZE = allocate_mario_action(ACT_GROUP_CUTSCENE | ACT_FLAG_INVULNERABLE)
 
 local function act_squishy_walking(m)
     local e = gSquishyStates[m.playerIndex]
@@ -1250,6 +1251,29 @@ local function act_squishy_trick(m)
     end
 end
 
+local function act_squishy_hit_freeze(m)
+    if not m then return end
+    local e = gSquishyStates[m.playerIndex]
+
+    if m.input & INPUT_A_PRESSED ~= 0 then
+        local combineVel = math.sqrt(m.vel.y^2 + m.forwardVel^2)*0.8
+        m.vel.y = combineVel
+        m.forwardVel = combineVel
+        return set_mario_action(m, ACT_SPECIAL_TRIPLE_JUMP, 0)
+    end
+
+    if m.actionTimer > 5 then
+        m.action = e.prevAction
+        m.actionArg = e.prevActionArg
+        m.marioObj.header.gfx.animInfo.animFrame = e.prevActionAnimFrame
+        m.actionTimer = e.prevActionTimer
+        m.actionState = e.prevActionState
+    end
+
+    m.actionTimer = m.actionTimer + 1
+    djui_chat_message_create(tostring(m.actionTimer))
+end
+
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
@@ -1268,6 +1292,7 @@ hook_mario_action(ACT_SQUISHY_WALL_KICK_AIR, {every_frame = act_squishy_wall_kic
 hook_mario_action(ACT_SQUISHY_SIDE_FLIP, {every_frame = act_squishy_side_flip})
 hook_mario_action(ACT_SQUISHY_LEDGE_GRAB, {every_frame = act_squishy_ledge_grab})
 hook_mario_action(ACT_SQUISHY_TRICK, {every_frame = act_squishy_trick})
+hook_mario_action(ACT_SQUISHY_HIT_FREEZE, {every_frame = act_squishy_hit_freeze})
 if _G.doorBust then
     _G.doorBust.add_door_bust_action(ACT_SQUISHY_SLIDE)
 end
@@ -1365,7 +1390,7 @@ local function squishy_update(m)
         e.hasKoopaShell = false
     end
 
-    if m.action ~= ACT_SQUISHY_TRICK then
+    if m.action ~= ACT_SQUISHY_TRICK and m.action ~= ACT_SQUISHY_HIT_FREEZE then
         e.prevActionAnimFrame = m.marioObj.header.gfx.animInfo.animFrame
         e.prevAction = m.action
         e.prevActionTimer = m.actionTimer
@@ -1633,9 +1658,9 @@ local forceWalkingInteracts = {
     [id_bhvKoopaShell] = true,
 }
 
-local function on_interact(m, obj, type)
+local function on_interact(m, o, type)
     local e = gSquishyStates[m.playerIndex]
-    local bhvID = get_id_from_behavior(obj.behavior)
+    local bhvID = get_id_from_behavior(o.behavior)
     if forceWalkingInteracts[bhvID] and m.action == ACT_SQUISHY_WALKING then
         e.forceDefaultWalk = true
         set_mario_action(m, ACT_WALKING, 0)
@@ -1648,9 +1673,21 @@ local grabActions = {
     [ACT_SQUISHY_SWIM_ATTACK] = true,
 }
 
-local function allow_interact(m, o, intType)
+local hitTypes = {
+    [INTERACT_BOUNCE_TOP]  = true,
+    [INTERACT_BOUNCE_TOP2] = true,
+    [INTERACT_KOOPA]       = true
+}
+
+local hitActs = {
+    [ACT_SQUISHY_SLIDE] = true,
+    [ACT_SQUISHY_GROUND_POUND] = true,
+}
+
+---@param m MarioState
+local function allow_interact(m, o, type)
     if grabActions[m.action] then
-        if (intType & (INTERACT_GRABBABLE) ~= 0) and o.oInteractionSubtype & (INT_SUBTYPE_NOT_GRABBABLE) == 0 then
+        if (type & (INTERACT_GRABBABLE) ~= 0) and o.oInteractionSubtype & (INT_SUBTYPE_NOT_GRABBABLE) == 0 then
             m.interactObj = o
             m.input = m.input | INPUT_INTERACT_OBJ_GRABBABLE
             if o.oSyncID ~= 0 then
@@ -1658,6 +1695,12 @@ local function allow_interact(m, o, intType)
             end
         end
     end 
+
+    if hitTypes[type] and hitActs[m.action] and (o.oInteractionSubtype & INT_SUBTYPE_TWIRL_BOUNCE) == 0 and m.action ~= ACT_SQUISHY_HIT_FREEZE then
+        set_mario_action(m, ACT_SQUISHY_HIT_FREEZE, 0)
+        o.oInteractStatus = ATTACK_GROUND_POUND_OR_TWIRL + (INT_STATUS_INTERACTED | INT_STATUS_WAS_ATTACKED)
+        return false
+    end
 end
 
 local function on_character_select_load()
