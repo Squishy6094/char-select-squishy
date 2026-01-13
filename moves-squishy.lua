@@ -27,6 +27,7 @@ local function squishy_reset_extra_states(index)
         trickCount = 0,
         prevFrameAction = 0,
         hasKoopaShell = false,
+        hitFreezeVel = 0,
 
         prevAction = 0,
         prevActionTimer = 0,
@@ -38,6 +39,7 @@ local function squishy_reset_extra_states(index)
         wallkickAngle = 0,
 
         gfx = {x = 0, y = 0, z = 0},
+        overrideColor = 0
     }
 end
 for i = 0, MAX_PLAYERS - 1 do
@@ -1251,27 +1253,31 @@ local function act_squishy_trick(m)
     end
 end
 
+local hitFreezeThreshhold = 30
 local function act_squishy_hit_freeze(m)
     if not m then return end
     local e = gSquishyStates[m.playerIndex]
 
-    if m.input & INPUT_A_PRESSED ~= 0 then
-        local combineVel = math.sqrt(m.vel.y^2 + m.forwardVel^2)*0.8
-        m.vel.y = combineVel
-        m.forwardVel = combineVel
-        return set_mario_action(m, ACT_SPECIAL_TRIPLE_JUMP, 0)
-    end
+    if m.actionTimer < math.min(e.hitFreezeVel/hitFreezeThreshhold, 10) then
+        e.overrideColor = 255
 
-    if m.actionTimer > 5 then
+        if m.input & INPUT_A_PRESSED ~= 0 then
+            local combineVel = e.hitFreezeVel*0.8
+            m.vel.y = combineVel
+            m.forwardVel = combineVel
+            return set_mario_action(m, m.actionArg == 0 and ACT_SPECIAL_TRIPLE_JUMP or m.actionArg, 0)
+        end
+    else
         m.action = e.prevAction
         m.actionArg = e.prevActionArg
         m.marioObj.header.gfx.animInfo.animFrame = e.prevActionAnimFrame
         m.actionTimer = e.prevActionTimer
         m.actionState = e.prevActionState
+        e.hitFreezeVel = 0
+        return
     end
 
     m.actionTimer = m.actionTimer + 1
-    djui_chat_message_create(tostring(m.actionTimer))
 end
 
 hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
@@ -1323,6 +1329,7 @@ local trickBlacklist = {
 ---@param m MarioState
 local function squishy_update(m)
     local e = gSquishyStates[m.playerIndex]
+    local np = gNetworkPlayers[m.playerIndex]
 
     -- Global Action Timer 
     e.actionTick = e.actionTick + 1
@@ -1390,13 +1397,28 @@ local function squishy_update(m)
         e.hasKoopaShell = false
     end
 
-    if m.action ~= ACT_SQUISHY_TRICK and m.action ~= ACT_SQUISHY_HIT_FREEZE then
-        e.prevActionAnimFrame = m.marioObj.header.gfx.animInfo.animFrame
-        e.prevAction = m.action
-        e.prevActionTimer = m.actionTimer
-        e.prevActionState = m.actionState
-        e.prevActionArg = m.actionArg
+    if m.action ~= ACT_SQUISHY_HIT_FREEZE then
+        if m.action ~= ACT_SQUISHY_TRICK then
+            e.prevActionAnimFrame = m.marioObj.header.gfx.animInfo.animFrame
+            e.prevAction = m.action
+            e.prevActionTimer = m.actionTimer
+            e.prevActionState = m.actionState
+            e.prevActionArg = m.actionArg
+        end
+        e.hitFreezeVel = math.floor(math.sqrt(m.vel.y^2 + m.forwardVel^2))
     end
+
+    -- Visual Effects
+    local menuColor = charSelect.get_menu_color()
+    for i = 0, EMBLEM do
+        local playerColor = network_player_get_override_palette_color(np, i)
+        network_player_set_override_palette_color(np, i, {
+            r = math.lerp(playerColor.r, (127 + playerColor.r*0.5)*menuColor.r/255, e.overrideColor/255),
+            g = math.lerp(playerColor.g, (127 + playerColor.g*0.5)*menuColor.g/255, e.overrideColor/255),
+            b = math.lerp(playerColor.b, (127 + playerColor.b*0.5)*menuColor.b/255, e.overrideColor/255),
+        })
+    end
+    e.overrideColor = math.lerp(e.overrideColor, 0, 0.2)
 
     if e.gfx.x ~= 0 then m.marioObj.header.gfx.angle.x = e.gfx.x end
     if e.gfx.y ~= 0 then m.marioObj.header.gfx.angle.y = m.faceAngle.y + e.gfx.y end
@@ -1673,15 +1695,19 @@ local grabActions = {
     [ACT_SQUISHY_SWIM_ATTACK] = true,
 }
 
-local hitTypes = {
+local objAttackTypes = {
     [INTERACT_BOUNCE_TOP]  = true,
     [INTERACT_BOUNCE_TOP2] = true,
     [INTERACT_KOOPA]       = true
 }
 
-local hitActs = {
+local objAttackActs = {
     [ACT_SQUISHY_SLIDE] = true,
+    [ACT_SQUISHY_SLIDE_AIR] = true,
+    [ACT_SQUISHY_DIVE] = true,
+    [ACT_SQUISHY_DIVE_SLIDE] = true,
     [ACT_SQUISHY_GROUND_POUND] = true,
+    [ACT_SPECIAL_TRIPLE_JUMP] = true,
 }
 
 ---@param m MarioState
@@ -1696,10 +1722,18 @@ local function allow_interact(m, o, type)
         end
     end 
 
-    if hitTypes[type] and hitActs[m.action] and (o.oInteractionSubtype & INT_SUBTYPE_TWIRL_BOUNCE) == 0 and m.action ~= ACT_SQUISHY_HIT_FREEZE then
-        set_mario_action(m, ACT_SQUISHY_HIT_FREEZE, 0)
+    local e = gSquishyStates[m.playerIndex]
+    if objAttackTypes[type] and objAttackActs[m.action] and m.action ~= ACT_SQUISHY_HIT_FREEZE and e.hitFreezeVel > hitFreezeThreshhold then
+        set_mario_action(m, ACT_SQUISHY_HIT_FREEZE, (o.oInteractionSubtype & INT_SUBTYPE_TWIRL_BOUNCE) == 0 and 0 or ACT_TWIRLING)
         o.oInteractStatus = ATTACK_GROUND_POUND_OR_TWIRL + (INT_STATUS_INTERACTED | INT_STATUS_WAS_ATTACKED)
         return false
+    end
+end
+
+local function on_pvp_attack(a, v, int)
+    local e = gSquishyStates[a.playerIndex]
+    if objAttackActs[a.action] and a.action ~= ACT_SQUISHY_HIT_FREEZE and e.hitFreezeVel > hitFreezeThreshhold then
+        set_mario_action(a, ACT_SQUISHY_HIT_FREEZE, 0)
     end
 end
 
@@ -1712,5 +1746,6 @@ local function on_character_select_load()
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_LEVEL_INIT, squishy_reset_extra_states)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_INTERACT, on_interact)
     _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ALLOW_INTERACT, allow_interact)
+    _G.charSelect.character_hook_moveset(CT_SQUISHY, HOOK_ON_PVP_ATTACK, on_pvp_attack)
 end
 hook_event(HOOK_ON_MODS_LOADED, on_character_select_load)
