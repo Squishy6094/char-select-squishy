@@ -119,10 +119,25 @@ function clamp_soft(num, min, max, rate)
     return num
 end
 
+function lerpS16Angle(a, b, t)
+    a = math.s16(a)
+    b = math.s16(b)
+
+    local delta = b - a
+
+    if delta > 0x8000 then
+        delta = delta - 0x10000
+    elseif delta < -0x8000 then
+        delta = delta + 0x10000
+    end
+
+    return math.s16(a + delta * t)
+end
+
+
 function invlerp(x, a, b)
     return clamp((x - a) / (b - a), 0.0, 1.0)
 end
-
 
 function convert_s16(num)
     local min = -32768

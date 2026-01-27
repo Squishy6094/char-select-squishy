@@ -598,13 +598,13 @@ local function act_squishy_ground_pound(m)
     e.forwardVelStore = m.forwardVel
     e.poundVel = math.sqrt(m.vel.x^2 + m.vel.y^2 + m.vel.z^2)
 
-    e.gfx.x = math.lerp(e.gfx.x, 0x8000 + atan2s(m.vel.y, m.forwardVel), 0.3)
+    e.gfx.x = lerpS16Angle(e.gfx.x, 0x8000 + atan2s(m.vel.y, m.forwardVel), 0.1)
 
     play_sound_if_no_flag(m, SOUND_ACTION_THROW, MARIO_ACTION_SOUND_PLAYED);
 
     set_character_animation(m, CHAR_ANIM_GROUND_POUND);
 
-    if (m.input & INPUT_A_PRESSED) ~= 0 and m.pos.y - m.floorHeight > 100 then
+    if m.actionTimer > 5 and (m.input & INPUT_A_PRESSED) ~= 0 and m.pos.y - m.floorHeight > 100 then
         e.poundVel = 0
         m.vel.x = m.vel.x + sins(m.intendedYaw)*50
         m.vel.z = m.vel.z + sins(m.intendedYaw)*50
