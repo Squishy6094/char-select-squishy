@@ -36,6 +36,13 @@ function debug_num_to_hex(num)
     return result
 end
 
+function debug_num_decimal_shorten(num)
+    if num == 0 then
+        return '0'
+    end
+    return tostring(math.floor(num*100)/100)
+end
+
 function clear_debug()
     debugLines = {"Squishy Debugging:"}
 end

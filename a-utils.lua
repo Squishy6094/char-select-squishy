@@ -177,27 +177,55 @@ end
 
 function mario_is_on_water(m)
     if m.waterLevel == nil then return false end
-    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) then return false end
-    if m.waterLevel + math.abs(m.forwardVel)*get_mario_floor_steepness(m) < m.floorHeight + 60 then return false end
+    if m.pos.y > m.waterLevel + math.abs(m.forwardVel)*get_mario_slope_steepness(m) then return false end
+    if m.waterLevel + math.abs(m.forwardVel)*get_mario_slope_steepness(m) < m.floorHeight + 60 then return false end
     return true
 end
 
-function get_mario_floor_steepness(m, angle)
-    if angle == nil then angle = m.faceAngle.y end
-    local floor = collision_find_surface_on_ray(m.pos.x, m.pos.y + 150, m.pos.z, 0, -300, 0).hitPos.y
-    local floorInFront = collision_find_surface_on_ray(m.pos.x + sins(angle), m.pos.y + 150, m.pos.z + coss(angle), 0, -300, 0).hitPos.y
-    local floorDif = floor - floorInFront 
-    if floorDif > 20 or floorDif < -20 then floorDif = 0 end
-    return floorDif
+function get_mario_slope_steepness(m)
+    local floor = m.floor
+    local slopeAngle = atan2s(floor.normal.z, floor.normal.x)
+    local angle = math.sqrt(floor.normal.x ^ 2 + floor.normal.z ^ 2)
+    if math.abs(math.s16(m.faceAngle.y - slopeAngle)) > 0x4000 then
+        angle = angle * -1.0
+    end
+    return angle
 end
 
-function get_mario_y_vel_from_floor(m)
-    if m.pos.y == m.floorHeight then
-        local yVel = math.sqrt(m.vel.x^2 + m.vel.y^2)*get_mario_floor_steepness(m)
-        local velAngle = (math.sqrt(m.vel.z^2 + m.vel.x^2) > 0 and atan2s(m.vel.z, m.vel.x) or m.faceAngle.y)
-        local angleDif = convert_s16(velAngle - m.faceAngle.y)
-        return yVel * ((angleDif > 0x4000 or angleDif < -0x4000) and 1 or -1)
-    else
-        return m.vel.y
+---@param m MarioState
+---@param e table ExtraState
+function mario_detatch_from_floor(m, e, airAction)
+    if airAction == nil then airAction = ACT_FREEFALL end
+
+    local speed = m.forwardVel
+    add_debug_display(m, "Slope: " .. tostring(m.forwardVel))
+
+    if e.floorSteep == nil then
+        e.floorSteep = get_mario_slope_steepness(m)
     end
+
+    local prevSlope = e.floorSteep
+    local slope = get_mario_slope_steepness(m)
+    local slopeDif = math.abs(prevSlope - slope)
+
+    e.floorSteep = slope
+
+    add_debug_display(m, "Slope: " .. tostring(slope))
+    add_debug_display(m, "Prev. Slope: " .. tostring(prevSlope))
+
+    -- DETACH: sudden slope change
+    local velY = m.forwardVel * -prevSlope
+    local velF = m.forwardVel * (1 - math.abs(prevSlope)*0.5)
+    local velAngle = -coss(atan2s(velY, velF))
+    if (slopeDif > 0.3 and (velAngle < slope - 0.2 or velAngle > slope + 0.2) and prevSlope < 0) or (m.pos.y > m.floorHeight + 10) then
+        djui_chat_message_create(tostring(slopeDif))
+        djui_chat_message_create(tostring(prevSlope))
+        djui_chat_message_create(tostring(velAngle))
+        m.vel.y = velY
+        m.forwardVel = velF
+        e.floorSteep = nil
+        return set_mario_action(m, airAction, 0)
+    end
+
+    return 0
 end
