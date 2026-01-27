@@ -590,13 +590,15 @@ local function act_squishy_ground_pound(m)
 
     if m.actionState == 0 then
         m.vel.y = math.max(m.vel.y, 30)
+        m.vel.x = m.forwardVel*sins(m.faceAngle.y)
+        m.vel.z = m.forwardVel*coss(m.faceAngle.y)
         m.actionState = 1
     end
 
     e.forwardVelStore = m.forwardVel
     e.poundVel = math.sqrt(m.vel.x^2 + m.vel.y^2 + m.vel.z^2)
 
-    e.gfx.y = e.gfx.y + math.abs(m.vel.y)*0x80
+    e.gfx.x = math.lerp(e.gfx.x, 0x8000 + atan2s(m.vel.y, m.forwardVel), 0.3)
 
     play_sound_if_no_flag(m, SOUND_ACTION_THROW, MARIO_ACTION_SOUND_PLAYED);
 
@@ -632,7 +634,7 @@ end
 
 --- @param m MarioState
 local function act_squishy_ground_pound_gravity(m)
-    m.vel.y = math.max(m.vel.y - 5, -150)
+    m.vel.y = math.max(m.vel.y - 3.5, -150)
 end
 
 --- @param m MarioState
@@ -666,7 +668,7 @@ local function act_squishy_ground_pound_land(m)
     if (m.input & INPUT_A_PRESSED) ~= 0 then
         m.vel.y = 60
         m.forwardVel = e.forwardVelStore
-        return set_mario_action(m, ACT_SQUISHY_GROUND_POUND_JUMP, 0)
+        return set_mario_action(m, ACT_DOUBLE_JUMP, 0)
     end
 
     if (m.input & INPUT_B_PRESSED) ~= 0 then
@@ -1265,7 +1267,7 @@ local function act_squishy_hit_freeze(m)
             local combineVel = e.hitFreezeVel*0.8
             m.vel.y = combineVel
             m.forwardVel = combineVel
-            return set_mario_action(m, m.actionArg == 0 and ACT_SPECIAL_TRIPLE_JUMP or m.actionArg, 0)
+            return set_mario_action(m, m.actionArg == 0 and ACT_SQUISHY_GROUND_POUND or m.actionArg, 0)
         end
     else
         m.action = e.prevAction
@@ -1284,7 +1286,7 @@ hook_mario_action(ACT_SQUISHY_WALKING, { every_frame = act_squishy_walking})
 hook_mario_action(ACT_SQUISHY_CROUCH_SLIDE, { every_frame = act_squishy_crouch_slide})
 hook_mario_action(ACT_SQUISHY_DIVE, { every_frame = act_squishy_dive}, INT_FAST_ATTACK_OR_SHELL)
 hook_mario_action(ACT_SQUISHY_DIVE_SLIDE, { every_frame = act_squishy_dive_slide}, INT_FAST_ATTACK_OR_SHELL)
-hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_FAST_ATTACK_OR_SHELL)
+hook_mario_action(ACT_SQUISHY_SLIDE, { every_frame = act_squishy_slide}, INT_SLIDE_KICK)
 hook_mario_action(ACT_SQUISHY_SLIDE_AIR, { every_frame = act_squishy_slide_air})
 hook_mario_action(ACT_SQUISHY_FORWARD_ROLLOUT, {every_frame = act_squishy_forward_rollout})
 hook_mario_action(ACT_SQUISHY_GROUND_POUND, { every_frame = act_squishy_ground_pound, gravity = act_squishy_ground_pound_gravity}, INT_GROUND_POUND)
@@ -1359,16 +1361,6 @@ local function squishy_update(m)
 
     m.vel.y = m.vel.y - math.max(e.groundpoundCancels - 1, 0)*0.6
 
-    if (m.action == ACT_LONG_JUMP or m.action == ACT_SQUISHY_DIVE) and m.input & INPUT_Z_PRESSED ~= 0 then
-        set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 0)
-    end
-    if m.action == ACT_BUTT_SLIDE then
-        set_mario_action(m, ACT_SQUISHY_SLIDE, 1)
-    end
-    if m.action == ACT_SLIDE_KICK then
-        m.forwardVel = m.forwardVel + 30
-        set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
-    end
     if (m.action == ACT_PUNCHING or m.action == ACT_MOVE_PUNCHING) and m.actionArg == 9 then
         m.forwardVel = 70
         set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
@@ -1437,8 +1429,21 @@ local function squishy_before_action(m, nextAct)
     if nextAct == ACT_GROUND_POUND then
         return set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 0)
     end
+    if nextAct == ACT_LONG_JUMP then
+        m.vel.y = 40
+        m.forwardVel = m.forwardVel + 15
+        return set_mario_action(m, ACT_SQUISHY_GROUND_POUND, 0)
+    end
     if nextAct == ACT_DIVE then
-        return set_mario_action(m, ACT_SQUISHY_DIVE, 0)
+        return set_mario_action(m, ACT_JUMP_KICK, 0)
+    end
+
+    if nextAct == ACT_BUTT_SLIDE then
+        return set_mario_action(m, ACT_SQUISHY_SLIDE, 1)
+    end
+    if nextAct == ACT_SLIDE_KICK then
+        m.forwardVel = m.forwardVel + 30
+        return set_mario_action(m, ACT_SQUISHY_SLIDE, 0)
     end
     if nextAct == ACT_FORWARD_ROLLOUT then
         return set_mario_action(m, ACT_SQUISHY_FORWARD_ROLLOUT, 0)

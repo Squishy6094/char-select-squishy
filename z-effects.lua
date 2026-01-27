@@ -51,7 +51,9 @@ local function bhv_spark_loop(obj)
     -- check if this should be activated
     if obj_is_hidden(obj) ~= 0 then
         cur_obj_unhide()
-        obj_set_model_extended(obj, E_MODEL_SLIDE_SPARK)
+        if obj_has_model_extended(obj, E_MODEL_SLIDE_SPARK) == 0 then
+            obj_set_model_extended(obj, E_MODEL_SLIDE_SPARK)
+        end
         obj_scale(obj, 1)
         obj.oAnimState = 0
         obj.header.gfx.node.flags = obj.header.gfx.node.flags & ~GRAPH_RENDER_BILLBOARD
