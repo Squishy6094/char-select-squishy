@@ -1,0 +1,15 @@
+extern const GeoLayout squishy_cap_geo_opt_1[];
+extern const GeoLayout squishy_cap_geo[];
+extern u8 squishy_cap_hatlogo_ia8[];
+extern Vtx squishy_cap_Cap_DL_mesh_layer_4_vtx_0[8];
+extern Gfx squishy_cap_Cap_DL_mesh_layer_4_tri_0[];
+extern Vtx squishy_cap_Cap_DL_mesh_layer_1_vtx_0[117];
+extern Gfx squishy_cap_Cap_DL_mesh_layer_1_tri_0[];
+extern Gfx mat_squishy_cap_squishy_hat_design[];
+extern Gfx mat_revert_squishy_cap_squishy_hat_design[];
+extern Gfx mat_squishy_cap_squishy_hat[];
+extern Gfx mat_revert_squishy_cap_squishy_hat[];
+extern Gfx squishy_cap_Cap_DL_mesh_layer_4[];
+extern Gfx squishy_cap_Cap_DL_mesh_layer_4_with_layer_4_revert[];
+extern Gfx squishy_cap_Cap_DL_mesh_layer_1_with_layer_1_revert[];
+extern Gfx squishy_cap_Cap_DL_mesh_layer_1_with_layer_5_revert[];
